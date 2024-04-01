@@ -1,0 +1,25 @@
+{
+  "name": "@supercat1337/store",
+  "version": "1.0.0",
+  "description": "Store",
+  "main": "index.js",
+  "scripts": {
+    "test": "c8 ava",
+    "build": "node scripts/build.js"
+  },
+  "keywords": [
+    "store"
+  ],
+  "type": "module",
+  "moduleResolution": "nodenext",
+  "author": "Supercat",
+  "license": "MIT",
+  "dependencies": {
+    "@supercat1337/event-emitter": "^1.0.2"
+  },
+  "devDependencies": {
+    "ava": "^6.1.2",
+    "c8": "^9.1.0",
+    "esbuild": "^0.20.2"
+  }
+}
