@@ -2,12 +2,12 @@
 
 // node_modules/@supercat1337/event-emitter/src/EventEmitter.js
 var EventEmitter = class {
-  /** @type {Object.<string, TListener[]>} */
+  /** @type {Object.<string, Function[]>} */
   events = {};
   /**
    * @param {string} event
-   * @param {TListener} listener
-   * @returns {Unsubscriber}
+   * @param {Function} listener
+   * @returns {()=>void}
    */
   on(event, listener) {
     if (typeof this.events[event] !== "object") {
@@ -22,7 +22,7 @@ var EventEmitter = class {
   }
   /**
    * @param {string} event
-   * @param {TListener} listener
+   * @param {Function} listener
    */
   removeListener(event, listener) {
     var idx;
@@ -53,8 +53,8 @@ var EventEmitter = class {
   }
   /**
    * @param {string} event
-   * @param {TListener} listener
-   * @returns {Unsubscriber}
+   * @param {Function} listener
+   * @returns {()=>void}
    */
   once(event, listener) {
     return this.on(event, function g() {
@@ -83,6 +83,31 @@ function compareObjects(a, b) {
 }
 
 // src/Store.js
+/**
+ * @preserve
+ * 
+ * @typedef {(a:any, b:any, item_name:string, property: (string | null))=>boolean} CompareFunction
+ * 
+ * @typedef {(details:UpdateEventDetails, store:Store)=>void} Subscriber
+ *  
+ * @typedef {()=>void} Unsubscriber 
+ * 
+ * @typedef {(details:ChangeEventObject, store:Store)=>void} ChangeEventSubscriber
+ * 
+ * @typedef {{[key:string]: UpdateEventDetails}} UpdatedItems
+ * 
+ * @typedef {Object} ChangeEventObject
+ * @property {string|null} eventType
+ * @property {UpdatedItems} details
+ * 
+ * @typedef {Object} ComputedType
+ * @property {string} item_name
+ * @property {string[]} dependencies
+ * @property {(store: Store)=>any} getter
+ * @property {any} value
+ * @property {boolean} stale
+ * 
+ */
 var UpdateEventDetails = class {
   /** @type {*} */
   value;
@@ -239,6 +264,7 @@ var Store = class {
    * @param {{[item_name: string]: any}} obj 
    */
   setItems(obj) {
+    /** @type {{[key: string]: UpdateEventDetails}} @preserve */
     var updated_items = {};
     var updated_items_arr = [];
     var has_changes = false;
@@ -465,12 +491,13 @@ var Store = class {
     var deps = Array.from(used_items_set);
     var define_vars_block = deps.map((item) => `var $${item} = store.getItem("${item}");`).join("\n");
     var callback = (
-      /** @type {(store: Store)=>any} */
+      /** @type {(store: Store)=>any} @preserve */
       new Function("store", `
     ${define_vars_block}
     return ${expression};
 `)
     );
+    // @ts-ignore @preserve
     this.#createComputedItemExtended(item_name, callback, deps, true);
     return item_name;
   }

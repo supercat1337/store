@@ -1,12 +1,7 @@
 // @ts-check
 
-//import * as esbuild from "@/esbuild/lib/main.js";
-
-// @ts-ignore
-import * as esbuild from 'esbuild';
-
+import * as esbuild from "./../node_modules/esbuild/lib/main.js";
 import fs from 'fs';
-
 import path from "path";
 
 
@@ -62,20 +57,6 @@ async function main() {
         fs.unlinkSync(path.join(dist_directory, file));
     }
 
-    var filename_1 = `${dist_directory}/store.${packageInfo.version}.esm.js`;
-
-    await esbuild.build({
-        entryPoints: [entry_point],
-        bundle: true,
-        minify: false,
-        outfile: filename_1,
-        platform: `neutral`,
-        banner: {"js":`// version ${packageInfo.version}`}
-
-    });
-
-    var filesize_1 = fs.statSync(filename_1).size;
-
     var filename_2 = `${dist_directory}/store.${packageInfo.version}.min.esm.js`;
 
     await esbuild.build({
@@ -83,13 +64,14 @@ async function main() {
         bundle: true,
         minify: true,
         outfile: filename_2,
+        legalComments: "none",
         platform: `neutral`,
+
         banner: {"js":`// version ${packageInfo.version}`}
     });
 
 
     var filesize_2 = fs.statSync(filename_2).size;
-
 
     var filename_3 = `${dist_directory}/store.bundle.esm.js`;
 
@@ -99,6 +81,7 @@ async function main() {
         minify: false,
         outfile: filename_3,
         platform: `neutral`,
+        legalComments: "inline",
         banner: {"js":`// version ${packageInfo.version}`}
     });
 
@@ -107,14 +90,10 @@ async function main() {
 
     console.table({
         1: {
-            file: filename_1,
-            size: humanFileSize(filesize_1, false, 2)
-        },
-        2: {
             file: filename_2,
             size: humanFileSize(filesize_2, false, 2)
         },
-        3: {
+        2: {
             file: filename_3,
             size: humanFileSize(filesize_3, false, 2)
         },

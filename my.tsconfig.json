@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "target": "ESNext",
+        "module": "NodeNext",
+        "emitDeclarationOnly": true,
+        "declaration": true, 
+        "outDir": "./dist",
+        "rootDir": ".",
+        "declarationMap": true,
+        "lib": ["ESNext", "DOM", "ES2023"],
+        "moduleResolution": "NodeNext"
+    },
+    "include": [
+        "src/*.js",
+        "node_modules/@supercat1337/event-emitter/src/EventEmitter.js"
+    ]
+}

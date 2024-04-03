@@ -6,7 +6,9 @@
   "scripts": {
     "test": "c8 ava",
     "build": "node scripts/build.js",
-    "docs": "typedoc --tsconfig \"tsconfig.json\" --options \"typedoc.json\""
+    "build2": "rollup ./src/Store.js --file ./dist/store.bundle.esm.js --format es",
+    "create_types": "npx -p typescript tsc --project tsconfig.json",
+    "docs": "typedoc --tsconfig \"my.tsconfig.json\" --options \"typedoc.json\""
   },
   "keywords": [
     "store"
@@ -16,9 +18,10 @@
   "author": "Supercat",
   "license": "MIT",
   "dependencies": {
-    "@supercat1337/event-emitter": "^1.0.2"
+    "@supercat1337/event-emitter": "^1.0.4"
   },
   "devDependencies": {
+    "@types/node": "^20.12.2",
     "ava": "^6.1.2",
     "c8": "^9.1.0",
     "esbuild": "^0.20.2",

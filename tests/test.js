@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 
 import { compareObjects } from "./../src/helpers.js";
 import { createStore, Store } from "./../src/Store.js";
@@ -323,7 +323,7 @@ test("subscribe #10 (collection, setCompareFunction)", t => {
     c[1] = 4;
     c[0] = 4;
 
-    t.log(c[1]);
+    //t.log(c[1]);
 
     if (c[1] == 2 && c[0] == 4) {
         t.pass();
@@ -337,8 +337,12 @@ test("onChange", t => {
 
     var store = new Store({ a: 1, b: 2 });
     var working = false;
+    store.log = t.log;
 
     store.onChange((data) => {
+
+        //store.log(data.details);
+
         if (data.details["b"]) {
             if (data.details["b"].value == 5) {
                 working = true;
@@ -350,6 +354,8 @@ test("onChange", t => {
     store.setItem("a", 2);
     store.setItem("b", 5);
 
+    store.setItems({ a: 0, b: 0 });
+
     if (working) t.pass(); else t.fail();
 
 });
@@ -358,8 +364,10 @@ test("onChangeAny", t => {
 
     var store = new Store({ a: 1, b: 2 });
     var working = false;
+    store.log = t.log;
 
-    store.onChangeAny(["a", "b"], () => {
+    store.onChangeAny(["a", "b"], (data) => {
+        store.log(data.details);
         working = true;
     });
 
@@ -369,7 +377,7 @@ test("onChangeAny", t => {
 
 });
 
-test("onChangeAny #2", t => {
+test("onChangeAny #2 (empty array)", t => {
 
     var store = new Store({ a: 1, b: 2 });
     var working = true;
@@ -384,7 +392,7 @@ test("onChangeAny #2", t => {
 
 });
 
-test("onChangeAny #3", t => {
+test("onChangeAny #3 (no changes)", t => {
 
     var store = new Store({ a: 1, b: 2 });
     var working = true;
@@ -403,8 +411,10 @@ test("onChangeAny #3", t => {
 test("unsubscribe", t => {
 
     var store = new Store({ a: [23], b: 2 });
+    store.log = t.log;
 
-    var unsubscriber = store.subscribe("a", () => {
+    var unsubscriber = store.subscribe("a", (details) => {
+        store.log(`item "${details.item_name}" is changed: ${details.value}`);
         t.fail();
     });
 
@@ -697,8 +707,9 @@ test("recalcComputed #2 (not exists)", t => {
 test("recalcComputed #3 (with subscribers)", t => {
 
     var store = new Store({ a: 1, b: [1, 2, 3] });
-    var foo = 0;
-    var b = store.getItem("b");
+    //store.log = t.log;
+
+    var obj = store.asObject();
 
     store.createComputedItem(
         "c",
@@ -708,17 +719,20 @@ test("recalcComputed #3 (with subscribers)", t => {
         ["a", "b"]
     );
 
-    b[1] = 25;
-
-    //foo === 1
-
-    store.subscribe("c", () => {
-        foo++;
+    store.subscribe("c", (details) => {
+        store.log("c is changed: " + details.value);
     });
 
-    let details = store.recalcComputed("c");
+    obj.a = 2;
+    // outputs: c is changed: 4
 
-    if (details && details.value === 26) {
+    obj.b[1] = 25;
+    // outputs nothing
+
+    store.recalcComputed("c");
+    // outputs: c is changed: 27
+
+    if (obj.c === 27) {
         t.pass();
     }
     else {
@@ -793,6 +807,8 @@ test("createCollection #2", t => {
     var store = new Store({ a: 1, b: 2 });
 
     var c = store.createCollection("c", [1, 2, 3]);
+    if (!c) return;
+   
     var s = Symbol("test");
 
     c[0] = c[1] + c[2];
@@ -813,6 +829,8 @@ test("createCollection #3 (delete property)", t => {
     var store = new Store({ a: 1, b: 2 });
 
     var c = store.createCollection("c", [1, 2, 3]);
+    if (!c) return;
+
     var s = Symbol("test");
 
     c[0] = c[1] + c[2];
@@ -864,6 +882,8 @@ test("#setCollectionItem #1 (with changes)", t => {
     var c = store.createCollection("c", [1, 2, 3]);
 
     store.subscribe("c", (details) => {
+        //store.log("collection item is changed. (property: " + details.property + ", value: " + details.value + ")");
+
         if (details.property == "0" && details.value == 15) {
             working = true;
         }
@@ -877,7 +897,6 @@ test("#setCollectionItem #1 (with changes)", t => {
     else {
         t.fail();
     }
-
 });
 
 test("#setCollectionItem #2(no changes)", t => {
@@ -908,6 +927,7 @@ test("#setCollectionItem #2(no changes)", t => {
 test("getItems #1 (without computed)", t => {
 
     var store = new Store({ a: 1, b: 2 });
+    store.log = t.log;
 
     store.createComputedItem(
         "c",
@@ -918,6 +938,11 @@ test("getItems #1 (without computed)", t => {
     );
 
     var items = store.getItems();
+    store.log(items);
+
+
+    var items_2 = store.getItems(true);
+    store.log(items_2);
 
     if (typeof items.c == "undefined") {
         t.pass();
@@ -1075,12 +1100,17 @@ test("deleteItem #2 (sealed)", t => {
     );
 
     store.seal();
+
+    store.setItem("a", 2);
+    store.setItem("e", 200);
+
     store.deleteItem("a");
     store.deleteItem("b");
     store.deleteItem("c");
 
 
     var items = store.getItems(true);
+    store.log(items);
 
     if (Object.keys(items).length == 3) {
         t.pass();
@@ -1199,7 +1229,8 @@ test("asObject #4 (set)", t => {
     var store = new Store({ a: 1, b: 2 });
     var working = false;
 
-    store.subscribe("b", () => {
+    store.subscribe("b", (details) => {
+        console.log(details.value);
         working = true;
     });
 
@@ -1276,8 +1307,10 @@ test("loadExpression", t => {
     var item_name = store.loadExpression(expression);
     var item_name_2 = store.loadExpression(expression);
 
+    store.setItem("a", 2);
 
-    if (item_name === item_name_2 && store.getItem(item_name) === 3) {
+
+    if (item_name === item_name_2 && store.getItem(item_name) === 4) {
         t.pass();
     }
     else {
