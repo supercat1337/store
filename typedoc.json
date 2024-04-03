@@ -1,0 +1,5 @@
+{
+    "out": "./docs",
+    "plugin": ["typedoc-plugin-missing-exports"],
+    "entryPoints": ["./src/Store.js"]
+}

@@ -1,10 +1,10 @@
-// @ts-check 
+// @ts-check
 
-import { EventEmitter } from "@/@supercat1337/event-emitter/index.js";
+import { EventEmitter } from "./../node_modules/@supercat1337/event-emitter/index.js";
 import { compareObjects } from "./helpers.js";
 
 /**
- * @typedef {(a:any, b:any, item_name:string, store: Store)=>boolean} CompareFunction
+ * @typedef {(a:any, b:any, item_name:string, property: (string | null))=>boolean} CompareFunction
  */
 
 /**
@@ -32,7 +32,7 @@ export class UpdateEventDetails {
     /** @type {"set"|"delete"} */
     eventType
 
-    /** @type {number|string|null} */
+    /** @type {string|null} */
     property = null
 }
 
@@ -75,8 +75,8 @@ export class Store {
     /** @type {Object} */
     #proxyObject = null
 
-    /** @type {CompareFunction | null} */
-    #customCompareFunction = null;
+    /** @type {{[item_name: string ]: (CompareFunction | null) }} */
+    #customCompareFunctions = {};
 
     /** @type {boolean} */
     #is_sealed = false;
@@ -93,6 +93,8 @@ export class Store {
         }
 
     }
+
+    log = console.log
 
     /**
      * 
@@ -114,8 +116,8 @@ export class Store {
         this.#atoms.set(item_name, value);
 
         let equal = true;
-        if (this.#customCompareFunction) {
-            equal = this.#customCompareFunction(old_value, value, item_name, this);
+        if (this.#customCompareFunctions[item_name]) {
+            equal = this.#customCompareFunctions[item_name](old_value, value, item_name, null);
         }
         else {
             equal = compareObjects(old_value, value);
@@ -152,9 +154,9 @@ export class Store {
     /**
      * 
      * @param {string} item_name 
-     * @param {number|string} property 
+     * @param {string} property 
      * @param {any} value 
-     * @returns {false|UpdateEventDetails}
+     * @returns {false|UpdateEventDetails} updated
      */
     #setCollectionItem(item_name, property, value) {
         property = property.toString();
@@ -165,45 +167,40 @@ export class Store {
 
         let equal = true;
 
-        if (this.#customCompareFunction) {
-            equal = this.#customCompareFunction(old_value, value, item_name, this);
+        if (this.#customCompareFunctions[item_name]) {
+            equal = this.#customCompareFunctions[item_name](old_value, value, item_name, property);
+            this.log(equal, old_value, value, item_name, property);
         }
         else {
             equal = compareObjects(old_value, value);
         }
 
-        if (!equal) {
+        if (equal) return false;
 
-            let prop = /^\d+$/.test(property) ? parseInt(property) : property;
+        let details = new UpdateEventDetails;
+        details.eventType = "set";
+        details.item_name = item_name;
+        details.property = property;
+        details.value = value;
+        details.old_value = old_value;
 
-
-            let details = new UpdateEventDetails;
-            details.eventType = "set";
-            details.item_name = item_name;
-            details.property = prop;
-            details.value = value;
-            details.old_value = old_value;
-
-            return details;
-        }
-
-        return false;
+        return details;
     }
 
     /**
      * 
      * @param {string} item_name 
-     * @param {any[]} value
+     * @param {any[]} array
      * @returns {false|UpdateEventDetails}
      */
-    #setCollection(item_name, value) {
+    #setCollection(item_name, array) {
 
         let proxied_array = this.#collections.get(item_name);
         let equal = true;
 
-        proxied_array.length = value.length;
+        proxied_array.length = array.length;
         for (let i = 0; i < proxied_array.length; i++) {
-            let details = this.#setCollectionItem(item_name, i, value);
+            let details = this.#setCollectionItem(item_name, i.toString(), array[i]);
 
             if (details) equal = false;
         }
@@ -212,7 +209,7 @@ export class Store {
             let details = new UpdateEventDetails;
             details.eventType = "set";
             details.item_name = item_name;
-            details.value = value;
+            details.value = array;
 
             return details;
         }
@@ -304,7 +301,7 @@ export class Store {
             if (!this.hasSubscribers(computed.item_name)) return;
 
             let details = this.#recalc(computed.item_name);
-            if (!details) { return; }
+            if (details === false) { return; }
 
             updated_items[computed.item_name] = details;
             updated_items_arr.push(details);
@@ -364,8 +361,8 @@ export class Store {
         computed.stale = false;
 
         let equal = true;
-        if (this.#customCompareFunction) {
-            equal = this.#customCompareFunction(old_value, value, item_name, this);
+        if (this.#customCompareFunctions[item_name]) {
+            equal = this.#customCompareFunctions[item_name](old_value, value, item_name, null);
         }
         else {
             equal = compareObjects(old_value, value);
@@ -448,13 +445,6 @@ export class Store {
             }
         }
 
-        /*
-                let a_intersect_b = dependencies.filter(x => updated_item_names.has(x));
-                if (a_intersect_b.length > 0) {
-                    computed.stale = true;
-                    return true;
-                }
-        */
         return false;
     }
 
@@ -464,6 +454,7 @@ export class Store {
      * @param {(store: Store)=>any} callback 
      * @param {string[]} deps 
      * @param {boolean} [skip_item_name_validation=false] 
+     * @returns {boolean}
      */
     #createComputedItemExtended(item_name, callback, deps, skip_item_name_validation = false) {
 
@@ -471,7 +462,7 @@ export class Store {
 
         if (this.hasItem(item_name)) {
             console.warn(`Item name ${item_name} name already exists`);
-            return;
+            return false;
         }
 
         if (!skip_item_name_validation) {
@@ -502,6 +493,7 @@ export class Store {
         }
 
         this.#registerComputed(item_name, callback, Array.from(set_of_deps));
+        return true;
     }
 
     /**
@@ -509,6 +501,7 @@ export class Store {
      * @param {string} item_name 
      * @param {(store: Store)=>any} callback 
      * @param {string[]} deps 
+     * @returns {boolean} is created
      */
     createComputedItem(item_name, callback, deps) {
 
@@ -517,7 +510,7 @@ export class Store {
             return false;
         }
 
-        this.#createComputedItemExtended(item_name, callback, deps);
+        return this.#createComputedItemExtended(item_name, callback, deps);
     }
 
     /**
@@ -536,19 +529,21 @@ export class Store {
         var used_items_set = new Set;
 
         var input_string = expression;
-        input_string = input_string.replace(/\.\s*[a-zA-Z_][a-zA-Z0-9_]*/g, "");
+        //input_string = input_string.replace(/\.\s*[a-zA-Z_][a-zA-Z0-9_]*/g, "");
 
-        var matches = input_string.matchAll(item_name_pattern_global);
+        var matches = input_string.matchAll(/\$[a-zA-Z_][a-zA-Z0-9_]*/g);
 
         for (const match of matches) {
-            if (!/\b(this|store)\b/.test(match[0])) {
-                if (this.hasItem(match[0]))
-                    used_items_set.add(match[0]);
-            }
+
+            let item_name = match[0].slice(1);
+
+            //this.log(item_name)
+            if (this.hasItem(item_name))
+                used_items_set.add(item_name);
         }
 
         var deps = Array.from(used_items_set);
-        var define_vars_block = deps.map((item) => `var ${item} = store.getItem("${item}");`).join("\n");
+        var define_vars_block = deps.map((item) => `var $${item} = store.getItem("${item}");`).join("\n");
 
         var callback = /** @type {(store: Store)=>any} */ (new Function("store", `
     ${define_vars_block}
@@ -580,8 +575,10 @@ export class Store {
         var store = this;
         var proxy = new Proxy(array, {
             deleteProperty: function (target, property) {
-
-                if (typeof property == "string") {
+                if (typeof property == "symbol") {
+                    delete target[property];
+                }
+                else if (typeof property == "string") {
                     let details = new UpdateEventDetails;
                     details.eventType = "delete";
                     details.item_name = item_name;
@@ -593,35 +590,32 @@ export class Store {
                     store.#eventEmitter.emit(details.item_name, details, store);
                     store.#fireChangeEvent({ [item_name]: details }, "delete");
                 }
-                else {
-                    delete target[property];
-                }
 
                 return true;
             },
             set: function (target, property, value, receiver) {
 
-                if (typeof property == "string") {
-                    let prop = /^\d+$/.test(property) ? parseInt(property) : property;
-                    let details = store.#setCollectionItem(item_name, prop, value)
-
+                if (typeof property == "symbol") {
                     target[property] = value;
+                }
+                else if (typeof property == "string") {
+                    let details = store.#setCollectionItem(item_name, property, value)
 
                     if (details) {
+                        target[property] = value;
+
                         store.#eventEmitter.emit(details.item_name, details, store);
-                        store.#fireChangeEvent({ [item_name]: details }, "delete");
+                        store.#fireChangeEvent({ [item_name]: details }, "set");
 
                     }
 
-                } else {
-                    target[property] = value;
                 }
 
                 return true;
             }
         });
 
-
+        store.#collections.set(item_name, proxy);
 
         return proxy;
     }
@@ -704,14 +698,6 @@ export class Store {
         }
 
         this.#fireChangeEvent({ [item_name]: details }, "delete");
-    }
-
-    /**
-     * 
-     * @returns {{[item_name:string]:any}}
-     */
-    getStateCopy() {
-        return JSON.parse(JSON.stringify(this.getItems()));
     }
 
     /**
@@ -804,7 +790,6 @@ export class Store {
             return this.#getCollection(item_name);
         }
 
-        return null;
     }
 
     /**
@@ -854,6 +839,7 @@ export class Store {
     reset() {
         this.#atoms.clear();
         this.#computed.clear();
+        this.#collections.clear();
 
         this.clearSubscribers();
     }
@@ -897,7 +883,7 @@ export class Store {
                     return that.getItem(item_name);
                 }
 
-                return undefined;
+                return null;
             },
 
             set(target, item_name, value) {
@@ -918,7 +904,7 @@ export class Store {
 
             deleteProperty: function (target, item_name) {
                 if (typeof item_name == "string") {
-                    return that.deleteItem(item_name);
+                    that.deleteItem(item_name);
                 }
 
                 return true;
@@ -930,11 +916,15 @@ export class Store {
     }
 
     /**
-     * 
+     * @param {string} item_name 
      * @param {CompareFunction | null} func_or_null 
+     * @returns {boolean}
      */
-    setCompareFunction(func_or_null) {
-        this.#customCompareFunction = func_or_null;
+    setCompareFunction(item_name, func_or_null) {
+        if (!this.hasItem(item_name)) return false;
+
+        this.#customCompareFunctions[item_name] = func_or_null;
+        return true;
     }
 
     /**
@@ -964,4 +954,6 @@ export function createStore(initObject) {
     return new Store(initObject)
 }
 
-export {EventEmitter};
+export { EventEmitter };
+
+//export function getVersion() { return '1.0.0' }

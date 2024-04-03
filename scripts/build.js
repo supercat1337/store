@@ -56,6 +56,7 @@ function humanFileSize(bytes, si = false, dp = 1) {
 async function main() {
 
     const dist_directory = "dist";
+    const entry_point = "src/Store.js";
 
     for (const file of fs.readdirSync(dist_directory)) {
         fs.unlinkSync(path.join(dist_directory, file));
@@ -64,11 +65,12 @@ async function main() {
     var filename_1 = `${dist_directory}/store.${packageInfo.version}.esm.js`;
 
     await esbuild.build({
-        entryPoints: ['./index.js'],
+        entryPoints: [entry_point],
         bundle: true,
         minify: false,
         outfile: filename_1,
         platform: `neutral`,
+        banner: {"js":`// version ${packageInfo.version}`}
 
     });
 
@@ -77,15 +79,31 @@ async function main() {
     var filename_2 = `${dist_directory}/store.${packageInfo.version}.min.esm.js`;
 
     await esbuild.build({
-        entryPoints: ['./index.js'],
+        entryPoints: [entry_point],
         bundle: true,
         minify: true,
         outfile: filename_2,
-        platform: `neutral`
+        platform: `neutral`,
+        banner: {"js":`// version ${packageInfo.version}`}
     });
 
 
     var filesize_2 = fs.statSync(filename_2).size;
+
+
+    var filename_3 = `${dist_directory}/store.bundle.esm.js`;
+
+    await esbuild.build({
+        entryPoints: [entry_point],
+        bundle: true,
+        minify: false,
+        outfile: filename_3,
+        platform: `neutral`,
+        banner: {"js":`// version ${packageInfo.version}`}
+    });
+
+    var filesize_3 = fs.statSync(filename_3).size;
+
 
     console.table({
         1: {
@@ -95,7 +113,12 @@ async function main() {
         2: {
             file: filename_2,
             size: humanFileSize(filesize_2, false, 2)
-        }
+        },
+        3: {
+            file: filename_3,
+            size: humanFileSize(filesize_3, false, 2)
+        },
+
     },
         ["file", "size"]);
 
