@@ -75,6 +75,9 @@ export class Store {
     /** @type {[string, UpdateEventDetails|ChangeEventObject][]} */
     #events = []
 
+    /** @type {number} */
+    #debounce_time = 0
+
     #eventEmitter = new EventEmitter;
 
     /**
@@ -1159,7 +1162,7 @@ export class Store {
      * Sets a callback for item's value changes
      * @param {string} item_name 
      * @param {Subscriber} callback
-     * @param {number} [debounce_time=0] debounce time
+     * @param {number|undefined} [debounce_time] debounce time
      * @returns {Unsubscriber} Returns unsubscriber 
      * 
      * ```js
@@ -1178,9 +1181,14 @@ export class Store {
      * // outputs nothing
      * ```
      */
-    subscribe(item_name, callback, debounce_time = 0) {
+    subscribe(item_name, callback, debounce_time) {
+
+        if (debounce_time === undefined) {
+            debounce_time = this.#debounce_time;
+        }
+
         var _callback = debounce_time <= 0 ? callback : debounce(callback, debounce_time);
-        
+
         let unsubscriber = this.#eventEmitter.on(item_name, _callback);
         return unsubscriber;
     }
@@ -1443,13 +1451,21 @@ export class Store {
         this.#fireEvents();
     }
 
-    #fireEvents(){
-        for (let i=0; i<this.#events.length; i++) {
+    #fireEvents() {
+        for (let i = 0; i < this.#events.length; i++) {
             let ev = this.#events[i];
             this.#eventEmitter.emit(ev[0], ev[1], this);
         }
-    
+
         this.#events = [];
+    }
+
+    /**
+     * Sets default debounce time for subscribers 
+     * @param {number} debounce_time 
+     */
+    setDebounceTime(debounce_time) {
+        this.#debounce_time = debounce_time < 0 ? 0 : debounce_time;
     }
 
 }

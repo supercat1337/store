@@ -133,7 +133,7 @@ test("subscribe #2-1 (atoms, with changes, debounce)", async t => {
     store.setItem("a", 3);
     await sleep(100);
 
-    if (foo==1 && store.getItem("a") === 3) {
+    if (foo == 1 && store.getItem("a") === 3) {
         t.pass();
     } else {
         t.fail();
@@ -232,7 +232,7 @@ test("subscribe #5-1 (collection, with changes)", t => {
     var store = new Store;
     var working = false;
 
-    store.createCollection("c", [1 , 2, 3]);
+    store.createCollection("c", [1, 2, 3]);
 
     store.subscribe("c", () => {
         working = true;
@@ -851,7 +851,7 @@ test("createCollection #2", t => {
 
     var c = store.createCollection("c", [1, 2, 3]);
     if (!c) return;
-   
+
     var s = Symbol("test");
 
     c[0] = c[1] + c[2];
@@ -910,7 +910,7 @@ test("createCollection #5 (item is already created)", t => {
     var store = new Store({ a: 1, b: 2 });
     store.createCollection("c", [1, 2, 3]);
     store.log = t.log;
-    
+
     try {
         store.createCollection("c", []);
         t.fail();
@@ -1395,7 +1395,7 @@ function sleep(ms) {
 test("debounce", async t => {
 
     var foo = 0;
-    var func = debounce(()=>{
+    var func = debounce(() => {
         foo++;
     }, 100);
 
@@ -1407,10 +1407,62 @@ test("debounce", async t => {
 
     await sleep(200);
 
-    if (foo!=1) {
+    if (foo != 1) {
         t.fail();
     } else {
         t.pass();
+    }
+
+});
+
+
+test("setDebounceTime", async t => {
+
+    var store = new Store({ a: 1, b: 2 });
+    store.setDebounceTime(100);
+
+    var foo = 0;
+
+    store.subscribe("a", () => {
+        foo++;
+    });
+
+    store.setItem("a", 2);
+    store.setItem("a", 3);
+    if (foo != 0) {
+        t.fail();
+    }
+    
+    await sleep(100);
+
+    if (foo == 1 && store.getItem("a") === 3) {
+        t.pass();
+    } else {
+        t.fail();
+    }
+
+});
+
+test("setDebounceTime #2 (negative value)", async t => {
+
+    var store = new Store({ a: 1, b: 2 });
+    store.setDebounceTime(-100);
+
+    var foo = 0;
+
+    store.subscribe("a", () => {
+        foo++;
+    });
+
+    store.setItem("a", 2);
+    store.setItem("a", 3);
+
+    await sleep(100);
+
+    if (foo == 2 && store.getItem("a") === 3) {
+        t.pass();
+    } else {
+        t.fail();
     }
 
 });

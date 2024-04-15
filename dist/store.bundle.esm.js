@@ -150,6 +150,10 @@ var Store = class {
   #customCompareFunctions = {};
   /** @type {boolean} */
   #is_sealed = false;
+  /** @type {[string, UpdateEventDetails|ChangeEventObject][]} */
+  #events = [];
+  /** @type {number} */
+  #debounce_time = 0;
   #eventEmitter = new EventEmitter();
   /**
    * Creates a store
@@ -428,7 +432,7 @@ var Store = class {
     });
     for (let i = 0; i < updated_items_arr.length; i++) {
       let details = updated_items_arr[i];
-      this.#eventEmitter.emit(details.item_name, details, this);
+      this.#registerEvents(details.item_name, details);
     }
     this.#fireChangeEvent(updated_items, "set");
   }
@@ -561,7 +565,7 @@ var Store = class {
     let details = this.#recalc(item_name);
     if (details) {
       if (this.hasSubscribers(item_name)) {
-        this.#eventEmitter.emit(item_name, details, this);
+        this.#registerEvents(item_name, details);
       }
     }
     return details;
@@ -757,7 +761,7 @@ var Store = class {
           let details = store.#deleteCollectionItem(item_name, property);
           if (details) {
             delete target[property];
-            store.#eventEmitter.emit(details.item_name, details, store);
+            store.#registerEvents(details.item_name, details);
             store.#fireChangeEvent({ [item_name]: details }, "delete");
           }
         }
@@ -770,7 +774,7 @@ var Store = class {
           let details = store.#setCollectionItem(item_name, property, value);
           if (details) {
             target[property] = value;
-            store.#eventEmitter.emit(details.item_name, details, store);
+            store.#registerEvents(details.item_name, details);
             store.#fireChangeEvent({ [item_name]: details }, "set");
           }
         }
@@ -1059,6 +1063,7 @@ var Store = class {
    * Sets a callback for item's value changes
    * @param {string} item_name 
    * @param {Subscriber} callback
+   * @param {number|undefined} [debounce_time] debounce time
    * @returns {Unsubscriber} Returns unsubscriber 
    * 
    * ```js
@@ -1077,8 +1082,12 @@ var Store = class {
    * // outputs nothing
    * ```
    */
-  subscribe(item_name, callback) {
-    let unsubscriber = this.#eventEmitter.on(item_name, callback);
+  subscribe(item_name, callback, debounce_time) {
+    if (debounce_time === void 0) {
+      debounce_time = this.#debounce_time;
+    }
+    var _callback = debounce_time <= 0 ? callback : debounce(callback, debounce_time);
+    let unsubscriber = this.#eventEmitter.on(item_name, _callback);
     return unsubscriber;
   }
   /**
@@ -1168,7 +1177,7 @@ var Store = class {
       details,
       eventType
     };
-    this.#eventEmitter.emit("change", ev, this);
+    this.#registerEvents("change", ev);
   }
   /**
    * Represents the store as object. Returns an proxy object.
@@ -1302,6 +1311,29 @@ var Store = class {
    */
   unseal() {
     this.#is_sealed = false;
+  }
+  /**
+   * 
+   * @param {string} event_name 
+   * @param {UpdateEventDetails|ChangeEventObject} details 
+   */
+  #registerEvents(event_name, details) {
+    this.#events.push([event_name, details]);
+    this.#fireEvents();
+  }
+  #fireEvents() {
+    for (let i = 0; i < this.#events.length; i++) {
+      let ev = this.#events[i];
+      this.#eventEmitter.emit(ev[0], ev[1], this);
+    }
+    this.#events = [];
+  }
+  /**
+   * Sets default debounce time for subscribers 
+   * @param {number} debounce_time 
+   */
+  setDebounceTime(debounce_time) {
+    this.#debounce_time = debounce_time < 0 ? 0 : debounce_time;
   }
 };
 function createStore(initObject) {
