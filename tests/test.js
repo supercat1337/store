@@ -120,6 +120,27 @@ test("subscribe #2 (atoms, with changes)", t => {
 
 });
 
+test("subscribe #2-1 (atoms, with changes, debounce)", async t => {
+
+    var store = new Store({ a: 1, b: 2 });
+    var foo = 0;
+
+    store.subscribe("a", () => {
+        foo++;
+    }, 100);
+
+    store.setItem("a", 2);
+    store.setItem("a", 3);
+    await sleep(100);
+
+    if (foo==1 && store.getItem("a") === 3) {
+        t.pass();
+    } else {
+        t.fail();
+    }
+
+});
+
 test("subscribe #3 (computed, with changes)", t => {
 
     var store = new Store({ a: 1, b: 2 });
@@ -197,6 +218,28 @@ test("subscribe #5 (collection, with changes)", t => {
     });
 
     store.setItem("c", [{ q: 2, t: 90, k: 1 }]);
+
+    if (working) {
+        t.pass();
+    } else {
+        t.fail();
+    }
+
+});
+
+test("subscribe #5-1 (collection, with changes)", t => {
+
+    var store = new Store;
+    var working = false;
+
+    store.createCollection("c", [1 , 2, 3]);
+
+    store.subscribe("c", () => {
+        working = true;
+
+    });
+
+    store.setItem("c", [1, 2]);
 
     if (working) {
         t.pass();

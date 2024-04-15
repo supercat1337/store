@@ -72,6 +72,9 @@ export class Store {
     /** @type {boolean} */
     #is_sealed = false;
 
+    /** @type {[string, UpdateEventDetails|ChangeEventObject][]} */
+    #events = []
+
     #eventEmitter = new EventEmitter;
 
     /**
@@ -413,7 +416,7 @@ export class Store {
 
         for (let i = 0; i < updated_items_arr.length; i++) {
             let details = updated_items_arr[i];
-            this.#eventEmitter.emit(details.item_name, details, this);
+            this.#registerEvents(details.item_name, details);
         }
 
         this.#fireChangeEvent(updated_items, "set");
@@ -564,7 +567,7 @@ export class Store {
 
         if (details) {
             if (this.hasSubscribers(item_name)) {
-                this.#eventEmitter.emit(item_name, details, this);
+                this.#registerEvents(item_name, details);
             }
         }
 
@@ -807,7 +810,7 @@ export class Store {
                     if (details) {
                         delete target[property];
 
-                        store.#eventEmitter.emit(details.item_name, details, store);
+                        store.#registerEvents(details.item_name, details);
                         store.#fireChangeEvent({ [item_name]: details }, "delete");
                     }
                 }
@@ -825,7 +828,7 @@ export class Store {
                     if (details) {
                         target[property] = value;
 
-                        store.#eventEmitter.emit(details.item_name, details, store);
+                        store.#registerEvents(details.item_name, details);
                         store.#fireChangeEvent({ [item_name]: details }, "set");
 
                     }
@@ -1156,6 +1159,7 @@ export class Store {
      * Sets a callback for item's value changes
      * @param {string} item_name 
      * @param {Subscriber} callback
+     * @param {number} [debounce_time=0] debounce time
      * @returns {Unsubscriber} Returns unsubscriber 
      * 
      * ```js
@@ -1174,8 +1178,10 @@ export class Store {
      * // outputs nothing
      * ```
      */
-    subscribe(item_name, callback) {
-        let unsubscriber = this.#eventEmitter.on(item_name, callback);
+    subscribe(item_name, callback, debounce_time = 0) {
+        var _callback = debounce_time <= 0 ? callback : debounce(callback, debounce_time);
+        
+        let unsubscriber = this.#eventEmitter.on(item_name, _callback);
         return unsubscriber;
     }
 
@@ -1274,7 +1280,7 @@ export class Store {
         let ev = {
             details, eventType
         };
-        this.#eventEmitter.emit("change", ev, this);
+        this.#registerEvents("change", ev);
     }
 
     /**
@@ -1425,6 +1431,25 @@ export class Store {
      */
     unseal() {
         this.#is_sealed = false;
+    }
+
+    /**
+     * 
+     * @param {string} event_name 
+     * @param {UpdateEventDetails|ChangeEventObject} details 
+     */
+    #registerEvents(event_name, details) {
+        this.#events.push([event_name, details]);
+        this.#fireEvents();
+    }
+
+    #fireEvents(){
+        for (let i=0; i<this.#events.length; i++) {
+            let ev = this.#events[i];
+            this.#eventEmitter.emit(ev[0], ev[1], this);
+        }
+    
+        this.#events = [];
     }
 
 }
