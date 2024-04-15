@@ -18,7 +18,7 @@
   "author": "Supercat",
   "license": "MIT",
   "dependencies": {
-    "@supercat1337/event-emitter": "^1.0.4"
+    "@supercat1337/event-emitter": "^1.0.5"
   },
   "devDependencies": {
     "@types/node": "^20.12.2",
