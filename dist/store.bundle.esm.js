@@ -85,6 +85,18 @@ function compareObjects(a, b) {
   let b_json = JSON.stringify(b, Object.keys(b).sort());
   return a_json === b_json;
 }
+function debounce(func, wait) {
+  var timeout;
+  return function() {
+    var context = this, args = arguments;
+    var later = function() {
+      timeout = null;
+      func.apply(context, args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
 
 // src/Store.js
 /**
@@ -243,6 +255,7 @@ var Store = class {
     }
     if (equal)
       return false;
+    collection[property] = value;
     let details = new UpdateEventDetails();
     details.eventType = "set";
     details.item_name = item_name;
@@ -254,26 +267,56 @@ var Store = class {
   /**
    * 
    * @param {string} item_name 
+   * @param {string} property 
+   * @returns {false|UpdateEventDetails} updated
+   */
+  #deleteCollectionItem(item_name, property) {
+    property = property.toString();
+    let collection = this.#collections.get(item_name);
+    let old_value = collection[property];
+    if (!collection.hasOwnProperty(property))
+      return false;
+    delete collection[property];
+    let details = new UpdateEventDetails();
+    details.eventType = "delete";
+    details.item_name = item_name;
+    details.property = property;
+    details.value = null;
+    details.old_value = old_value;
+    return details;
+  }
+  /**
+   * 
+   * @param {string} item_name 
    * @param {any[]} array
-   * @returns {false|UpdateEventDetails}
    */
   #setCollection(item_name, array) {
-    let proxied_array = this.#collections.get(item_name);
+    let old_array = this.#collections.get(item_name);
     let equal = true;
-    proxied_array.length = array.length;
-    for (let i = 0; i < proxied_array.length; i++) {
+    let details_arr = [];
+    if (old_array.length > array.length)
+      for (let i = array.length; i < old_array.length; i++) {
+        let details = this.#deleteCollectionItem(item_name, i.toString());
+        if (details) {
+          details_arr.push(details);
+          equal = false;
+        }
+      }
+    old_array.length = array.length;
+    for (let i = 0; i < array.length; i++) {
       let details = this.#setCollectionItem(item_name, i.toString(), array[i]);
-      if (details)
+      if (details) {
+        details_arr.push(details);
         equal = false;
+      }
     }
-    if (!equal) {
-      let details = new UpdateEventDetails();
-      details.eventType = "set";
-      details.item_name = item_name;
-      details.value = array;
-      return details;
-    }
-    return false;
+    if (equal)
+      return false;
+    let main_details = new UpdateEventDetails();
+    main_details.eventType = "set";
+    main_details.item_name = item_name;
+    main_details.value = array;
+    return { main_details, details_arr };
   }
   /**
    * Checks if item exists by its name
@@ -348,13 +391,23 @@ var Store = class {
       let value = obj[item_name];
       let is_atom = this.isAtomItem(item_name);
       let is_collection = this.isCollection(item_name);
-      if (is_atom || is_collection) {
-        let details = is_atom ? this.#setAtom(item_name, value) : this.#setCollection(item_name, value);
+      if (is_atom) {
+        let details = this.#setAtom(item_name, value);
         if (details == false)
           continue;
         has_changes = true;
         updated_items[item_name] = details;
         updated_items_arr.push(details);
+        updated_atom_item_names.add(item_name);
+      }
+      if (is_collection) {
+        let result = this.#setCollection(item_name, value);
+        if (result == false)
+          continue;
+        has_changes = true;
+        let { main_details, details_arr } = result;
+        updated_items[item_name] = main_details;
+        updated_items_arr.push(...details_arr, main_details);
         updated_atom_item_names.add(item_name);
       }
     }
@@ -669,8 +722,9 @@ var Store = class {
   }
   /**
    * creates a collection item
+   * @template {any[]} T
    * @param {string} item_name 
-   * @param {any[]} array 
+   * @param {T} [array] 
    * 
    * ```js
    * var store = new Store({ a: 1, b: 2 });
@@ -689,8 +743,7 @@ var Store = class {
   createCollection(item_name, array) {
     item_name = item_name.trim();
     if (this.hasItem(item_name)) {
-      console.warn(`Item name ${item_name} name already exists`);
-      return false;
+      throw new Error(`Item name ${item_name} name already exists`);
     }
     if (!this.#isValidItemName(item_name)) {
       throw new Error(`${item_name} is wrong store's item_name`);
@@ -701,14 +754,12 @@ var Store = class {
         if (typeof property == "symbol") {
           delete target[property];
         } else if (typeof property == "string") {
-          let details = new UpdateEventDetails();
-          details.eventType = "delete";
-          details.item_name = item_name;
-          details.value = target[property];
-          details.property = property;
-          delete target[property];
-          store.#eventEmitter.emit(details.item_name, details, store);
-          store.#fireChangeEvent({ [item_name]: details }, "delete");
+          let details = store.#deleteCollectionItem(item_name, property);
+          if (details) {
+            delete target[property];
+            store.#eventEmitter.emit(details.item_name, details, store);
+            store.#fireChangeEvent({ [item_name]: details }, "delete");
+          }
         }
         return true;
       },
@@ -726,7 +777,7 @@ var Store = class {
         return true;
       }
     });
-    store.#collections.set(item_name, proxy);
+    store.#collections.set(item_name, array);
     return proxy;
   }
   /**
@@ -1260,5 +1311,6 @@ export {
   EventEmitter,
   Store,
   UpdateEventDetails,
-  createStore
+  createStore,
+  debounce
 };

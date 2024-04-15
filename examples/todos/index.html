@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Todo List</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+      #root_list {
+        min-width: 400px;
+      }
+
+      #root_list li {
+        min-height: 50px;
+      }
+    </style>
+</head>
+
+<body>
+  <div class="container mt-5">
+    <div class="d-flex flex-column align-items-center">
+      <h1 class="mb-3">Todo List</h1>
+
+      <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Add todo" aria-label="Add todo" aria-describedby="button-addon2" id="add_todo_input">
+        <button class="btn btn-outline-secondary" type="button" id="add_todo_button" autocomplete="off">Add</button>
+      </div>
+
+      <div class="mb-3">
+        <ul class="list-group" id="root_list"></ul>
+      </div>
+
+    </div>
+  </div>
+  <script src="index.js" type="module"></script>
+</body>
+
+</html>

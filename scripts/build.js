@@ -87,6 +87,20 @@ async function main() {
 
     var filesize_3 = fs.statSync(filename_3).size;
 
+    var filename_4 = `${dist_directory}/store.bundle.js`;
+
+    await esbuild.build({
+        entryPoints: [entry_point],
+        bundle: true,
+        minify: false,
+        outfile: filename_4,
+        platform: `neutral`,
+        legalComments: "inline",
+        format: "iife",
+        banner: {"js":`// version ${packageInfo.version}`}
+    });
+
+    var filesize_4 = fs.statSync(filename_3).size;
 
     console.table({
         1: {
@@ -97,7 +111,10 @@ async function main() {
             file: filename_3,
             size: humanFileSize(filesize_3, false, 2)
         },
-
+        3: {
+            file: filename_4,
+            size: humanFileSize(filesize_4, false, 2)
+        },
     },
         ["file", "size"]);
 

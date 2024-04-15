@@ -22,3 +22,25 @@ export function compareObjects(a, b) {
     let b_json = JSON.stringify(b, Object.keys(b).sort());
     return a_json === b_json;
 }
+
+/**
+ * Debounce function that, as long as it continues to be invoked, will not be triggered.
+ * @param {Function} func - Function to be debounced
+ * @param {number} wait - Time in milliseconds to wait before the function gets called.
+ * @returns {Function}
+ * @example
+   window.addEventListener('resize', debounce((evt) => console.log(evt), 250));
+ */
+export function debounce(func, wait) {
+    var timeout;
+    return function () {
+        var context = this,
+            args = arguments;
+        var later = function () {
+            timeout = null;
+            func.apply(context, args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}

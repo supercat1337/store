@@ -1,6 +1,6 @@
 // @ts-check
 
-import { compareObjects } from "./../src/helpers.js";
+import { compareObjects, debounce } from "./../src/helpers.js";
 import { createStore, Store } from "./../src/Store.js";
 
 import test from "./../node_modules/ava/entrypoints/main.mjs";
@@ -860,15 +860,19 @@ test("createCollection #4 (not valid name)", t => {
 }
 );
 
+
+
 test("createCollection #5 (item is already created)", t => {
 
     var store = new Store({ a: 1, b: 2 });
     store.createCollection("c", [1, 2, 3]);
-    var result = store.createCollection("c", [3]);
-    if (!Array.isArray(result)) {
-        t.pass();
-    } else {
+    store.log = t.log;
+    
+    try {
+        store.createCollection("c", []);
         t.fail();
+    } catch (e) {
+        t.pass();
     }
 
 });
@@ -1329,6 +1333,38 @@ test("setCompareFunction (item doesn't exist)", t => {
     });
 
     if (is_set) {
+        t.fail();
+    } else {
+        t.pass();
+    }
+
+});
+
+/**
+ * 
+ * @param {number} ms 
+ * @returns 
+ */
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+test("debounce", async t => {
+
+    var foo = 0;
+    var func = debounce(()=>{
+        foo++;
+    }, 100);
+
+    func();
+    func();
+    func();
+    func();
+    func();
+
+    await sleep(200);
+
+    if (foo!=1) {
         t.fail();
     } else {
         t.pass();
