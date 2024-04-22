@@ -1,2 +1,2 @@
 // @ts-check
-export * from "./dist/store.bundle.esm.js";
+export * from "./src/Store.js";
