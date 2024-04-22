@@ -694,6 +694,29 @@ test("createComputedItem #5 (already exists)", t => {
 
 });
 
+test("createComputedItem #6 (with error)", t => {
+
+    var store = new Store({ a: "abcdef", b: "ghijk" });
+    store.createComputedItem(
+        "c",
+        (store) => {
+            return store.getItem("a").slice(0, 1) + store.getItem("b").slice(0, 1);
+        },
+        ["a", "b"]
+    );
+
+    store.setItem("b", 0);
+
+    if (store.getItem("c") === "#ERROR!") {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+
 test("recalcComputed #1", t => {
 
     var store = new Store({ a: 1, b: 2 });

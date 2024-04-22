@@ -1,4 +1,4 @@
-// version 1.0.1
+// version 1.0.4
 
 // node_modules/@supercat1337/event-emitter/src/EventEmitter.js
 var EventEmitter = class {
@@ -119,7 +119,7 @@ function debounce(func, wait) {
  * @typedef {Object} ComputedType
  * @property {string} item_name
  * @property {string[]} dependencies
- * @property {(store: Store)=>any} getter
+ * @property {()=>any} getter
  * @property {any} value
  * @property {boolean} stale
  * 
@@ -505,7 +505,7 @@ var Store = class {
     let store = this;
     let old_value = computed.value;
     computed.stale = true;
-    let value = computed.getter(store);
+    let value = computed.getter();
     computed.stale = false;
     let equal = true;
     if (this.#customCompareFunctions[item_name]) {
@@ -579,11 +579,19 @@ var Store = class {
     if (depsArray.length == 0) {
       throw new Error(`Computed item ${item_name} hasn't dependencies`);
     }
+    var __callback = () => {
+      try {
+        return callback(store);
+      } catch (e) {
+        console.error(`Computed error ${item_name}: `, e);
+        return "#ERROR!";
+      }
+    };
     this.#computed.set(item_name, {
       item_name,
       dependencies: depsArray,
-      getter: callback,
-      value: callback(store),
+      getter: __callback,
+      value: __callback(),
       stale: false
     });
   }
@@ -670,6 +678,23 @@ var Store = class {
    * 
    * store.recalcComputed("c");
    * // outputs: c is changed: 27
+   * ```
+   * 
+   * When computed item has error
+   * ```js
+   * var store = new Store({ a: "abcdef", b: "ghijk" });
+   * store.createComputedItem(
+   *     "c",
+   *     (store) => {
+   *         return store.getItem("a").slice(0, 1) + store.getItem("b").slice(0, 1);
+   *     },
+   *     ["a", "b"]
+   * );
+   * 
+   * store.setItem("b", 0);
+   * 
+   * console.log(store.getItem("c"));
+   * // outputs "#ERROR!"
    * ```
    */
   createComputedItem(item_name, callback, deps) {
