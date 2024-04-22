@@ -1,4 +1,4 @@
-// version 1.0.0
+// version 1.0.1
 
 // node_modules/@supercat1337/event-emitter/src/EventEmitter.js
 var EventEmitter = class {
@@ -278,8 +278,6 @@ var Store = class {
     property = property.toString();
     let collection = this.#collections.get(item_name);
     let old_value = collection[property];
-    if (!collection.hasOwnProperty(property))
-      return false;
     delete collection[property];
     let details = new UpdateEventDetails();
     details.eventType = "delete";
@@ -432,9 +430,9 @@ var Store = class {
     });
     for (let i = 0; i < updated_items_arr.length; i++) {
       let details = updated_items_arr[i];
-      this.#registerEvents(details.item_name, details);
+      this.#registerEvent(details.item_name, details);
     }
-    this.#fireChangeEvent(updated_items, "set");
+    this.#registerChangeEvent(updated_items, "set");
   }
   /**
    * Checks if item is computed
@@ -565,7 +563,7 @@ var Store = class {
     let details = this.#recalc(item_name);
     if (details) {
       if (this.hasSubscribers(item_name)) {
-        this.#registerEvents(item_name, details);
+        this.#registerEvent(item_name, details);
       }
     }
     return details;
@@ -761,8 +759,8 @@ var Store = class {
           let details = store.#deleteCollectionItem(item_name, property);
           if (details) {
             delete target[property];
-            store.#registerEvents(details.item_name, details);
-            store.#fireChangeEvent({ [item_name]: details }, "delete");
+            store.#registerEvent(details.item_name, details);
+            store.#registerChangeEvent({ [item_name]: details }, "delete");
           }
         }
         return true;
@@ -774,8 +772,8 @@ var Store = class {
           let details = store.#setCollectionItem(item_name, property, value);
           if (details) {
             target[property] = value;
-            store.#registerEvents(details.item_name, details);
-            store.#fireChangeEvent({ [item_name]: details }, "set");
+            store.#registerEvent(details.item_name, details);
+            store.#registerChangeEvent({ [item_name]: details }, "set");
           }
         }
         return true;
@@ -841,7 +839,7 @@ var Store = class {
    * ```
    */
   onChange(callback) {
-    let unsubscriber = this.#eventEmitter.on("change", callback);
+    let unsubscriber = this.#eventEmitter.on("#change", callback);
     return unsubscriber;
   }
   /**
@@ -875,7 +873,7 @@ var Store = class {
     if (arr_item_names.length == 0)
       return;
     let store = this;
-    let unsubscriber = this.#eventEmitter.on("change", function(ev) {
+    let unsubscriber = this.#eventEmitter.on("#change", function(ev) {
       let details = ev.details;
       let shouldFireEvent = false;
       for (let item_name in details) {
@@ -942,7 +940,7 @@ var Store = class {
     if (this.isCollection(item_name)) {
       this.#collections.delete(item_name);
     }
-    this.#fireChangeEvent({ [item_name]: details }, "delete");
+    this.#registerChangeEvent({ [item_name]: details }, "delete");
   }
   /**
    * 
@@ -1172,12 +1170,12 @@ var Store = class {
    * @param {{[item_name: string]: UpdateEventDetails}} details
    * @param {"set"|"delete"|null} [eventType]  
    */
-  #fireChangeEvent(details, eventType = null) {
+  #registerChangeEvent(details, eventType = null) {
     let ev = {
       details,
       eventType
     };
-    this.#registerEvents("change", ev);
+    this.#registerEvent("#change", ev);
   }
   /**
    * Represents the store as object. Returns an proxy object.
@@ -1317,7 +1315,7 @@ var Store = class {
    * @param {string} event_name 
    * @param {UpdateEventDetails|ChangeEventObject} details 
    */
-  #registerEvents(event_name, details) {
+  #registerEvent(event_name, details) {
     this.#events.push([event_name, details]);
     this.#fireEvents();
   }

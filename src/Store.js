@@ -232,8 +232,6 @@ export class Store {
 
         let old_value = collection[property];
 
-        if (!collection.hasOwnProperty(property)) return false;
-
         delete collection[property];
 
         let details = new UpdateEventDetails;
@@ -419,10 +417,10 @@ export class Store {
 
         for (let i = 0; i < updated_items_arr.length; i++) {
             let details = updated_items_arr[i];
-            this.#registerEvents(details.item_name, details);
+            this.#registerEvent(details.item_name, details);
         }
 
-        this.#fireChangeEvent(updated_items, "set");
+        this.#registerChangeEvent(updated_items, "set");
     }
 
     /**
@@ -570,7 +568,7 @@ export class Store {
 
         if (details) {
             if (this.hasSubscribers(item_name)) {
-                this.#registerEvents(item_name, details);
+                this.#registerEvent(item_name, details);
             }
         }
 
@@ -813,8 +811,8 @@ export class Store {
                     if (details) {
                         delete target[property];
 
-                        store.#registerEvents(details.item_name, details);
-                        store.#fireChangeEvent({ [item_name]: details }, "delete");
+                        store.#registerEvent(details.item_name, details);
+                        store.#registerChangeEvent({ [item_name]: details }, "delete");
                     }
                 }
 
@@ -831,8 +829,8 @@ export class Store {
                     if (details) {
                         target[property] = value;
 
-                        store.#registerEvents(details.item_name, details);
-                        store.#fireChangeEvent({ [item_name]: details }, "set");
+                        store.#registerEvent(details.item_name, details);
+                        store.#registerChangeEvent({ [item_name]: details }, "set");
 
                     }
 
@@ -903,7 +901,7 @@ export class Store {
      * ```
      */
     onChange(callback) {
-        let unsubscriber = this.#eventEmitter.on("change", callback);
+        let unsubscriber = this.#eventEmitter.on("#change", callback);
         return unsubscriber;
     }
 
@@ -940,7 +938,7 @@ export class Store {
 
         let store = this;
 
-        let unsubscriber = this.#eventEmitter.on("change", function (/** @type {ChangeEventObject} */ ev) {
+        let unsubscriber = this.#eventEmitter.on("#change", function (/** @type {ChangeEventObject} */ ev) {
             let details = ev.details;
 
             let shouldFireEvent = false;
@@ -1022,7 +1020,7 @@ export class Store {
             this.#collections.delete(item_name);
         }
 
-        this.#fireChangeEvent({ [item_name]: details }, "delete");
+        this.#registerChangeEvent({ [item_name]: details }, "delete");
     }
 
     /**
@@ -1283,12 +1281,12 @@ export class Store {
      * @param {{[item_name: string]: UpdateEventDetails}} details
      * @param {"set"|"delete"|null} [eventType]  
      */
-    #fireChangeEvent(details, eventType = null) {
+    #registerChangeEvent(details, eventType = null) {
         /** @type {ChangeEventObject} */
         let ev = {
             details, eventType
         };
-        this.#registerEvents("change", ev);
+        this.#registerEvent("#change", ev);
     }
 
     /**
@@ -1446,7 +1444,7 @@ export class Store {
      * @param {string} event_name 
      * @param {UpdateEventDetails|ChangeEventObject} details 
      */
-    #registerEvents(event_name, details) {
+    #registerEvent(event_name, details) {
         this.#events.push([event_name, details]);
         this.#fireEvents();
     }

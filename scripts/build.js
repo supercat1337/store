@@ -57,7 +57,8 @@ async function main() {
         fs.unlinkSync(path.join(dist_directory, file));
     }
 
-    var filename_2 = `${dist_directory}/store.${packageInfo.version}.min.esm.js`;
+    //var filename_2 = `${dist_directory}/store.${packageInfo.version}.min.esm.js`;
+    var filename_2 = `${dist_directory}/store.latest.min.esm.js`;
 
     await esbuild.build({
         entryPoints: [entry_point],
@@ -73,7 +74,8 @@ async function main() {
 
     var filesize_2 = fs.statSync(filename_2).size;
 
-    var filename_3 = `${dist_directory}/store.bundle.esm.js`;
+    // bundle
+    var filename_3 = `${dist_directory}/store.esm.js`;
 
     await esbuild.build({
         entryPoints: [entry_point],
@@ -87,21 +89,6 @@ async function main() {
 
     var filesize_3 = fs.statSync(filename_3).size;
 
-    var filename_4 = `${dist_directory}/store.bundle.js`;
-
-    await esbuild.build({
-        entryPoints: [entry_point],
-        bundle: true,
-        minify: false,
-        outfile: filename_4,
-        platform: `neutral`,
-        legalComments: "inline",
-        format: "iife",
-        banner: {"js":`// version ${packageInfo.version}`}
-    });
-
-    var filesize_4 = fs.statSync(filename_3).size;
-
     console.table({
         1: {
             file: filename_2,
@@ -110,10 +97,6 @@ async function main() {
         2: {
             file: filename_3,
             size: humanFileSize(filesize_3, false, 2)
-        },
-        3: {
-            file: filename_4,
-            size: humanFileSize(filesize_4, false, 2)
         },
     },
         ["file", "size"]);

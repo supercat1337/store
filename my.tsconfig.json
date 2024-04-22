@@ -5,14 +5,14 @@
         "module": "NodeNext",
         "emitDeclarationOnly": true,
         "declaration": true, 
-        "outDir": "./dist",
+        "outDir": "./types",
         "rootDir": ".",
         "declarationMap": true,
         "lib": ["ESNext", "DOM", "ES2023"],
-        "moduleResolution": "NodeNext"
+        "moduleResolution": "NodeNext",
+        "stripInternal": true
     },
     "include": [
-        "src/*.js",
-        "node_modules/@supercat1337/event-emitter/src/EventEmitter.js"
+        "dist/*.js"
     ]
 }
