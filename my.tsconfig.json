@@ -13,6 +13,7 @@
         "stripInternal": true
     },
     "include": [
-        "dist/*.js"
+        "src/*.js",
+        "node_modules/@supercat1337/event-emitter/src/*.js"
     ]
 }
