@@ -1,0 +1,6 @@
+{
+    "out": "./docs-md",
+    "plugin": ["typedoc-plugin-missing-exports", "typedoc-plugin-markdown"],
+    "entryPoints": ["./src/Store.js", "./node_modules/@supercat1337/event-emitter/src/EventEmitter.js"],
+    "entryPointStrategy": "expand"
+}
