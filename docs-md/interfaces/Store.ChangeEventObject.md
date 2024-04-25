@@ -19,7 +19,7 @@
 
 #### Defined in
 
-[src/Store.js:23](https://github.com/supercat911/store/blob/7df2cea901795343a92975806dcdc89a738610af/src/Store.js#L23)
+[src/Store.js:23](https://github.com/supercat911/store/blob/34794c6cd85e55f7a2c211f70b0039701cb03b0f/src/Store.js#L23)
 
 ___
 
@@ -29,4 +29,4 @@ ___
 
 #### Defined in
 
-[src/Store.js:22](https://github.com/supercat911/store/blob/7df2cea901795343a92975806dcdc89a738610af/src/Store.js#L22)
+[src/Store.js:22](https://github.com/supercat911/store/blob/34794c6cd85e55f7a2c211f70b0039701cb03b0f/src/Store.js#L22)

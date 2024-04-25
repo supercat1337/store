@@ -87,7 +87,7 @@ export class Store {
      * Used to debug code during testing
      * @type {Function}
      * @example
-     * ```js
+     *```js
      * import test from "./../node_modules/ava/entrypoints/main.mjs";
      * 
      * test("create store", t => {
@@ -115,7 +115,8 @@ export class Store {
     /**
      * Creates a store
      * @param {{[item_name: string]: any}} [initObject] object of items
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 1, b: 2 });
      * this.log(store.getItem("a"), store.getItem("b"));
      * // outputs 1, 2
@@ -302,7 +303,8 @@ export class Store {
      * @param {string} item_name
      * @returns {boolean} 
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 1, b: 2 });
      * 
      * this.log(store.hasItem("a"));
@@ -318,7 +320,8 @@ export class Store {
      * @param {string} item_name
      * @param {any} value  
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 1, b: 2 });
      * 
      * store.setItem("a", 2);
@@ -338,7 +341,8 @@ export class Store {
      * Sets values of items
      * @param {{[item_name: string]: any}} obj 
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store;
      * store.setItems({ a: 1, b: 2 });
      * 
@@ -446,7 +450,8 @@ export class Store {
      * @param {string} item_name 
      * @returns {boolean}
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 1, b: 2 });
      * store.createComputedItem(
      *     "c",
@@ -469,7 +474,8 @@ export class Store {
      * @param {string} item_name 
      * @returns {Boolean}
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 1, b: 2 });
      * store.createComputedItem(
      *     "c",
@@ -492,7 +498,8 @@ export class Store {
      * @param {string} item_name 
      * @returns {Boolean}
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 1, b: 2 });
      * 
      * store.createCollection("c", [{ q: 2, t: 90 }]);
@@ -548,7 +555,8 @@ export class Store {
      * @param {string} item_name
      * @returns {false|UpdateEventDetails}
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 1, b: [1, 2, 3] });
      * 
      * var obj = store.asObject();
@@ -704,7 +712,8 @@ export class Store {
      * @param {string[]} deps 
      * @returns {boolean} is created
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 1, b: [1, 2, 3] });
      * 
      * var obj = store.asObject();
@@ -732,7 +741,8 @@ export class Store {
      * ```
      * 
      * When computed item has error
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: "abcdef", b: "ghijk" });
      * store.createComputedItem(
      *     "c",
@@ -763,7 +773,8 @@ export class Store {
      * @param {string} expression 
      * @returns {string} returns the name of computed item
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 1, b: 2 });
      * 
      * // get name of computed item
@@ -819,7 +830,8 @@ export class Store {
      * @param {string} item_name 
      * @param {T} [array] 
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 1, b: 2 });
      * 
      * var c = store.createCollection("c", [1, 2, 3]);
@@ -898,7 +910,8 @@ export class Store {
      * @param {ChangeEventSubscriber} callback 
      * @returns {Unsubscriber} unsubscriber
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 1, b: 2 });
      * 
      * store.onChange((data) => {
@@ -960,7 +973,8 @@ export class Store {
      * @param {ChangeEventSubscriber} callback 
      * @returns {Unsubscriber|undefined} unsubscriber
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 1, b: 2 });
      * 
      * store.onChangeAny(["a", "b"], (data) => {
@@ -1013,7 +1027,8 @@ export class Store {
      * @param {string} item_name 
      * @returns {boolean}
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 1, b: 2 });
      * 
      * store.createComputedItem(
@@ -1085,7 +1100,8 @@ export class Store {
      * @param {boolean} show_computed 
      * @returns {{[item_name: string]: any}}
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 1, b: 2 });
      * 
      * store.createComputedItem(
@@ -1212,7 +1228,8 @@ export class Store {
      * @param {number|undefined} [debounce_time] debounce time
      * @returns {Unsubscriber} Returns unsubscriber 
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 1, b: 2 });
      * 
      * var unsubscriber = store.subscribe("a", (details) => {
@@ -1258,7 +1275,8 @@ export class Store {
     /**
      * Deletes all subscribers
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 0, b: 2 });
      * 
      * store.subscribe("a", () => {
@@ -1281,7 +1299,8 @@ export class Store {
     /**
      * Deletes the item's subscribers
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 0, b: 2 });
      * 
      * store.subscribe("a", () => {
@@ -1305,7 +1324,8 @@ export class Store {
     /**
      * Resets the instance. Deletes all items an subscribers.
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 0, b: 2 });
      * 
      * store.subscribe("a", () => {
@@ -1342,7 +1362,8 @@ export class Store {
      * Represents the store as object. Returns an proxy object.
      * @returns { {[item_name:string]:any}}
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 1, b: 2 });
      * 
      * store.subscribe("b", (details) => {
@@ -1415,7 +1436,8 @@ export class Store {
      * @param {CompareFunction | null} func_or_null 
      * @returns {boolean}
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: { value: 1, meta_info: { qwe: 900 } } });
      * 
      * store.setCompareFunction("a", (old_value, value) => {
@@ -1451,7 +1473,8 @@ export class Store {
     /**
      * Seals the store. This protects the store from creating new items or deleting items
      * 
-     * ```js
+     * @example
+     *```js
      * var store = new Store({ a: 1, b: 2 });
      * 
      * store.createComputedItem(
@@ -1526,7 +1549,7 @@ export class Store {
     /**
      * Calls a function after all reactions have completed execution
      * @param {(store:Store)=>void} func 
-     * 
+     * @example
      *```js
      * var store = new Store({ a: 1, b: 2 });
      * store.log = t.log;
