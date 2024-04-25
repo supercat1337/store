@@ -60,7 +60,7 @@ Re-exports [EventEmitter](../classes/EventEmitter.EventEmitter.md)
 
 #### Defined in
 
-[src/Store.js:17](https://github.com/supercat911/store/blob/34794c6cd85e55f7a2c211f70b0039701cb03b0f/src/Store.js#L17)
+[src/Store.js:17](https://github.com/supercat911/store/blob/50356dfc282b266e2a37bddbcf0d115dc960dfe7/src/Store.js#L17)
 
 ___
 
@@ -87,7 +87,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:11](https://github.com/supercat911/store/blob/34794c6cd85e55f7a2c211f70b0039701cb03b0f/src/Store.js#L11)
+[src/Store.js:11](https://github.com/supercat911/store/blob/50356dfc282b266e2a37bddbcf0d115dc960dfe7/src/Store.js#L11)
 
 ___
 
@@ -112,7 +112,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:13](https://github.com/supercat911/store/blob/34794c6cd85e55f7a2c211f70b0039701cb03b0f/src/Store.js#L13)
+[src/Store.js:13](https://github.com/supercat911/store/blob/50356dfc282b266e2a37bddbcf0d115dc960dfe7/src/Store.js#L13)
 
 ___
 
@@ -130,7 +130,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:15](https://github.com/supercat911/store/blob/34794c6cd85e55f7a2c211f70b0039701cb03b0f/src/Store.js#L15)
+[src/Store.js:15](https://github.com/supercat911/store/blob/50356dfc282b266e2a37bddbcf0d115dc960dfe7/src/Store.js#L15)
 
 ___
 
@@ -144,7 +144,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:19](https://github.com/supercat911/store/blob/34794c6cd85e55f7a2c211f70b0039701cb03b0f/src/Store.js#L19)
+[src/Store.js:19](https://github.com/supercat911/store/blob/50356dfc282b266e2a37bddbcf0d115dc960dfe7/src/Store.js#L19)
 
 ## Functions
 
@@ -166,7 +166,7 @@ Create a store instance. Same as "new Store(initObject);"
 
 #### Defined in
 
-[src/Store.js:1594](https://github.com/supercat911/store/blob/34794c6cd85e55f7a2c211f70b0039701cb03b0f/src/Store.js#L1594)
+[src/Store.js:1594](https://github.com/supercat911/store/blob/50356dfc282b266e2a37bddbcf0d115dc960dfe7/src/Store.js#L1594)
 
 ___
 
@@ -195,4 +195,4 @@ window.addEventListener('resize', debounce((evt) => console.log(evt), 250));
 
 #### Defined in
 
-[src/helpers.js:34](https://github.com/supercat911/store/blob/34794c6cd85e55f7a2c211f70b0039701cb03b0f/src/helpers.js#L34)
+[src/helpers.js:34](https://github.com/supercat911/store/blob/50356dfc282b266e2a37bddbcf0d115dc960dfe7/src/helpers.js#L34)
