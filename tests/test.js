@@ -354,6 +354,8 @@ test("subscribe #10 (collection, setCompareFunction)", t => {
     var foo = 0;
     var c = store.createCollection("ccc", [1, 2, 3]);
     store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
 
     store.setCompareFunction("ccc", (old_value, value, item_name, property) => {
 
@@ -381,6 +383,8 @@ test("onChange", t => {
     var store = new Store({ a: 1, b: 2 });
     var working = false;
     store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
 
     store.onChange((data) => {
 
@@ -408,6 +412,8 @@ test("onChangeAny", t => {
     var store = new Store({ a: 1, b: 2 });
     var working = false;
     store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
 
     store.onChangeAny(["a", "b"], (data) => {
         store.log(data.details);
@@ -455,6 +461,8 @@ test("unsubscribe", t => {
 
     var store = new Store({ a: [23], b: 2 });
     store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
 
     var unsubscriber = store.subscribe("a", (details) => {
         store.log(`item "${details.item_name}" is changed: ${details.value}`);
@@ -773,7 +781,9 @@ test("recalcComputed #2 (not exists)", t => {
 test("recalcComputed #3 (with subscribers)", t => {
 
     var store = new Store({ a: 1, b: [1, 2, 3] });
-    //store.log = t.log;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
 
     var obj = store.asObject();
 
@@ -933,6 +943,8 @@ test("createCollection #5 (item is already created)", t => {
     var store = new Store({ a: 1, b: 2 });
     store.createCollection("c", [1, 2, 3]);
     store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
 
     try {
         store.createCollection("c", []);
@@ -948,11 +960,14 @@ test("#setCollectionItem #1 (with changes)", t => {
 
     var store = new Store({ a: 1, b: 2 });
     var working = false;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
 
     var c = store.createCollection("c", [1, 2, 3]);
 
     store.subscribe("c", (details) => {
-        //store.log("collection item is changed. (property: " + details.property + ", value: " + details.value + ")");
+        store.log("collection item is changed. (property: " + details.property + ", value: " + details.value + ")");
 
         if (details.property == "0" && details.value == 15) {
             working = true;
@@ -998,6 +1013,8 @@ test("getItems #1 (without computed)", t => {
 
     var store = new Store({ a: 1, b: 2 });
     store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
 
     store.createComputedItem(
         "c",
@@ -1160,6 +1177,9 @@ test("deleteItem #1", t => {
 test("deleteItem #2 (sealed)", t => {
 
     var store = new Store({ a: 1, b: 2 });
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
 
     store.createComputedItem(
         "c",
@@ -1298,9 +1318,13 @@ test("asObject #4 (set)", t => {
 
     var store = new Store({ a: 1, b: 2 });
     var working = false;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
 
     store.subscribe("b", (details) => {
-        console.log(details.value);
+        store.log(details.value);
         working = true;
     });
 
@@ -1372,6 +1396,8 @@ test("loadExpression", t => {
 
     var store = new Store({ a: 1, b: 2 });
     store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
     var expression = "$a + $b";
 
     var item_name = store.loadExpression(expression);
@@ -1455,7 +1481,7 @@ test("setDebounceTime", async t => {
     if (foo != 0) {
         t.fail();
     }
-    
+
     await sleep(100);
 
     if (foo == 1 && store.getItem("a") === 3) {
@@ -1485,6 +1511,184 @@ test("setDebounceTime #2 (negative value)", async t => {
     if (foo == 2 && store.getItem("a") === 3) {
         t.pass();
     } else {
+        t.fail();
+    }
+
+});
+
+test("setItems in reaction # 1 (no next())", t => {
+
+    var store = new Store({ a: 1, b: 2 });
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    var foo = 0;
+
+    store.subscribe("a", () => {
+        store.setItem("b", 0);
+        foo = 1;
+    });
+
+    store.setItem("a", 2);
+
+    if (foo == 0) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+test("setItems in reaction # 2 (with next())", t => {
+
+    var store = new Store({ a: 1, b: 2 });
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    var foo = 0;
+
+    store.subscribe("a", () => {
+        store.next(() => {
+            store.setItem("b", 0);
+        });
+        foo = 1;
+    });
+
+    store.setItem("a", 2);
+
+    if (foo == 1 && store.getItem("b") == 0) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+test("setItems with next()", t => {
+
+    var store = new Store({ a: 1, b: 2 });
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    store.next(() => {
+        store.setItem("b", 0);
+    });
+    store.setItem("a", 2);
+
+    if (store.getItem("a") == 2 && store.getItem("b") == 0) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+
+test("deleteProperty(), modify collection item in reaction (no next())", t => {
+
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    var data = store.createCollection("c", [1, 2, 3]);
+
+    store.setItem("a", 1);
+
+    var foo = 0;
+
+    store.subscribe("a", () => {
+        delete data[0];
+        foo++;
+    });
+
+    store.setItem("a", 0);
+
+
+    if (foo == 0) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+
+test("set(), modify collection item in reaction (no next())", t => {
+
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    store.setItem("a", 1);
+
+    var data = store.createCollection("c", [1, 2, 3]);
+
+    var foo = 0;
+
+    store.subscribe("a", () => {
+        data[0] = 1000;
+        foo++;
+    });
+
+    store.setItem("a", 0);
+
+    if (foo == 0) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+
+
+test("call #fireEvents in #fireEvents", t => {
+
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    store.setItem("a", { prop: 0 });
+    var a = store.getItem("a");
+
+    store.setItem("b", 0);
+
+    store.createComputedItem("c", (_store) => {
+        return _store.getItem("a").prop;
+    }, ["a"]);
+
+    var foo = 0;
+
+    store.subscribe("b", () => {
+        //store.log(`c = `, store.getItem("c"));
+        // store.getItem("c") == 0
+        store.recalcComputed("c");
+        //store.log(`c = `, store.getItem("c"));
+        // store.getItem("c") == 1
+    });
+
+    store.subscribe("c", () => {
+        foo++;
+    });
+
+    a.prop = 1;
+    store.setItem("b", 1);
+
+    if (foo == 1) {
+        t.pass();
+    }
+    else {
         t.fail();
     }
 

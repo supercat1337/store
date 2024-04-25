@@ -1,4 +1,4 @@
-// version 1.0.4
+// version 1.0.5
 
 // node_modules/@supercat1337/event-emitter/src/EventEmitter.js
 var EventEmitter = class {
@@ -150,25 +150,13 @@ var Store = class {
   #customCompareFunctions = {};
   /** @type {boolean} */
   #is_sealed = false;
+  /** @type {boolean} */
+  #reactions_are_running = false;
   /** @type {[string, UpdateEventDetails|ChangeEventObject][]} */
-  #events = [];
+  #change_events = [];
   /** @type {number} */
   #debounce_time = 0;
   #eventEmitter = new EventEmitter();
-  /**
-   * Creates a store
-   * @param {{[item_name: string]: any}} [initObject] object of items
-   * ```js
-   * var store = new Store({ a: 1, b: 2 });
-   * console.log(store.getItem("a"), store.getItem("b"));
-   * // outputs 1, 2
-   * ```
-   */
-  constructor(initObject) {
-    if (initObject) {
-      this.setItems(initObject);
-    }
-  }
   /**
    * Used to debug code during testing
    * @type {Function}
@@ -195,6 +183,22 @@ var Store = class {
    * ```
    */
   log = console.log;
+  logError = console.error;
+  warn = console.warn;
+  /**
+   * Creates a store
+   * @param {{[item_name: string]: any}} [initObject] object of items
+   * ```js
+   * var store = new Store({ a: 1, b: 2 });
+   * this.log(store.getItem("a"), store.getItem("b"));
+   * // outputs 1, 2
+   * ```
+   */
+  constructor(initObject) {
+    if (initObject) {
+      this.setItems(initObject);
+    }
+  }
   /**
    * 
    * @param {string} item_name 
@@ -247,6 +251,9 @@ var Store = class {
    * @returns {false|UpdateEventDetails} updated
    */
   #setCollectionItem(item_name, property, value) {
+    if (this.#reactions_are_running) {
+      throw new Error("You cannot change property values \u200B\u200Bwhile reactions are running. Use method next() in reaction");
+    }
     property = property.toString();
     let collection = this.#collections.get(item_name);
     let old_value = collection[property];
@@ -275,6 +282,9 @@ var Store = class {
    * @returns {false|UpdateEventDetails} updated
    */
   #deleteCollectionItem(item_name, property) {
+    if (this.#reactions_are_running) {
+      throw new Error("You cannot change property values \u200B\u200Bwhile reactions are running. Use method next() in reaction");
+    }
     property = property.toString();
     let collection = this.#collections.get(item_name);
     let old_value = collection[property];
@@ -328,7 +338,7 @@ var Store = class {
    * ```js
    * var store = new Store({ a: 1, b: 2 });
    * 
-   * console.log(store.hasItem("a"));
+   * this.log(store.hasItem("a"));
    * // outputs true 
    * ```
    */
@@ -344,7 +354,7 @@ var Store = class {
    * var store = new Store({ a: 1, b: 2 });
    * 
    * store.setItem("a", 2);
-   * console.log(store.getItem("a"), store.getItem("b"));
+   * this.log(store.getItem("a"), store.getItem("b"));
    * // outputs 2, 2
    * ```
    */
@@ -363,14 +373,17 @@ var Store = class {
    * store.setItems({ a: 1, b: 2 });
    * 
    * if (store.getItem("a") == 1 && store.getItem("b") == 2) {
-   *     console.log('ok');
+   *     this.log('ok');
    * }
    * else {
-   *     console.log('fail');
+   *     this.log('fail');
    * }
    * ```
    */
   setItems(obj) {
+    if (this.#reactions_are_running) {
+      throw new Error("You cannot change property values \u200B\u200Bwhile reactions are running. Use method next() in reaction");
+    }
     /** @type {{[key: string]: UpdateEventDetails}} @preserve */
     var updated_items = {};
     var updated_items_arr = [];
@@ -385,7 +398,7 @@ var Store = class {
       }
       if (!this.hasItem(item_name)) {
         if (this.#is_sealed) {
-          console.error(`Store is sealed. Can't create the item "${item_name}"`);
+          this.logError(`Store is sealed. Can't create the item "${item_name}"`);
           continue;
         }
         this.#registerAtom(item_name, void 0);
@@ -433,6 +446,7 @@ var Store = class {
       this.#registerEvent(details.item_name, details);
     }
     this.#registerChangeEvent(updated_items, "set");
+    this.#fireEvents();
   }
   /**
    * Checks if item is computed
@@ -449,7 +463,7 @@ var Store = class {
    *     ["a", "b"]
    * );
    * 
-   * console.log(store.isComputedItem("a"), store.isComputedItem("c"));
+   * this.log(store.isComputedItem("a"), store.isComputedItem("c"));
    * // outputs: false, true
    * ```
    */
@@ -471,7 +485,7 @@ var Store = class {
    *     ["a", "b"]
    * );
    * 
-   * console.log(store.isAtomItem("a"), store.isAtomItem("c"));
+   * this.log(store.isAtomItem("a"), store.isAtomItem("c"));
    * // outputs: true, false
    * ```
    */
@@ -488,7 +502,7 @@ var Store = class {
    * 
    * store.createCollection("c", [{ q: 2, t: 90 }]);
    * 
-   * console.log(store.isCollection("a"), store.isCollection("c"));
+   * this.log(store.isCollection("a"), store.isCollection("c"));
    * // outputs: false, true
    * ```
    */
@@ -564,6 +578,7 @@ var Store = class {
     if (details) {
       if (this.hasSubscribers(item_name)) {
         this.#registerEvent(item_name, details);
+        this.#fireEvents();
       }
     }
     return details;
@@ -583,7 +598,7 @@ var Store = class {
       try {
         return callback(store);
       } catch (e) {
-        console.error(`Computed error ${item_name}: `, e);
+        this.logError(`Computed error ${item_name}: `, e);
         return "#ERROR!";
       }
     };
@@ -622,7 +637,7 @@ var Store = class {
   #createComputedItemExtended(item_name, callback, deps, skip_item_name_validation = false) {
     item_name = item_name.trim();
     if (this.hasItem(item_name)) {
-      console.warn(`Item name ${item_name} name already exists`);
+      this.warn(`Item name ${item_name} name already exists`);
       return false;
     }
     if (!skip_item_name_validation) {
@@ -634,11 +649,11 @@ var Store = class {
     for (let i = 0; i < deps.length; i++) {
       let deps_name = deps[i];
       if (!this.hasItem(deps_name)) {
-        console.warn(`${item_name}: Unknown dependency ${deps_name} is ignored`);
+        this.warn(`${item_name}: Unknown dependency ${deps_name} is ignored`);
         continue;
       }
       if (!this.isAtomItem(deps_name)) {
-        console.warn(`${item_name}: The non-atom item ${deps_name} is ignored`);
+        this.warn(`${item_name}: The non-atom item ${deps_name} is ignored`);
         continue;
       }
       set_of_deps.add(deps_name);
@@ -693,13 +708,13 @@ var Store = class {
    * 
    * store.setItem("b", 0);
    * 
-   * console.log(store.getItem("c"));
+   * this.log(store.getItem("c"));
    * // outputs "#ERROR!"
    * ```
    */
   createComputedItem(item_name, callback, deps) {
     if (this.#is_sealed) {
-      console.error(`Store is sealed. Can't create the item "${item_name}"`);
+      this.logError(`Store is sealed. Can't create the item "${item_name}"`);
       return false;
     }
     return this.#createComputedItemExtended(item_name, callback, deps);
@@ -717,7 +732,7 @@ var Store = class {
    * 
    * store.setItem("a", 2);
    * 
-   * console.log(store.getItem(item_name));
+   * this.log(store.getItem(item_name));
    * // outputs: 4
    * ```
    */
@@ -759,7 +774,7 @@ var Store = class {
    * var c = store.createCollection("c", [1, 2, 3]);
    * 
    * store.subscribe("c", (details) => {
-   *     console.log("collection item is changed. (property :" + details.property + ", value: " + details.value + ")");
+   *     this.log("collection item is changed. (property :" + details.property + ", value: " + details.value + ")");
    * });
    * 
    * c[0] = 15;
@@ -786,6 +801,7 @@ var Store = class {
             delete target[property];
             store.#registerEvent(details.item_name, details);
             store.#registerChangeEvent({ [item_name]: details }, "delete");
+            store.#fireEvents();
           }
         }
         return true;
@@ -799,6 +815,7 @@ var Store = class {
             target[property] = value;
             store.#registerEvent(details.item_name, details);
             store.#registerChangeEvent({ [item_name]: details }, "set");
+            store.#fireEvents();
           }
         }
         return true;
@@ -938,13 +955,13 @@ var Store = class {
    * 
    * var items = store.getItems(true);
    * 
-   * console.log(Object.keys(items).length);
+   * this.log(Object.keys(items).length);
    * // outputs: 0
    * ```
    */
   deleteItem(item_name) {
     if (this.#is_sealed) {
-      console.error(`Store is sealed. Can't delete the item "${item_name}"`);
+      this.logError(`Store is sealed. Can't delete the item "${item_name}"`);
       return false;
     }
     if (!this.hasItem(item_name)) {
@@ -1093,7 +1110,7 @@ var Store = class {
    * var store = new Store({ a: 1, b: 2 });
    * 
    * var unsubscriber = store.subscribe("a", (details) => {
-   *     console.log(`item "${details.item_name}" is changed: ${details.value}`);
+   *     this.log(`item "${details.item_name}" is changed: ${details.value}`);
    * });
    * 
    * store.setItem("a", 2);
@@ -1131,7 +1148,7 @@ var Store = class {
    * var store = new Store({ a: 0, b: 2 });
    * 
    * store.subscribe("a", () => {
-   *     console.log("Hello");
+   *     this.log("Hello");
    * });
    * 
    * store.setItem("a", 1);
@@ -1153,7 +1170,7 @@ var Store = class {
    * var store = new Store({ a: 0, b: 2 });
    * 
    * store.subscribe("a", () => {
-   *     console.log("Hello");
+   *     this.log("Hello");
    * });
    * 
    * store.setItem("a", 1);
@@ -1176,12 +1193,12 @@ var Store = class {
    * var store = new Store({ a: 0, b: 2 });
    * 
    * store.subscribe("a", () => {
-   *     console.log("Hello");
+   *     this.log("Hello");
    * });
    * 
    * store.reset();
    * 
-   * console.log(store.getItem("a")); 
+   * this.log(store.getItem("a")); 
    * // outputs: null
    * ```
    */
@@ -1210,7 +1227,7 @@ var Store = class {
    * var store = new Store({ a: 1, b: 2 });
    * 
    * store.subscribe("b", (details) => {
-   *     console.log(details.value);
+   *     this.log(details.value);
    * });
    * 
    * var obj = store.asObject();
@@ -1274,7 +1291,7 @@ var Store = class {
    * });
    * 
    * store.subscribe("a", () => {
-   *     console.log("changed");
+   *     this.log("changed");
    * });
    * 
    * store.setItem("a", { value: 1, meta_info: { qwe: 1000 } });
@@ -1341,15 +1358,21 @@ var Store = class {
    * @param {UpdateEventDetails|ChangeEventObject} details 
    */
   #registerEvent(event_name, details) {
-    this.#events.push([event_name, details]);
-    this.#fireEvents();
+    this.#change_events.push([event_name, details]);
   }
   #fireEvents() {
-    for (let i = 0; i < this.#events.length; i++) {
-      let ev = this.#events[i];
+    if (this.#reactions_are_running)
+      return;
+    this.#reactions_are_running = true;
+    var i = 0;
+    while (i < this.#change_events.length) {
+      let ev = this.#change_events[i];
       this.#eventEmitter.emit(ev[0], ev[1], this);
+      i++;
     }
-    this.#events = [];
+    this.#change_events = [];
+    this.#reactions_are_running = false;
+    this.#eventEmitter.emit("#reactions_finished", this);
   }
   /**
    * Sets default debounce time for subscribers 
@@ -1357,6 +1380,42 @@ var Store = class {
    */
   setDebounceTime(debounce_time) {
     this.#debounce_time = debounce_time < 0 ? 0 : debounce_time;
+  }
+  /**
+   * Calls a function after all reactions have completed execution
+   * @param {(store:Store)=>void} func 
+   * 
+   *```js
+   * var store = new Store({ a: 1, b: 2 });
+   * store.log = t.log;
+   * store.logError = t.log;
+   * store.warn = t.log;
+   *
+   * var foo = 0;
+   *
+   * store.subscribe("a", () => {
+   *     store.next(() => {
+   *         store.setItem("b", 0);
+   *     });
+   *     foo = 1;
+   * });
+   *
+   * store.setItem("a", 2);
+   *
+   * if (foo == 1 && store.getItem("b") == 0) {
+   *     console.log("success");
+   * }
+   * else {
+   *     console.log("fail");
+   * }
+   *```     
+   */
+  next(func) {
+    if (this.#reactions_are_running) {
+      this.#eventEmitter.once("#reactions_finished", func);
+    } else {
+      func(this);
+    }
   }
 };
 function createStore(initObject) {
