@@ -56,8 +56,7 @@ test("setItems #1 (try to set computed)", t => {
         "c",
         (store) => {
             return store.getItem("a") + store.getItem("b");
-        },
-        ["a", "b"]
+        }
     );
 
     store.setItems({ a: 2, c: 100, "store": 1 });
@@ -152,16 +151,14 @@ test("subscribe #3 (computed, with changes)", t => {
         "c",
         (store) => {
             return store.getItem("a") + store.getItem("b");
-        },
-        ["a", "b"]
+        }
     );
 
     store.createComputedItem(
         "d",
         (store) => {
             return store.getItem("a") > 0;
-        },
-        ["a", "b"]
+        }
     );
 
     store.subscribe("c", () => {
@@ -553,8 +550,7 @@ test("getItemNames", t => {
         "c",
         (store) => {
             return store.getItem("a") + store.getItem("b");
-        },
-        ["a", "b"]
+        }
     );
 
     store.createCollection("d", [1, 2, 3]);
@@ -582,8 +578,7 @@ test("createComputedItem #1", t => {
         "c",
         (store) => {
             return store.getItem("a") + store.getItem("b");
-        },
-        ["a", "b"]
+        }
     );
 
     if (store.getItem("c") == 3) {
@@ -604,8 +599,7 @@ test("createComputedItem #2 (sealed)", t => {
         "c",
         (store) => {
             return store.getItem("a") + store.getItem("b");
-        },
-        ["a", "b"]
+        }
     );
 
     if (is_created === false) {
@@ -625,17 +619,15 @@ test("createComputedItem #3 (not atoms, no deps)", t => {
         "c",
         (store) => {
             return store.getItem("a") + store.getItem("b");
-        },
-        ["a", "b"]
+        }
     );
 
     try {
         var is_created = store.createComputedItem(
             "d",
             (store) => {
-                return store.getItem("a") + store.getItem("b");
-            },
-            ["c", "f"]
+                return 123;
+            }
         );
 
         if (is_created === false) {
@@ -661,8 +653,7 @@ test("createComputedItem #4 (not valid name)", t => {
             "c djdj",
             (store) => {
                 return store.getItem("a") + store.getItem("b");
-            },
-            ["a", "b"]
+            }
         );
 
         t.fail();
@@ -681,16 +672,14 @@ test("createComputedItem #5 (already exists)", t => {
         "c",
         (store) => {
             return store.getItem("a") + store.getItem("b");
-        },
-        ["a", "b"]
+        }
     );
 
     var is_created = store.createComputedItem(
         "c",
         (store) => {
             return store.getItem("a") - store.getItem("b");
-        },
-        ["a", "b"]
+        }
     );
 
     if (!is_created) {
@@ -709,8 +698,7 @@ test("createComputedItem #6 (with error)", t => {
         "c",
         (store) => {
             return store.getItem("a").slice(0, 1) + store.getItem("b").slice(0, 1);
-        },
-        ["a", "b"]
+        }
     );
 
     store.setItem("b", 0);
@@ -724,6 +712,111 @@ test("createComputedItem #6 (with error)", t => {
 
 });
 
+test("createComputedItem #7 (with collection)", t => {
+
+    var store = new Store;
+    store.log = t.log;
+
+    var c = store.createCollection("c", [1, 2, 3]);
+
+    store.subscribe("c", (details)=>{
+        store.log(details.property);
+    });
+
+    store.createComputedItem(
+        "d",
+        (store) => {
+            return store.getItem("c").length;
+        }
+    );
+
+    store.log(store.getItem("d"));
+
+    c.push(4);
+
+    store.log(store.getItem("d"));
+
+    if (store.getItem("d") === 4) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+
+test("createComputedItem #8 (with collection, subscribe)", t => {
+
+    var store = new Store;
+    store.log = t.log;
+
+    var foo = [];
+
+    var c = store.createCollection("c", [1, 2, 3]);
+
+    store.createComputedItem(
+        "d",
+        (store) => {
+            return store.getItem("c").length;
+        }
+    );
+
+    store.subscribe("c", (details)=>{
+        store.log(details.property);
+    });
+
+    store.subscribe("d", (details)=>{
+        store.log("d is updated");
+    });
+
+    store.log(store.getItem("d"));
+
+    c.push(4);
+
+    store.log(store.getItem("d"));
+
+    if (store.getItem("d") === 4) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+test("createComputedItem #9 (with collection, delete)", t => {
+
+    var store = new Store;
+    store.log = t.log;
+
+    var c = store.createCollection("c", [1, 2, 3]);
+
+    store.subscribe("c", (details)=>{
+        store.log("c is changed: ", details.property, details.value);
+    });
+
+    store.createComputedItem(
+        "d",
+        (store) => {
+            return store.getItem("c").length;
+        }
+    );
+
+    store.log("d = ", store.getItem("d"));
+
+    c.pop();
+
+    store.log("d = ", store.getItem("d"));
+
+    if (store.getItem("d") === 2) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
 
 test("recalcComputed #1", t => {
 
@@ -735,8 +828,7 @@ test("recalcComputed #1", t => {
         (store) => {
             foo++;
             return store.getItem("a") + store.getItem("b");
-        },
-        ["a", "b"]
+        }
     );
 
     //foo === 1
@@ -760,8 +852,7 @@ test("recalcComputed #2 (not exists)", t => {
         "c",
         (store) => {
             return store.getItem("a") + store.getItem("b");
-        },
-        ["a", "b"]
+        }
     );
 
     //foo === 1
@@ -791,8 +882,7 @@ test("recalcComputed #3 (with subscribers)", t => {
         "c",
         (store) => {
             return store.getItem("a") + store.getItem("b")[1];
-        },
-        ["a", "b"]
+        }
     );
 
     store.subscribe("c", (details) => {
@@ -831,8 +921,7 @@ test("recalcComputed #4 (with subscribers, with custom compare function)", t => 
                 id: 100
             };
             return result;
-        },
-        ["a", "b"]
+        }
     );
 
     store.setCompareFunction("c", (old_value, value) => {
@@ -1020,8 +1109,7 @@ test("getItems #1 (without computed)", t => {
         "c",
         (store) => {
             return store.getItem("a") + store.getItem("b");
-        },
-        ["a", "b"]
+        }
     );
 
     var items = store.getItems();
@@ -1049,8 +1137,7 @@ test("getItems #2 (with computed)", t => {
         "c",
         (store) => {
             return store.getItem("a") + store.getItem("b");
-        },
-        ["a", "b"]
+        }
     );
 
     var items = store.getItems(true);
@@ -1098,8 +1185,7 @@ test("getItem #3 (recalc and get computed item)", t => {
         "c",
         (store) => {
             return store.getItem("a") + store.getItem("b");
-        },
-        ["a", "b"]
+        }
     );
 
     store.setItem("a", 2);
@@ -1122,8 +1208,7 @@ test("getItem #4 (recalc and get computed item with no updates)", t => {
         "c",
         (store) => {
             return store.getItem("a") + store.getItem("b");
-        },
-        ["a", "b"]
+        }
     );
 
     store.subscribe("c", () => {
@@ -1150,8 +1235,7 @@ test("deleteItem #1", t => {
         "c",
         (store) => {
             return store.getItem("a") + store.getItem("b");
-        },
-        ["a", "b"]
+        }
     );
 
     store.createCollection("d", [1, 2, 3]);
@@ -1185,8 +1269,7 @@ test("deleteItem #2 (sealed)", t => {
         "c",
         (store) => {
             return store.getItem("a") + store.getItem("b");
-        },
-        ["a", "b"]
+        }
     );
 
     store.seal();
@@ -1666,7 +1749,7 @@ test("call #fireEvents in #fireEvents", t => {
 
     store.createComputedItem("c", (_store) => {
         return _store.getItem("a").prop;
-    }, ["a"]);
+    });
 
     var foo = 0;
 

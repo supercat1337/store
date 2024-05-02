@@ -83,6 +83,11 @@ export class Store {
 
     #eventEmitter = new EventEmitter;
 
+    #track_deps_flag = false
+
+    /** @type {Set<string>} */
+    #tracked_set = new Set;
+
     /**
      * Used to debug code during testing
      * @type {Function}
@@ -335,6 +340,35 @@ export class Store {
         };
 
         this.setItems(obj);
+    }
+
+    /**
+     * 
+     * @param {Set<string>} updated_item_names
+     */
+    #sendSignalToComputedItems(updated_item_names) {
+
+        /** @type {{[key: string]: UpdateEventDetails}} */
+        var updated_items = {};
+
+        this.#computed.forEach((computed) => {
+            let is_stale = this.#markStaleComputedValueIfNeeded(computed, updated_item_names);
+            if (!is_stale) return;
+
+            if (!this.hasSubscribers(computed.item_name)) return;
+
+            let details = this.#recalc(computed.item_name);
+            if (details === false) { return; }
+
+            this.#registerEvent(details.item_name, details);
+            updated_items[computed.item_name] = details;
+
+        });
+
+        if (Object.keys(updated_items).length > 0) {
+            this.#registerChangeEvent(updated_items, "set");
+            this.#fireEvents();
+        }
     }
 
     /**
@@ -606,15 +640,10 @@ export class Store {
      * 
      * @param {string} item_name 
      * @param {(store: Store)=>any} callback
-     * @param {string[]} depsArray 
      */
-    #registerComputed(item_name, callback, depsArray) {
+    #registerComputed(item_name, callback) {
 
         let store = this;
-
-        if (depsArray.length == 0) {
-            throw new Error(`Computed item ${item_name} hasn't dependencies`);
-        }
 
         var __callback = () => {
             try {
@@ -626,11 +655,24 @@ export class Store {
             }
         }
 
+        this.#tracked_set.clear();
+        this.#track_deps_flag = true;
+        let value = __callback();
+
+        var depsArray = Array.from(this.#tracked_set);
+
+        if (depsArray.length == 0) {
+            throw new Error(`Computed item ${item_name} hasn't dependencies`);
+        }
+
+        this.#track_deps_flag = false;
+        this.#tracked_set.clear();
+
         this.#computed.set(item_name, {
             item_name: item_name,
             dependencies: depsArray,
             getter: __callback,
-            value: __callback(),
+            value: value,
             stale: false
         });
 
@@ -661,11 +703,10 @@ export class Store {
      * 
      * @param {string} item_name 
      * @param {(store: Store)=>any} callback 
-     * @param {string[]} deps 
      * @param {boolean} [skip_item_name_validation=false] 
      * @returns {boolean}
      */
-    #createComputedItemExtended(item_name, callback, deps, skip_item_name_validation = false) {
+    #createComputedItemExtended(item_name, callback, skip_item_name_validation = false) {
 
         item_name = item_name.trim();
 
@@ -681,27 +722,8 @@ export class Store {
             }
         }
 
-        /** @type {Set<string>} */
-        let set_of_deps = new Set;
 
-        for (let i = 0; i < deps.length; i++) {
-            let deps_name = deps[i];
-
-            if (!this.hasItem(deps_name)) {
-                this.warn(`${item_name}: Unknown dependency ${deps_name} is ignored`);
-                continue;
-            }
-
-            if (!this.isAtomItem(deps_name)) {
-                this.warn(`${item_name}: The non-atom item ${deps_name} is ignored`);
-                continue;
-            }
-
-            set_of_deps.add(deps_name);
-
-        }
-
-        this.#registerComputed(item_name, callback, Array.from(set_of_deps));
+        this.#registerComputed(item_name, callback);
         return true;
     }
 
@@ -709,7 +731,6 @@ export class Store {
      * Creates a computed item
      * @param {string} item_name 
      * @param {(store: Store)=>any} callback 
-     * @param {string[]} deps 
      * @returns {boolean} is created
      * 
      * @example
@@ -758,14 +779,14 @@ export class Store {
      * // outputs "#ERROR!"
      * ```
      */
-    createComputedItem(item_name, callback, deps) {
+    createComputedItem(item_name, callback) {
 
         if (this.#is_sealed) {
             this.logError(`Store is sealed. Can't create the item "${item_name}"`);
             return false;
         }
 
-        return this.#createComputedItemExtended(item_name, callback, deps);
+        return this.#createComputedItemExtended(item_name, callback);
     }
 
     /**
@@ -858,8 +879,11 @@ export class Store {
         }
 
         var store = this;
+        var length = array.length;
         var proxy = new Proxy(array, {
             deleteProperty: function (target, property) {
+
+                let target_length = target.length;
 
                 if (typeof property == "symbol") {
                     delete target[property];
@@ -873,13 +897,17 @@ export class Store {
 
                         store.#registerEvent(details.item_name, details);
                         store.#registerChangeEvent({ [item_name]: details }, "delete");
+                        store.#sendSignalToComputedItems(new Set(item_name));
                         store.#fireEvents();
                     }
+
                 }
 
                 return true;
             },
             set: function (target, property, value, receiver) {
+
+                let target_length = target.length;
 
                 if (typeof property == "symbol") {
                     target[property] = value;
@@ -892,9 +920,27 @@ export class Store {
 
                         store.#registerEvent(details.item_name, details);
                         store.#registerChangeEvent({ [item_name]: details }, "set");
+                        store.#sendSignalToComputedItems(new Set(item_name));
                         store.#fireEvents();
+
                     }
 
+                }
+
+                if (length != target_length) {
+                    let details = new UpdateEventDetails;
+                    details.eventType = "set";
+                    details.item_name = item_name;
+                    details.property = "length";
+                    details.value = target_length;
+                    details.old_value = length;
+
+                    length = target_length;
+
+                    store.#registerEvent(item_name, details);
+                    store.#registerChangeEvent({ [item_name]: details }, "set");
+                    store.#sendSignalToComputedItems(new Set(item_name));
+                    store.#fireEvents();
                 }
 
                 return true;
@@ -1159,6 +1205,10 @@ export class Store {
      * @param {string} item_name 
      */
     #getCollection(item_name) {
+        if (this.#track_deps_flag) {
+            this.#tracked_set.add(item_name);
+        }
+
         return this.#collections.get(item_name);
     }
 
@@ -1181,6 +1231,9 @@ export class Store {
      * @param {string} item_name 
      */
     #getAtomValue(item_name) {
+        if (this.#track_deps_flag) {
+            this.#tracked_set.add(item_name);
+        }
         return this.#atoms.get(item_name);
     }
 
