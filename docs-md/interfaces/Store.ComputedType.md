@@ -22,7 +22,7 @@
 
 #### Defined in
 
-[src/Store.js:27](https://github.com/supercat911/store/blob/50356dfc282b266e2a37bddbcf0d115dc960dfe7/src/Store.js#L27)
+[src/Store.js:27](https://github.com/supercat911/store/blob/9b9a25e7671821d8a1b643c0795834191eef81e1/src/Store.js#L27)
 
 ___
 
@@ -40,7 +40,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:28](https://github.com/supercat911/store/blob/50356dfc282b266e2a37bddbcf0d115dc960dfe7/src/Store.js#L28)
+[src/Store.js:28](https://github.com/supercat911/store/blob/9b9a25e7671821d8a1b643c0795834191eef81e1/src/Store.js#L28)
 
 ___
 
@@ -50,7 +50,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:26](https://github.com/supercat911/store/blob/50356dfc282b266e2a37bddbcf0d115dc960dfe7/src/Store.js#L26)
+[src/Store.js:26](https://github.com/supercat911/store/blob/9b9a25e7671821d8a1b643c0795834191eef81e1/src/Store.js#L26)
 
 ___
 
@@ -60,7 +60,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:30](https://github.com/supercat911/store/blob/50356dfc282b266e2a37bddbcf0d115dc960dfe7/src/Store.js#L30)
+[src/Store.js:30](https://github.com/supercat911/store/blob/9b9a25e7671821d8a1b643c0795834191eef81e1/src/Store.js#L30)
 
 ___
 
@@ -70,4 +70,4 @@ ___
 
 #### Defined in
 
-[src/Store.js:29](https://github.com/supercat911/store/blob/50356dfc282b266e2a37bddbcf0d115dc960dfe7/src/Store.js#L29)
+[src/Store.js:29](https://github.com/supercat911/store/blob/9b9a25e7671821d8a1b643c0795834191eef81e1/src/Store.js#L29)

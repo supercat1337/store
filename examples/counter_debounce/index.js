@@ -1,6 +1,6 @@
 // @ts-check 
 
-import { Store } from "./../../dist/store.bundle.esm.js";
+import { Store} from "./../../index.js";
 
 var counter_value = /** @type {HTMLElement} */ (document.querySelector("#counter_value"));
 

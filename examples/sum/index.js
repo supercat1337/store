@@ -1,6 +1,6 @@
 // @ts-check 
 
-import { Store, debounce } from "./../../dist/store.bundle.esm.js";
+import { Store} from "./../../index.js";
 
 var a_counter_value = /** @type {HTMLElement} */ (document.querySelector("#a_counter_value"));
 var a_button_dec = document.querySelector("#a_dec_button");
@@ -18,17 +18,17 @@ var obj = store.asObject();
 var sum_item = store.loadExpression("$a + $b");
 
 
-const showValueA = debounce(() => {
+const showValueA = () => {
     a_counter_value.innerText = obj.a;
-}, 100);
+};
 
-const showValueB = debounce(() => {
+const showValueB = () => {
     b_counter_value.innerText = obj.b;
-}, 100);
+};
 
-const showValueSum = debounce(() => {
+const showValueSum = () => {
     c_counter_value.innerText = obj[sum_item];
-}, 100);
+};
 
 
 a_button_dec.addEventListener("click", () => {
@@ -47,9 +47,9 @@ b_button_inc.addEventListener("click", () => {
     obj.b++;
 });
 
-store.subscribe("a", showValueA);
-store.subscribe("b", showValueB);
-store.subscribe(sum_item, showValueSum);
+store.subscribe("a", showValueA, 100);
+store.subscribe("b", showValueB, 100);
+store.subscribe(sum_item, showValueSum, 100);
 
 
 obj.counter = 0;

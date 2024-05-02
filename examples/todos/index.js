@@ -1,5 +1,5 @@
 // @ts-check 
-import { Store } from "./../../dist/store.bundle.esm.js";
+import { Store } from "./../../index.js";
 
 // Model
 const store = new Store;
@@ -103,7 +103,11 @@ root_list.addEventListener("click", (e) => {
 });
 
 store.subscribe("todos", (details) => {
-    setListSize(todos.length);
+
+    if (details.property == "length") {
+        setListSize(todos.length);
+        return;
+    }
 
     var index = parseInt(details.property);
 

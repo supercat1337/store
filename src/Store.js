@@ -863,6 +863,7 @@ export class Store {
      */
     createCollection(item_name, array) {
         item_name = item_name.trim();
+        var length = array.length;
 
         if (this.hasItem(item_name)) {
 
@@ -874,7 +875,6 @@ export class Store {
         }
 
         var store = this;
-        var length = array.length;
         var proxy = new Proxy(array, {
             deleteProperty: function (target, property) {
 
@@ -902,7 +902,6 @@ export class Store {
             },
             set: function (target, property, value, receiver) {
 
-                let target_length = target.length;
 
                 if (typeof property == "symbol") {
                     target[property] = value;
@@ -913,6 +912,22 @@ export class Store {
                     if (details) {
                         target[property] = value;
 
+                        if (length != target.length) {
+                            let details = new UpdateEventDetails;
+                            details.eventType = "set";
+                            details.item_name = item_name;
+                            details.property = "length";
+                            details.value = target.length;
+                            details.old_value = length;
+        
+                            length = target.length;
+        
+                            store.#registerEvent(item_name, details);
+                            store.#registerChangeEvent({ [item_name]: details }, "set");
+                            store.#sendSignalToComputedItems(new Set(item_name));
+                            store.#fireEvents();
+                        }
+        
                         store.#registerEvent(details.item_name, details);
                         store.#registerChangeEvent({ [item_name]: details }, "set");
                         store.#sendSignalToComputedItems(new Set(item_name));
@@ -920,22 +935,6 @@ export class Store {
 
                     }
 
-                }
-
-                if (length != target_length) {
-                    let details = new UpdateEventDetails;
-                    details.eventType = "set";
-                    details.item_name = item_name;
-                    details.property = "length";
-                    details.value = target_length;
-                    details.old_value = length;
-
-                    length = target_length;
-
-                    store.#registerEvent(item_name, details);
-                    store.#registerChangeEvent({ [item_name]: details }, "set");
-                    store.#sendSignalToComputedItems(new Set(item_name));
-                    store.#fireEvents();
                 }
 
                 return true;
