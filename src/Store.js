@@ -491,8 +491,7 @@ export class Store {
      *     "c",
      *     (store) => {
      *         return store.getItem("a") + store.getItem("b");
-     *     },
-     *     ["a", "b"]
+     *     }
      * );
      * 
      * this.log(store.isComputedItem("a"), store.isComputedItem("c"));
@@ -515,8 +514,7 @@ export class Store {
      *     "c",
      *     (store) => {
      *         return store.getItem("a") + store.getItem("b");
-     *     },
-     *     ["a", "b"]
+     *     }
      * );
      * 
      * this.log(store.isAtomItem("a"), store.isAtomItem("c"));
@@ -599,8 +597,7 @@ export class Store {
      *     "c",
      *     (store) => {
      *         return store.getItem("a") + store.getItem("b")[1];
-     *     },
-     *     ["a", "b"]
+     *     }
      * );
      * 
      * store.subscribe("c", (details) => {
@@ -743,8 +740,7 @@ export class Store {
      *     "c",
      *     (store) => {
      *         return store.getItem("a") + store.getItem("b")[1];
-     *     },
-     *     ["a", "b"]
+     *     }
      * );
      * 
      * store.subscribe("c", (details) => {
@@ -769,8 +765,7 @@ export class Store {
      *     "c",
      *     (store) => {
      *         return store.getItem("a").slice(0, 1) + store.getItem("b").slice(0, 1);
-     *     },
-     *     ["a", "b"]
+     *     }
      * );
      * 
      * store.setItem("b", 0);
@@ -1081,8 +1076,7 @@ export class Store {
      *     "c",
      *     (store) => {
      *         return store.getItem("a") + store.getItem("b");
-     *     },
-     *     ["a", "b"]
+     *     }
      * );
      * 
      * store.createCollection("d", [1, 2, 3]);
@@ -1154,8 +1148,7 @@ export class Store {
      *     "c",
      *     (store) => {
      *         return store.getItem("a") + store.getItem("b");
-     *     },
-     *     ["a", "b"]
+     *     }
      * );
      * 
      * var items = store.getItems();
@@ -1534,8 +1527,7 @@ export class Store {
      *     "c",
      *     (store) => {
      *         return store.getItem("a") + store.getItem("b");
-     *     },
-     *     ["a", "b"]
+     *     }
      * );
      * 
      * store.seal();
