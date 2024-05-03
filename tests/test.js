@@ -185,7 +185,7 @@ test("subscribe #4 (collection, no changes)", t => {
     var store = new Store;
     var working = true;
 
-    store.createCollection("c", [{ q: 2, t: 90 }]);
+    store.createCollectionItem("c", [{ q: 2, t: 90 }]);
 
     store.subscribe("c", () => {
         working = false;
@@ -207,7 +207,7 @@ test("subscribe #5 (collection, with changes)", t => {
     var store = new Store;
     var working = false;
 
-    store.createCollection("c", [{ q: 2, t: 90 }]);
+    store.createCollectionItem("c", [{ q: 2, t: 90 }]);
 
     store.subscribe("c", () => {
         working = true;
@@ -229,7 +229,7 @@ test("subscribe #5-1 (collection, with changes)", t => {
     var store = new Store;
     var working = false;
 
-    store.createCollection("c", [1, 2, 3]);
+    store.createCollectionItem("c", [1, 2, 3]);
 
     store.subscribe("c", () => {
         working = true;
@@ -349,7 +349,7 @@ test("subscribe #10 (collection, setCompareFunction)", t => {
 
     var store = new Store;
     var foo = 0;
-    var c = store.createCollection("ccc", [1, 2, 3]);
+    var c = store.createCollectionItem("ccc", [1, 2, 3]);
     store.log = t.log;
     store.logError = t.log;
     store.warn = t.log;
@@ -553,8 +553,8 @@ test("getItemNames", t => {
         }
     );
 
-    store.createCollection("d", [1, 2, 3]);
-    store.createCollection("e", [5, 6, 7]);
+    store.createCollectionItem("d", [1, 2, 3]);
+    store.createCollectionItem("e", [5, 6, 7]);
 
     var item_names = store.getItemNames().sort();
     var result = ["a", "b", "c", "d", "e"].sort();
@@ -717,7 +717,7 @@ test("createComputedItem #7 (with collection)", t => {
     var store = new Store;
     store.log = t.log;
 
-    var c = store.createCollection("c", [1, 2, 3]);
+    var c = store.createCollectionItem("c", [1, 2, 3]);
 
     store.subscribe("c", (details)=>{
         store.log(details.property);
@@ -753,7 +753,7 @@ test("createComputedItem #8 (with collection, subscribe)", t => {
 
     var foo = [];
 
-    var c = store.createCollection("c", [1, 2, 3]);
+    var c = store.createCollectionItem("c", [1, 2, 3]);
 
     store.createComputedItem(
         "d",
@@ -790,7 +790,7 @@ test("createComputedItem #9 (with collection, delete)", t => {
     var store = new Store;
     store.log = t.log;
 
-    var c = store.createCollection("c", [1, 2, 3]);
+    var c = store.createCollectionItem("c", [1, 2, 3]);
 
     store.subscribe("c", (details)=>{
         store.log("c is changed: ", details.property, details.value);
@@ -948,11 +948,11 @@ test("recalcComputed #4 (with subscribers, with custom compare function)", t => 
 
 });
 
-test("createCollection #1", t => {
+test("createCollectionItem #1", t => {
 
     var store = new Store({ a: 1, b: 2 });
 
-    store.createCollection("c", [1, 2, 3]);
+    store.createCollectionItem("c", [1, 2, 3]);
 
     var c = store.getItem("c");
     c[0] = c[1] + c[2];
@@ -967,11 +967,11 @@ test("createCollection #1", t => {
 });
 
 
-test("createCollection #2", t => {
+test("createCollectionItem #2", t => {
 
     var store = new Store({ a: 1, b: 2 });
 
-    var c = store.createCollection("c", [1, 2, 3]);
+    var c = store.createCollectionItem("c", [1, 2, 3]);
     if (!c) return;
 
     var s = Symbol("test");
@@ -989,11 +989,11 @@ test("createCollection #2", t => {
 });
 
 
-test("createCollection #3 (delete property)", t => {
+test("createCollectionItem #3 (delete property)", t => {
 
     var store = new Store({ a: 1, b: 2 });
 
-    var c = store.createCollection("c", [1, 2, 3]);
+    var c = store.createCollectionItem("c", [1, 2, 3]);
     if (!c) return;
 
     var s = Symbol("test");
@@ -1012,11 +1012,11 @@ test("createCollection #3 (delete property)", t => {
     }
 });
 
-test("createCollection #4 (not valid name)", t => {
+test("createCollectionItem #4 (not valid name)", t => {
 
     var store = new Store({ a: 1, b: 2 });
     try {
-        var c = store.createCollection("c!", [1, 2, 3]);
+        var c = store.createCollectionItem("c!", [1, 2, 3]);
         t.fail();
 
     } catch (e) {
@@ -1027,16 +1027,16 @@ test("createCollection #4 (not valid name)", t => {
 
 
 
-test("createCollection #5 (item is already created)", t => {
+test("createCollectionItem #5 (item is already created)", t => {
 
     var store = new Store({ a: 1, b: 2 });
-    store.createCollection("c", [1, 2, 3]);
+    store.createCollectionItem("c", [1, 2, 3]);
     store.log = t.log;
     store.logError = t.log;
     store.warn = t.log;
 
     try {
-        store.createCollection("c", []);
+        store.createCollectionItem("c", []);
         t.fail();
     } catch (e) {
         t.pass();
@@ -1053,7 +1053,7 @@ test("#setCollectionItem #1 (with changes)", t => {
     store.logError = t.log;
     store.warn = t.log;
 
-    var c = store.createCollection("c", [1, 2, 3]);
+    var c = store.createCollectionItem("c", [1, 2, 3]);
 
     store.subscribe("c", (details) => {
         store.log("collection item is changed. (property: " + details.property + ", value: " + details.value + ")");
@@ -1078,7 +1078,7 @@ test("#setCollectionItem #2(no changes)", t => {
     var store = new Store({ a: 1, b: 2 });
     var working = true;
 
-    var c = store.createCollection("c", [1, 2, 3]);
+    var c = store.createCollectionItem("c", [1, 2, 3]);
 
     store.subscribe("c", (details) => {
         if (details) {
@@ -1238,7 +1238,7 @@ test("deleteItem #1", t => {
         }
     );
 
-    store.createCollection("d", [1, 2, 3]);
+    store.createCollectionItem("d", [1, 2, 3]);
 
     store.deleteItem("a");
     store.deleteItem("b");
@@ -1680,7 +1680,7 @@ test("deleteProperty(), modify collection item in reaction (no next())", t => {
     store.logError = t.log;
     store.warn = t.log;
 
-    var data = store.createCollection("c", [1, 2, 3]);
+    var data = store.createCollectionItem("c", [1, 2, 3]);
 
     store.setItem("a", 1);
 
@@ -1713,7 +1713,7 @@ test("set(), modify collection item in reaction (no next())", t => {
 
     store.setItem("a", 1);
 
-    var data = store.createCollection("c", [1, 2, 3]);
+    var data = store.createCollectionItem("c", [1, 2, 3]);
 
     var foo = 0;
 

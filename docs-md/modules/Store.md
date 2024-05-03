@@ -8,6 +8,10 @@
 
 - [EventEmitter](Store.md#eventemitter)
 
+### Modules
+
+- [\<internal\>](Store._internal_.md)
+
 ### Classes
 
 - [Store](../classes/Store.Store.md)
@@ -60,7 +64,7 @@ Re-exports [EventEmitter](../classes/EventEmitter.EventEmitter.md)
 
 #### Defined in
 
-[src/Store.js:17](https://github.com/supercat911/store/blob/9b9a25e7671821d8a1b643c0795834191eef81e1/src/Store.js#L17)
+[src/Store.js:18](https://github.com/supercat911/store/blob/b4bf59eee75c36911e4b4bce8b19bb05b373858d/src/Store.js#L18)
 
 ___
 
@@ -87,7 +91,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:11](https://github.com/supercat911/store/blob/9b9a25e7671821d8a1b643c0795834191eef81e1/src/Store.js#L11)
+[src/Store.js:12](https://github.com/supercat911/store/blob/b4bf59eee75c36911e4b4bce8b19bb05b373858d/src/Store.js#L12)
 
 ___
 
@@ -112,7 +116,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:13](https://github.com/supercat911/store/blob/9b9a25e7671821d8a1b643c0795834191eef81e1/src/Store.js#L13)
+[src/Store.js:14](https://github.com/supercat911/store/blob/b4bf59eee75c36911e4b4bce8b19bb05b373858d/src/Store.js#L14)
 
 ___
 
@@ -130,7 +134,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:15](https://github.com/supercat911/store/blob/9b9a25e7671821d8a1b643c0795834191eef81e1/src/Store.js#L15)
+[src/Store.js:16](https://github.com/supercat911/store/blob/b4bf59eee75c36911e4b4bce8b19bb05b373858d/src/Store.js#L16)
 
 ___
 
@@ -144,7 +148,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:19](https://github.com/supercat911/store/blob/9b9a25e7671821d8a1b643c0795834191eef81e1/src/Store.js#L19)
+[src/Store.js:20](https://github.com/supercat911/store/blob/b4bf59eee75c36911e4b4bce8b19bb05b373858d/src/Store.js#L20)
 
 ## Functions
 
@@ -166,7 +170,7 @@ Create a store instance. Same as "new Store(initObject);"
 
 #### Defined in
 
-[src/Store.js:1638](https://github.com/supercat911/store/blob/9b9a25e7671821d8a1b643c0795834191eef81e1/src/Store.js#L1638)
+[src/Store.js:1669](https://github.com/supercat911/store/blob/b4bf59eee75c36911e4b4bce8b19bb05b373858d/src/Store.js#L1669)
 
 ___
 
@@ -195,4 +199,4 @@ window.addEventListener('resize', debounce((evt) => console.log(evt), 250));
 
 #### Defined in
 
-[src/helpers.js:34](https://github.com/supercat911/store/blob/9b9a25e7671821d8a1b643c0795834191eef81e1/src/helpers.js#L34)
+[src/helpers.js:34](https://github.com/supercat911/store/blob/b4bf59eee75c36911e4b4bce8b19bb05b373858d/src/helpers.js#L34)

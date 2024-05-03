@@ -1,4 +1,4 @@
-// version 1.0.5
+// version 1.0.6
 
 // node_modules/@supercat1337/event-emitter/src/EventEmitter.js
 var EventEmitter = class {
@@ -65,6 +65,178 @@ var EventEmitter = class {
       this.removeListener(event, g);
       listener.apply(this, arguments);
     });
+  }
+};
+
+// src/Atom.js
+var Atom = class {
+  /** @type {String} */
+  #name;
+  /** @type {Store} */
+  #store;
+  /**
+   * Creates the atom item
+   * @param {Store} store 
+   * @param {string} name 
+   * @param {any} [value] 
+   */
+  constructor(store2, name, value) {
+    this.#store = store2;
+    this.#name = name;
+    if (typeof value != "undefined") {
+      this.value = value;
+    }
+  }
+  /**
+   * Sets value
+   *
+   * @type {any}
+   */
+  set value(value) {
+    this.#store.setItem(this.#name, value);
+  }
+  get value() {
+    return this.#store.getItem(this.#name);
+  }
+  get name() {
+    return this.#name;
+  }
+  /**
+   * 
+   * @param {Subscriber} callback
+   * @param {number|undefined} [debounce_time] debounce time
+   */
+  subscribe(callback, debounce_time) {
+    this.#store.subscribe(this.#name, callback, debounce_time);
+  }
+  clearSubscribers() {
+    this.#store.clearItemSubscribers(this.#name);
+  }
+  hasSubscribers() {
+    this.#store.hasSubscribers(this.#name);
+  }
+  /**
+   * 
+   * @param {CompareFunction | null} func_or_null 
+   * @returns {boolean}
+   */
+  setCompareFunction(func_or_null) {
+    return this.#store.setCompareFunction(this.#name, func_or_null);
+  }
+  get store() {
+    return this.#store;
+  }
+};
+
+// src/Collection.js
+var Collection = class {
+  /** @type {String} */
+  #name;
+  /** @type {Store} */
+  #store;
+  /** @type {any[]} */
+  #value;
+  /**
+   * Creates the atom item
+   * @param {Store} store 
+   * @param {string} name 
+   * @param {any[]} [value] 
+   */
+  constructor(store2, name, value) {
+    this.#store = store2;
+    this.#name = name;
+    if (typeof value != "undefined") {
+      this.#value = this.#store.createCollectionItem(this.#name, value);
+    }
+  }
+  /**
+   * Sets value
+   *
+   * @type {any[]}
+   */
+  set value(value) {
+    this.#value = value;
+    this.#store.setItem(this.#name, value);
+  }
+  get value() {
+    return this.#value;
+  }
+  get name() {
+    return this.#name;
+  }
+  /**
+   * 
+   * @param {Subscriber} callback
+   * @param {number|undefined} [debounce_time] debounce time
+   */
+  subscribe(callback, debounce_time) {
+    this.#store.subscribe(this.#name, callback, debounce_time);
+  }
+  clearSubscribers() {
+    this.#store.clearItemSubscribers(this.#name);
+  }
+  hasSubscribers() {
+    this.#store.hasSubscribers(this.#name);
+  }
+  /**
+   * 
+   * @param {CompareFunction | null} func_or_null 
+   * @returns {boolean}
+   */
+  setCompareFunction(func_or_null) {
+    return this.#store.setCompareFunction(this.#name, func_or_null);
+  }
+};
+
+// src/Computed.js
+var Computed = class {
+  /** @type {String} */
+  #name;
+  /** @type {Store} */
+  #store;
+  /**
+   * Creates the atom item
+   * @param {Store} store 
+   * @param {string} name 
+   * @param {(store: Store)=>any} [callback] 
+   */
+  constructor(store2, name, callback) {
+    this.#store = store2;
+    this.#name = name;
+    if (typeof callback != "undefined") {
+      this.#store.createComputedItem(this.#name, callback);
+    }
+  }
+  get value() {
+    return this.#store.getItem(this.#name);
+  }
+  get name() {
+    return this.#name;
+  }
+  /**
+   * 
+   * @param {Subscriber} callback
+   * @param {number|undefined} [debounce_time] debounce time
+   */
+  subscribe(callback, debounce_time) {
+    this.#store.subscribe(this.#name, callback, debounce_time);
+  }
+  clearSubscribers() {
+    this.#store.clearItemSubscribers(this.#name);
+  }
+  hasSubscribers() {
+    this.#store.hasSubscribers(this.#name);
+  }
+  /**
+   * 
+   * @param {CompareFunction | null} func_or_null 
+   * @returns {boolean}
+   */
+  setCompareFunction(func_or_null) {
+    return this.#store.setCompareFunction(this.#name, func_or_null);
+  }
+  recalc() {
+    return this.#store.recalcComputed(this.#name);
   }
 };
 
@@ -157,11 +329,15 @@ var Store = class {
   /** @type {number} */
   #debounce_time = 0;
   #eventEmitter = new EventEmitter();
+  #track_deps_flag = false;
+  /** @type {Set<string>} */
+  #tracked_set = /* @__PURE__ */ new Set();
+  #base_item_name_index = 0;
   /**
    * Used to debug code during testing
    * @type {Function}
    * @example
-   * ```js
+   *```js
    * import test from "./../node_modules/ava/entrypoints/main.mjs";
    * 
    * test("create store", t => {
@@ -188,7 +364,8 @@ var Store = class {
   /**
    * Creates a store
    * @param {{[item_name: string]: any}} [initObject] object of items
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 1, b: 2 });
    * this.log(store.getItem("a"), store.getItem("b"));
    * // outputs 1, 2
@@ -306,6 +483,7 @@ var Store = class {
     let old_array = this.#collections.get(item_name);
     let equal = true;
     let details_arr = [];
+    let length = old_array.length;
     if (old_array.length > array.length)
       for (let i = array.length; i < old_array.length; i++) {
         let details = this.#deleteCollectionItem(item_name, i.toString());
@@ -328,6 +506,17 @@ var Store = class {
     main_details.eventType = "set";
     main_details.item_name = item_name;
     main_details.value = array;
+    if (length != array.length) {
+      let details = new UpdateEventDetails();
+      details.eventType = "set";
+      details.item_name = item_name;
+      details.property = "length";
+      details.value = array.length;
+      details.old_value = length;
+      store.#registerEvent(item_name, details);
+      store.#registerChangeEvent({ [item_name]: details }, "set");
+      store.#sendSignalToComputedItems(new Set(item_name), false);
+    }
     return { main_details, details_arr };
   }
   /**
@@ -335,7 +524,8 @@ var Store = class {
    * @param {string} item_name
    * @returns {boolean} 
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 1, b: 2 });
    * 
    * this.log(store.hasItem("a"));
@@ -350,7 +540,8 @@ var Store = class {
    * @param {string} item_name
    * @param {any} value  
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 1, b: 2 });
    * 
    * store.setItem("a", 2);
@@ -365,10 +556,38 @@ var Store = class {
     this.setItems(obj);
   }
   /**
+   * 
+   * @param {Set<string>} updated_item_names
+   * @param {boolean} [shouldFireEvent=true] 
+   */
+  #sendSignalToComputedItems(updated_item_names, shouldFireEvent = true) {
+    var updated_items = {};
+    this.#computed.forEach((computed) => {
+      let is_stale = this.#markStaleComputedValueIfNeeded(computed, updated_item_names);
+      if (!is_stale)
+        return;
+      if (!this.hasSubscribers(computed.item_name))
+        return;
+      let details = this.#recalc(computed.item_name);
+      if (details === false) {
+        return;
+      }
+      this.#registerEvent(details.item_name, details);
+      updated_items[computed.item_name] = details;
+    });
+    if (Object.keys(updated_items).length > 0) {
+      this.#registerChangeEvent(updated_items, "set");
+      if (shouldFireEvent) {
+        this.#fireEvents();
+      }
+    }
+  }
+  /**
    * Sets values of items
    * @param {{[item_name: string]: any}} obj 
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store;
    * store.setItems({ a: 1, b: 2 });
    * 
@@ -453,14 +672,14 @@ var Store = class {
    * @param {string} item_name 
    * @returns {boolean}
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 1, b: 2 });
    * store.createComputedItem(
    *     "c",
    *     (store) => {
    *         return store.getItem("a") + store.getItem("b");
-   *     },
-   *     ["a", "b"]
+   *     }
    * );
    * 
    * this.log(store.isComputedItem("a"), store.isComputedItem("c"));
@@ -475,14 +694,14 @@ var Store = class {
    * @param {string} item_name 
    * @returns {Boolean}
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 1, b: 2 });
    * store.createComputedItem(
    *     "c",
    *     (store) => {
    *         return store.getItem("a") + store.getItem("b");
-   *     },
-   *     ["a", "b"]
+   *     }
    * );
    * 
    * this.log(store.isAtomItem("a"), store.isAtomItem("c"));
@@ -497,10 +716,11 @@ var Store = class {
    * @param {string} item_name 
    * @returns {Boolean}
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 1, b: 2 });
    * 
-   * store.createCollection("c", [{ q: 2, t: 90 }]);
+   * store.createCollectionItem("c", [{ q: 2, t: 90 }]);
    * 
    * this.log(store.isCollection("a"), store.isCollection("c"));
    * // outputs: false, true
@@ -516,7 +736,7 @@ var Store = class {
    */
   #recalc(item_name) {
     let computed = this.#computed.get(item_name);
-    let store = this;
+    let store2 = this;
     let old_value = computed.value;
     computed.stale = true;
     let value = computed.getter();
@@ -542,7 +762,8 @@ var Store = class {
    * @param {string} item_name
    * @returns {false|UpdateEventDetails}
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 1, b: [1, 2, 3] });
    * 
    * var obj = store.asObject();
@@ -551,8 +772,7 @@ var Store = class {
    *     "c",
    *     (store) => {
    *         return store.getItem("a") + store.getItem("b")[1];
-   *     },
-   *     ["a", "b"]
+   *     }
    * );
    * 
    * store.subscribe("c", (details) => {
@@ -587,26 +807,31 @@ var Store = class {
    * 
    * @param {string} item_name 
    * @param {(store: Store)=>any} callback
-   * @param {string[]} depsArray 
    */
-  #registerComputed(item_name, callback, depsArray) {
-    let store = this;
-    if (depsArray.length == 0) {
-      throw new Error(`Computed item ${item_name} hasn't dependencies`);
-    }
+  #registerComputed(item_name, callback) {
+    let store2 = this;
     var __callback = () => {
       try {
-        return callback(store);
+        return callback(store2);
       } catch (e) {
         this.logError(`Computed error ${item_name}: `, e);
         return "#ERROR!";
       }
     };
+    this.#tracked_set.clear();
+    this.#track_deps_flag = true;
+    let value = __callback();
+    var depsArray = Array.from(this.#tracked_set);
+    if (depsArray.length == 0) {
+      throw new Error(`Computed item ${item_name} hasn't dependencies`);
+    }
+    this.#track_deps_flag = false;
+    this.#tracked_set.clear();
     this.#computed.set(item_name, {
       item_name,
       dependencies: depsArray,
       getter: __callback,
-      value: __callback(),
+      value,
       stale: false
     });
   }
@@ -630,11 +855,10 @@ var Store = class {
    * 
    * @param {string} item_name 
    * @param {(store: Store)=>any} callback 
-   * @param {string[]} deps 
    * @param {boolean} [skip_item_name_validation=false] 
    * @returns {boolean}
    */
-  #createComputedItemExtended(item_name, callback, deps, skip_item_name_validation = false) {
+  #createComputedItemExtended(item_name, callback, skip_item_name_validation = false) {
     item_name = item_name.trim();
     if (this.hasItem(item_name)) {
       this.warn(`Item name ${item_name} name already exists`);
@@ -645,30 +869,17 @@ var Store = class {
         throw new Error(`${item_name} is wrong store's item_name`);
       }
     }
-    let set_of_deps = /* @__PURE__ */ new Set();
-    for (let i = 0; i < deps.length; i++) {
-      let deps_name = deps[i];
-      if (!this.hasItem(deps_name)) {
-        this.warn(`${item_name}: Unknown dependency ${deps_name} is ignored`);
-        continue;
-      }
-      if (!this.isAtomItem(deps_name)) {
-        this.warn(`${item_name}: The non-atom item ${deps_name} is ignored`);
-        continue;
-      }
-      set_of_deps.add(deps_name);
-    }
-    this.#registerComputed(item_name, callback, Array.from(set_of_deps));
+    this.#registerComputed(item_name, callback);
     return true;
   }
   /**
    * Creates a computed item
    * @param {string} item_name 
    * @param {(store: Store)=>any} callback 
-   * @param {string[]} deps 
    * @returns {boolean} is created
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 1, b: [1, 2, 3] });
    * 
    * var obj = store.asObject();
@@ -677,8 +888,7 @@ var Store = class {
    *     "c",
    *     (store) => {
    *         return store.getItem("a") + store.getItem("b")[1];
-   *     },
-   *     ["a", "b"]
+   *     }
    * );
    * 
    * store.subscribe("c", (details) => {
@@ -696,14 +906,14 @@ var Store = class {
    * ```
    * 
    * When computed item has error
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: "abcdef", b: "ghijk" });
    * store.createComputedItem(
    *     "c",
    *     (store) => {
    *         return store.getItem("a").slice(0, 1) + store.getItem("b").slice(0, 1);
-   *     },
-   *     ["a", "b"]
+   *     }
    * );
    * 
    * store.setItem("b", 0);
@@ -712,19 +922,20 @@ var Store = class {
    * // outputs "#ERROR!"
    * ```
    */
-  createComputedItem(item_name, callback, deps) {
+  createComputedItem(item_name, callback) {
     if (this.#is_sealed) {
       this.logError(`Store is sealed. Can't create the item "${item_name}"`);
       return false;
     }
-    return this.#createComputedItemExtended(item_name, callback, deps);
+    return this.#createComputedItemExtended(item_name, callback);
   }
   /**
    * 
    * @param {string} expression 
    * @returns {string} returns the name of computed item
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 1, b: 2 });
    * 
    * // get name of computed item
@@ -768,10 +979,11 @@ var Store = class {
    * @param {string} item_name 
    * @param {T} [array] 
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 1, b: 2 });
    * 
-   * var c = store.createCollection("c", [1, 2, 3]);
+   * var c = store.createCollectionItem("c", [1, 2, 3]);
    * 
    * store.subscribe("c", (details) => {
    *     this.log("collection item is changed. (property :" + details.property + ", value: " + details.value + ")");
@@ -782,26 +994,29 @@ var Store = class {
    * 
    * ```
    */
-  createCollection(item_name, array) {
+  createCollectionItem(item_name, array) {
     item_name = item_name.trim();
+    var length = array.length;
     if (this.hasItem(item_name)) {
       throw new Error(`Item name ${item_name} name already exists`);
     }
     if (!this.#isValidItemName(item_name)) {
       throw new Error(`${item_name} is wrong store's item_name`);
     }
-    var store = this;
+    var store2 = this;
     var proxy = new Proxy(array, {
       deleteProperty: function(target, property) {
+        let target_length = target.length;
         if (typeof property == "symbol") {
           delete target[property];
         } else if (typeof property == "string") {
-          let details = store.#deleteCollectionItem(item_name, property);
+          let details = store2.#deleteCollectionItem(item_name, property);
           if (details) {
             delete target[property];
-            store.#registerEvent(details.item_name, details);
-            store.#registerChangeEvent({ [item_name]: details }, "delete");
-            store.#fireEvents();
+            store2.#registerEvent(details.item_name, details);
+            store2.#registerChangeEvent({ [item_name]: details }, "delete");
+            store2.#sendSignalToComputedItems(new Set(item_name));
+            store2.#fireEvents();
           }
         }
         return true;
@@ -810,18 +1025,32 @@ var Store = class {
         if (typeof property == "symbol") {
           target[property] = value;
         } else if (typeof property == "string") {
-          let details = store.#setCollectionItem(item_name, property, value);
+          let details = store2.#setCollectionItem(item_name, property, value);
           if (details) {
             target[property] = value;
-            store.#registerEvent(details.item_name, details);
-            store.#registerChangeEvent({ [item_name]: details }, "set");
-            store.#fireEvents();
+            if (length != target.length) {
+              let details2 = new UpdateEventDetails();
+              details2.eventType = "set";
+              details2.item_name = item_name;
+              details2.property = "length";
+              details2.value = target.length;
+              details2.old_value = length;
+              length = target.length;
+              store2.#registerEvent(item_name, details2);
+              store2.#registerChangeEvent({ [item_name]: details2 }, "set");
+              store2.#sendSignalToComputedItems(new Set(item_name));
+              store2.#fireEvents();
+            }
+            store2.#registerEvent(details.item_name, details);
+            store2.#registerChangeEvent({ [item_name]: details }, "set");
+            store2.#sendSignalToComputedItems(new Set(item_name));
+            store2.#fireEvents();
           }
         }
         return true;
       }
     });
-    store.#collections.set(item_name, array);
+    store2.#collections.set(item_name, array);
     return proxy;
   }
   /**
@@ -829,7 +1058,8 @@ var Store = class {
    * @param {ChangeEventSubscriber} callback 
    * @returns {Unsubscriber} unsubscriber
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 1, b: 2 });
    * 
    * store.onChange((data) => {
@@ -890,7 +1120,8 @@ var Store = class {
    * @param {ChangeEventSubscriber} callback 
    * @returns {Unsubscriber|undefined} unsubscriber
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 1, b: 2 });
    * 
    * store.onChangeAny(["a", "b"], (data) => {
@@ -914,7 +1145,7 @@ var Store = class {
   onChangeAny(arr_item_names, callback) {
     if (arr_item_names.length == 0)
       return;
-    let store = this;
+    let store2 = this;
     let unsubscriber = this.#eventEmitter.on("#change", function(ev) {
       let details = ev.details;
       let shouldFireEvent = false;
@@ -925,7 +1156,7 @@ var Store = class {
         }
       }
       if (shouldFireEvent) {
-        callback(ev, store);
+        callback(ev, store2);
       }
     });
     return unsubscriber;
@@ -935,18 +1166,18 @@ var Store = class {
    * @param {string} item_name 
    * @returns {boolean}
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 1, b: 2 });
    * 
    * store.createComputedItem(
    *     "c",
    *     (store) => {
    *         return store.getItem("a") + store.getItem("b");
-   *     },
-   *     ["a", "b"]
+   *     }
    * );
    * 
-   * store.createCollection("d", [1, 2, 3]);
+   * store.createCollectionItem("d", [1, 2, 3]);
    * 
    * store.deleteItem("a");
    * store.deleteItem("b");
@@ -996,15 +1227,15 @@ var Store = class {
    * @param {boolean} show_computed 
    * @returns {{[item_name: string]: any}}
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 1, b: 2 });
    * 
    * store.createComputedItem(
    *     "c",
    *     (store) => {
    *         return store.getItem("a") + store.getItem("b");
-   *     },
-   *     ["a", "b"]
+   *     }
    * );
    * 
    * var items = store.getItems();
@@ -1049,6 +1280,9 @@ var Store = class {
    * @param {string} item_name 
    */
   #getCollection(item_name) {
+    if (this.#track_deps_flag) {
+      this.#tracked_set.add(item_name);
+    }
     return this.#collections.get(item_name);
   }
   /**
@@ -1067,6 +1301,9 @@ var Store = class {
    * @param {string} item_name 
    */
   #getAtomValue(item_name) {
+    if (this.#track_deps_flag) {
+      this.#tracked_set.add(item_name);
+    }
     return this.#atoms.get(item_name);
   }
   /**
@@ -1106,7 +1343,8 @@ var Store = class {
    * @param {number|undefined} [debounce_time] debounce time
    * @returns {Unsubscriber} Returns unsubscriber 
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 1, b: 2 });
    * 
    * var unsubscriber = store.subscribe("a", (details) => {
@@ -1144,7 +1382,8 @@ var Store = class {
   /**
    * Deletes all subscribers
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 0, b: 2 });
    * 
    * store.subscribe("a", () => {
@@ -1166,7 +1405,8 @@ var Store = class {
   /**
    * Deletes the item's subscribers
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 0, b: 2 });
    * 
    * store.subscribe("a", () => {
@@ -1189,7 +1429,8 @@ var Store = class {
   /**
    * Resets the instance. Deletes all items an subscribers.
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 0, b: 2 });
    * 
    * store.subscribe("a", () => {
@@ -1223,7 +1464,8 @@ var Store = class {
    * Represents the store as object. Returns an proxy object.
    * @returns { {[item_name:string]:any}}
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 1, b: 2 });
    * 
    * store.subscribe("b", (details) => {
@@ -1283,7 +1525,8 @@ var Store = class {
    * @param {CompareFunction | null} func_or_null 
    * @returns {boolean}
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: { value: 1, meta_info: { qwe: 900 } } });
    * 
    * store.setCompareFunction("a", (old_value, value) => {
@@ -1317,15 +1560,15 @@ var Store = class {
   /**
    * Seals the store. This protects the store from creating new items or deleting items
    * 
-   * ```js
+   * @example
+   *```js
    * var store = new Store({ a: 1, b: 2 });
    * 
    * store.createComputedItem(
    *     "c",
    *     (store) => {
    *         return store.getItem("a") + store.getItem("b");
-   *     },
-   *     ["a", "b"]
+   *     }
    * );
    * 
    * store.seal();
@@ -1384,7 +1627,7 @@ var Store = class {
   /**
    * Calls a function after all reactions have completed execution
    * @param {(store:Store)=>void} func 
-   * 
+   * @example
    *```js
    * var store = new Store({ a: 1, b: 2 });
    * store.log = t.log;
@@ -1416,6 +1659,78 @@ var Store = class {
     } else {
       func(this);
     }
+  }
+  #generateItemName() {
+    while (this.hasItem(`_` + this.#base_item_name_index)) {
+      this.#base_item_name_index++;
+    }
+    return `_` + this.#base_item_name_index;
+  }
+  /**
+   * Creates an instance of the Atom 
+   * @param {any} value 
+   * @param {string} name 
+   * @returns {Atom}
+   */
+  createAtom(value, name) {
+    if (typeof name == "undefined") {
+      name = this.#generateItemName();
+    }
+    return new Atom(this, name, value);
+  }
+  /**
+   * Returns an instance of the Atom if the item exists
+   * @param {string} item_name 
+   */
+  getAtom(item_name) {
+    if (this.isAtomItem(item_name)) {
+      return new Atom(this, item_name);
+    }
+    return false;
+  }
+  /**
+   * Creates an instance of the Computed 
+   * @param {(store: Store) => any} callback 
+   * @param {string} [name] 
+   * @returns {Computed}
+   */
+  createComputed(callback, name) {
+    if (typeof name == "undefined") {
+      name = this.#generateItemName();
+    }
+    return new Computed(this, name, callback);
+  }
+  /**
+   * Returns an instance of the Computed if the item exists
+   * @param {string} item_name 
+   */
+  getComputed(item_name) {
+    if (this.isComputedItem(item_name)) {
+      return new Computed(this, item_name);
+    }
+    return false;
+  }
+  /**
+   * Creates an instance of the Collection 
+  * @param {any[]} value 
+   * @param {string} [name] 
+   * @returns {Collection}
+   */
+  createCollection(value, name) {
+    if (typeof name == "undefined") {
+      name = this.#generateItemName();
+    }
+    return new Collection(this, name, value);
+  }
+  /**
+   * Returns an instance of the Collection if the item exists 
+   * @param {string} item_name 
+   */
+  getCollection(item_name) {
+    if (this.isCollection(item_name)) {
+      return new Collection(this, item_name);
+    }
+    return false;
   }
 };
 function createStore(initObject) {
