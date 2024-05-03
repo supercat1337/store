@@ -1833,6 +1833,45 @@ test("atom (create)", (t) => {
 
 });
 
+test("atom (getAtom)", (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    let a = store.createAtom(1, "a");
+    let b = store.getAtom("a");
+    if (!b) {
+        t.fail();
+        return;
+    }
+
+    if (store.getItem("a") == a.value && a.name === b.name && a.value === b.value) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+test("atom (getAtom #2)", (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    let b = store.getAtom("a");
+
+    if (b === false) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
 test("atom (subscribe)", (t) => {
     var store = new Store;
     store.log = t.log;
@@ -1963,6 +2002,51 @@ test("computed (create)", (t) => {
 
 
     if (store.getItem("b") == b.value && b.name == "b" && b.store === store && b.value == 3) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+test("computed (getComputed)", (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    let a = store.createAtom(0);
+    let b = store.createComputed(()=>{return a.value + 1});
+    let c = store.getComputed(b.name);
+
+    if (c === false) {
+        t.fail();
+        return;
+    }
+
+    a.value++;
+
+    if (b.name === c.name && c.value == 2) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+
+test("computed (getComputed #2)", (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    let a = store.createAtom(0);
+    let c = store.getComputed("foo");
+
+    if (c === false) {
         t.pass();
     }
     else {
@@ -2117,6 +2201,67 @@ test("collection (create)", (t) => {
     }
 
 });
+
+
+test("collection (create #2)", (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    let a = store.createCollection([]);
+    a.value.push(1);
+
+    if (a.name == "_0"  && a.value.length == 1) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+
+test("atom (getCollection)", (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    let a = store.createCollection([1, 2, 3], "a");
+    let b = store.getCollection("a");
+
+    if (!b) {
+        t.fail();
+        return;
+    }
+
+    if (store.getItem("a") == a.value && a.name === b.name && a.value === b.value) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+test("atom (getCollection #2)", (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    let b = store.getCollection("a");
+
+    if (b === false) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
 
 test("collection (subscribe)", (t) => {
     var store = new Store;
