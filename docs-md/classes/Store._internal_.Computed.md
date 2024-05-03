@@ -32,7 +32,7 @@
 
 ### constructor
 
-• **new Computed**(`store`, `name`, `callback`): [`Computed`](Store._internal_.Computed.md)
+• **new Computed**(`store`, `name`, `callback?`): [`Computed`](Store._internal_.Computed.md)
 
 Creates the atom item
 
@@ -42,7 +42,7 @@ Creates the atom item
 | :------ | :------ |
 | `store` | [`Store`](Store.Store.md) |
 | `name` | `string` |
-| `callback` | (`store`: [`Store`](Store.Store.md)) => `any` |
+| `callback?` | (`store`: [`Store`](Store.Store.md)) => `any` |
 
 #### Returns
 
@@ -50,7 +50,7 @@ Creates the atom item
 
 #### Defined in
 
-src/objects.js:163
+[src/Computed.js:24](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L24)
 
 ## Properties
 
@@ -60,7 +60,7 @@ src/objects.js:163
 
 #### Defined in
 
-src/objects.js:153
+[src/Computed.js:14](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L14)
 
 ___
 
@@ -70,7 +70,7 @@ ___
 
 #### Defined in
 
-src/objects.js:155
+[src/Computed.js:16](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L16)
 
 ## Accessors
 
@@ -84,7 +84,7 @@ src/objects.js:155
 
 #### Defined in
 
-src/objects.js:173
+[src/Computed.js:37](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L37)
 
 ___
 
@@ -98,7 +98,7 @@ ___
 
 #### Defined in
 
-src/objects.js:169
+[src/Computed.js:33](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L33)
 
 ## Methods
 
@@ -112,7 +112,7 @@ src/objects.js:169
 
 #### Defined in
 
-src/objects.js:186
+[src/Computed.js:50](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L50)
 
 ___
 
@@ -126,7 +126,7 @@ ___
 
 #### Defined in
 
-src/objects.js:190
+[src/Computed.js:54](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L54)
 
 ___
 
@@ -140,7 +140,7 @@ ___
 
 #### Defined in
 
-src/objects.js:203
+[src/Computed.js:67](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L67)
 
 ___
 
@@ -152,7 +152,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `func_or_null` | [`CompareFunction`](../modules/Store._internal_.md#comparefunction) |
+| `func_or_null` | [`CompareFunction`](../modules/Store._internal_.md#comparefunction-1) |
 
 #### Returns
 
@@ -160,7 +160,7 @@ ___
 
 #### Defined in
 
-src/objects.js:199
+[src/Computed.js:63](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L63)
 
 ___
 
@@ -172,7 +172,7 @@ ___
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `callback` | [`Subscriber`](../modules/Store._internal_.md#subscriber) |  |
+| `callback` | [`Subscriber`](../modules/Store._internal_.md#subscriber-1) |  |
 | `debounce_time?` | `number` | debounce time |
 
 #### Returns
@@ -181,4 +181,4 @@ ___
 
 #### Defined in
 
-src/objects.js:182
+[src/Computed.js:46](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L46)

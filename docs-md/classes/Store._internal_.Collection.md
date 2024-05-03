@@ -14,7 +14,6 @@
 
 - [#name](Store._internal_.Collection.md##name)
 - [#store](Store._internal_.Collection.md##store)
-- [#value](Store._internal_.Collection.md##value)
 
 ### Accessors
 
@@ -32,7 +31,7 @@
 
 ### constructor
 
-• **new Collection**(`store`, `name`, `value`): [`Collection`](Store._internal_.Collection.md)
+• **new Collection**(`store`, `name`, `value?`): [`Collection`](Store._internal_.Collection.md)
 
 Creates the atom item
 
@@ -42,7 +41,7 @@ Creates the atom item
 | :------ | :------ |
 | `store` | [`Store`](Store.Store.md) |
 | `name` | `string` |
-| `value` | `any`[] |
+| `value?` | `any`[] |
 
 #### Returns
 
@@ -50,7 +49,7 @@ Creates the atom item
 
 #### Defined in
 
-src/objects.js:99
+[src/Collection.js:26](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Collection.js#L26)
 
 ## Properties
 
@@ -60,7 +59,7 @@ src/objects.js:99
 
 #### Defined in
 
-src/objects.js:86
+[src/Collection.js:16](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Collection.js#L16)
 
 ___
 
@@ -70,17 +69,7 @@ ___
 
 #### Defined in
 
-src/objects.js:88
-
-___
-
-### #value
-
-• `Private` **#value**: `any`[]
-
-#### Defined in
-
-src/objects.js:91
+[src/Collection.js:18](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Collection.js#L18)
 
 ## Accessors
 
@@ -94,21 +83,21 @@ src/objects.js:91
 
 #### Defined in
 
-src/objects.js:119
+[src/Collection.js:49](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Collection.js#L49)
 
 ___
 
 ### value
 
-• `get` **value**(): `any`[]
+• `get` **value**(): `any`
 
 #### Returns
 
-`any`[]
+`any`
 
 #### Defined in
 
-src/objects.js:115
+[src/Collection.js:45](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Collection.js#L45)
 
 • `set` **value**(`value`): `void`
 
@@ -118,7 +107,7 @@ Sets value
 
 | Name | Type |
 | :------ | :------ |
-| `value` | `any`[] |
+| `value` | `any` |
 
 #### Returns
 
@@ -126,7 +115,7 @@ Sets value
 
 #### Defined in
 
-src/objects.js:110
+[src/Collection.js:41](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Collection.js#L41)
 
 ## Methods
 
@@ -140,7 +129,7 @@ src/objects.js:110
 
 #### Defined in
 
-src/objects.js:132
+[src/Collection.js:62](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Collection.js#L62)
 
 ___
 
@@ -154,7 +143,7 @@ ___
 
 #### Defined in
 
-src/objects.js:136
+[src/Collection.js:66](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Collection.js#L66)
 
 ___
 
@@ -166,7 +155,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `func_or_null` | [`CompareFunction`](../modules/Store._internal_.md#comparefunction) |
+| `func_or_null` | [`CompareFunction`](../modules/Store._internal_.md#comparefunction-2) |
 
 #### Returns
 
@@ -174,7 +163,7 @@ ___
 
 #### Defined in
 
-src/objects.js:145
+[src/Collection.js:75](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Collection.js#L75)
 
 ___
 
@@ -186,7 +175,7 @@ ___
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `callback` | [`Subscriber`](../modules/Store._internal_.md#subscriber) |  |
+| `callback` | [`Subscriber`](../modules/Store._internal_.md#subscriber-2) |  |
 | `debounce_time?` | `number` | debounce time |
 
 #### Returns
@@ -195,4 +184,4 @@ ___
 
 #### Defined in
 
-src/objects.js:128
+[src/Collection.js:58](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Collection.js#L58)

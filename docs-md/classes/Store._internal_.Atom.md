@@ -32,7 +32,7 @@
 
 ### constructor
 
-• **new Atom**(`store`, `name`, `value`): [`Atom`](Store._internal_.Atom.md)
+• **new Atom**(`store`, `name`, `value?`): [`Atom`](Store._internal_.Atom.md)
 
 Creates the atom item
 
@@ -42,7 +42,7 @@ Creates the atom item
 | :------ | :------ |
 | `store` | [`Store`](Store.Store.md) |
 | `name` | `string` |
-| `value` | `any` |
+| `value?` | `any` |
 
 #### Returns
 
@@ -50,7 +50,7 @@ Creates the atom item
 
 #### Defined in
 
-src/objects.js:27
+[src/Atom.js:25](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L25)
 
 ## Properties
 
@@ -60,7 +60,7 @@ src/objects.js:27
 
 #### Defined in
 
-src/objects.js:17
+[src/Atom.js:15](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L15)
 
 ___
 
@@ -70,7 +70,7 @@ ___
 
 #### Defined in
 
-src/objects.js:19
+[src/Atom.js:17](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L17)
 
 ## Accessors
 
@@ -84,7 +84,7 @@ src/objects.js:19
 
 #### Defined in
 
-src/objects.js:47
+[src/Atom.js:48](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L48)
 
 ___
 
@@ -98,7 +98,7 @@ ___
 
 #### Defined in
 
-src/objects.js:77
+[src/Atom.js:78](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L78)
 
 ___
 
@@ -112,7 +112,7 @@ ___
 
 #### Defined in
 
-src/objects.js:43
+[src/Atom.js:44](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L44)
 
 • `set` **value**(`value`): `void`
 
@@ -130,7 +130,7 @@ Sets value
 
 #### Defined in
 
-src/objects.js:39
+[src/Atom.js:40](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L40)
 
 ## Methods
 
@@ -144,7 +144,7 @@ src/objects.js:39
 
 #### Defined in
 
-src/objects.js:60
+[src/Atom.js:61](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L61)
 
 ___
 
@@ -158,7 +158,7 @@ ___
 
 #### Defined in
 
-src/objects.js:64
+[src/Atom.js:65](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L65)
 
 ___
 
@@ -178,7 +178,7 @@ ___
 
 #### Defined in
 
-src/objects.js:73
+[src/Atom.js:74](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L74)
 
 ___
 
@@ -199,4 +199,4 @@ ___
 
 #### Defined in
 
-src/objects.js:56
+[src/Atom.js:57](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L57)
