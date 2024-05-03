@@ -56,24 +56,19 @@ export class Collection {
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
-        this.#store.subscribe(this.#name, callback, debounce_time);
+        return this.#store.subscribe(this.#name, callback, debounce_time);
     }
 
     clearSubscribers() {
-        this.#store.clearItemSubscribers(this.#name);
+        return this.#store.clearItemSubscribers(this.#name);
     }
 
     hasSubscribers() {
-        this.#store.hasSubscribers(this.#name);
+        return this.#store.hasSubscribers(this.#name);
     }
 
-    /**
-     * 
-     * @param {CompareFunction | null} func_or_null 
-     * @returns {boolean}
-     */
-    setCompareFunction(func_or_null) {
-        return this.#store.setCompareFunction(this.#name, func_or_null);
+    get store() {
+        return this.#store;
     }
 
 }

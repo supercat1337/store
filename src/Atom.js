@@ -55,15 +55,15 @@ export class Atom {
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
-        this.#store.subscribe(this.#name, callback, debounce_time);
+        return this.#store.subscribe(this.#name, callback, debounce_time);
     }
 
     clearSubscribers() {
-        this.#store.clearItemSubscribers(this.#name);
+        return this.#store.clearItemSubscribers(this.#name);
     }
 
     hasSubscribers() {
-        this.#store.hasSubscribers(this.#name);
+        return this.#store.hasSubscribers(this.#name);
     }
 
     /**
