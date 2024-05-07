@@ -256,6 +256,9 @@ function debounce(func, wait) {
     timeout = setTimeout(later, wait);
   };
 }
+function isObject(x) {
+  return typeof x === "object" && !Array.isArray(x) && x !== null;
+}
 
 // src/Store.js
 /**
@@ -362,7 +365,20 @@ var Store = class {
    */
   constructor(initObject) {
     if (initObject) {
-      this.setItems(initObject);
+      for (let prop in initObject) {
+        let value = initObject[prop];
+        if (value === null || value === void 0) {
+          this.#registerAtom(prop, value);
+          continue;
+        }
+        if (Array.isArray(value)) {
+          this.createCollection(value, prop);
+          continue;
+        }
+        if (value instanceof Function)
+          continue;
+        this.#registerAtom(prop, value);
+      }
     }
   }
   /**
@@ -468,13 +484,21 @@ var Store = class {
    * @param {any[]} array
    */
   #setCollection(item_name, array) {
+    if (!Array.isArray(array)) {
+      this.warn(`Cannot assign a non-array value to a collection. Now ${item_name} == [].`);
+      array = [];
+    }
     let old_array = this.#collections.get(item_name);
+    let old_array_copy = new Array(old_array.length);
+    for (let i = 0; i < old_array.length; i++) {
+      old_array_copy[i] = old_array[i];
+    }
     let equal = true;
     let details_arr = [];
     let length = old_array.length;
     if (old_array.length > array.length)
       for (let i = array.length; i < old_array.length; i++) {
-        let details = this.#deleteCollectionItem(item_name, i.toString());
+        let details = this.#deleteCollectionItem(item_name, (old_array.length - i - 1).toString());
         if (details) {
           details_arr.push(details);
           equal = false;
@@ -521,7 +545,7 @@ var Store = class {
    * ```
    */
   hasItem(item_name) {
-    return this.#atoms.has(item_name) || this.#computed.has(item_name) || this.#collections.has(item_name);
+    return item_name == "store" || this.#atoms.has(item_name) || this.#computed.has(item_name) || this.#collections.has(item_name);
   }
   /**
    * Sets item's value
@@ -1309,7 +1333,7 @@ var Store = class {
       return this;
     }
     if (!this.hasItem(item_name)) {
-      return null;
+      return void 0;
     }
     if (this.isAtomItem(item_name)) {
       return this.#getAtomValue(item_name);
@@ -1663,6 +1687,25 @@ var Store = class {
    * @param {any} value 
    * @param {string} [name] 
    * @returns {Atom}
+   * 
+   * @example
+   *```js
+   * 
+   * var store = new Store;
+   * var foo = 0;
+   * 
+   * let a = store.createAtom(1);
+   * a.subscribe((details) => {
+   *     foo++;
+   * });
+   * 
+   * a.value++;
+   * a.value++;
+   * 
+   * 
+   * console.log(foo == 2);
+   * // outputs: true
+   *```
    */
   createAtom(value, name) {
     if (typeof name == "undefined") {
@@ -1672,7 +1715,29 @@ var Store = class {
   }
   /**
    * Returns an instance of the Atom if the item exists
-   * @param {string} item_name 
+   * @param {string} item_name     
+   * 
+   * @example
+   *```js
+   * var store = new Store;
+   * 
+   * let a = store.createAtom(1, "a");
+   * let b = store.getAtom("a");
+   * let value = store.getItem("a");
+   * 
+   * console.log(store.getItem("a") == a.value);
+   * // true
+   * 
+   * console.log(a.name === b.name);
+   * // true
+   * 
+   * console.log(a.value === b.value);
+   * // true
+   * 
+   * console.log(value === b.value);
+   * // true
+   * 
+   *```
    */
   getAtom(item_name) {
     if (this.isAtomItem(item_name)) {
@@ -1682,9 +1747,37 @@ var Store = class {
   }
   /**
    * Creates an instance of the Computed 
+   * 
    * @param {(store: Store) => any} callback 
    * @param {string} [name] 
    * @returns {Computed}
+   * 
+   * @example
+   *```js
+   * var store = new Store;
+   * 
+   * var foo = 0;
+   * 
+   * let a = store.createAtom(1);
+   * 
+   * let b = store.createComputed(() => {
+   *     return a.value + 1;
+   * });
+   * 
+   * b.subscribe(() => {
+   *     foo++;
+   * });
+   * 
+   * a.value++;
+   * a.value++;
+   * 
+   * console.log(b.value);
+   * // 3
+   * 
+   * console.log(foo);
+   * // 2
+   * 
+   *```
    */
   createComputed(callback, name) {
     if (typeof name == "undefined") {
@@ -1695,6 +1788,24 @@ var Store = class {
   /**
    * Returns an instance of the Computed if the item exists
    * @param {string} item_name 
+   * 
+   * @example
+   *```js
+   * var store = new Store;
+   * 
+   * let a = store.createAtom(0);
+   * 
+   * let b = store.createComputed(() => { return a.value + 1 });
+   * let c = store.getComputed(b.name);
+   * 
+   * a.value++;
+   * 
+   * console.log(b.name === c.name);
+   * // true
+   * 
+   * console.log(c.value == 2);
+   * // true
+   *```
    */
   getComputed(item_name) {
     if (this.isComputedItem(item_name)) {
@@ -1704,9 +1815,39 @@ var Store = class {
   }
   /**
    * Creates an instance of the Collection 
-  * @param {any[]} value 
+   * @param {any[]} value 
    * @param {string} [name] 
    * @returns {Collection}
+   * 
+   * @example
+   *```js
+   * var store = new Store;
+   * 
+   * var value_changed = 0;
+   * var length_changed = 0;
+   * 
+   * let a = store.createCollection([]);
+   * 
+   * a.subscribe((details) => {
+   * 
+   *     if (details.property == "length") {
+   *         length_changed++;
+   *         return;
+   *     }
+   * 
+   *     value_changed++;
+   * });
+   * 
+   * a.value.push(1);
+   * a.value.push(2);
+   * 
+   * console.log(value_changed);
+   * // 2
+   * 
+   * console.log(length_changed);
+   * // 2
+   * 
+   *```
    */
   createCollection(value, name) {
     if (typeof name == "undefined") {
@@ -1717,12 +1858,157 @@ var Store = class {
   /**
    * Returns an instance of the Collection if the item exists 
    * @param {string} item_name 
+   * 
+   * @example
+   *```js
+   * var store = new Store;
+   * 
+   * var value_changed = 0;
+   * var length_changed = 0;
+   * 
+   * let b = store.createCollection([1, 2, 3], "b");
+   * 
+   * let a = store.getCollection("b");
+   * 
+   * a.subscribe((details) => {
+   * 
+   *     if (details.property == "length") {
+   *         length_changed++;
+   *         return;
+   *     }
+   * 
+   *     value_changed++;
+   * });
+   * 
+   * a.value.push(1);
+   * a.value.push(2);
+   * 
+   * console.log(a.value.length);
+   * // 5
+   * 
+   * console.log(a.name === b.name);
+   * // true
+   * 
+   * console.log(value_changed);
+   * // 2
+   * 
+   * console.log(length_changed);
+   * // 2
+   * 
+   *```
    */
   getCollection(item_name) {
     if (this.isCollection(item_name)) {
       return new Collection(this, item_name);
     }
     return false;
+  }
+  /**
+   * @template {Object} T
+   * @param {T} target 
+   * @returns {T & {store: Store}}
+   * 
+   * 
+   * @example
+   *```js
+   * class Sample {
+   *     a = 0;
+   *     b = null;
+   *     c = [];
+   * 
+   *     d = undefined;
+   * 
+   *     e = Symbol();
+   * 
+   *     incA () {
+   *         this.a++;
+   *     }
+   * }
+   * 
+   * var store = createStore();
+   * 
+   * var sample = store.observeObject(new Sample);
+   * 
+   * sample.store.subscribe("a", (details)=>{
+   *     //store.log(details);
+   * });
+   * 
+   * sample.store.subscribe("c", (details)=>{
+   *     //store.log(details);
+   * });
+   * 
+   * sample.incA();
+   * sample.incA();
+   * 
+   * sample.c.push("foo");
+   * 
+   * 
+   * console.log(store.getItem("a") == sample.a);
+   * // true
+   * 
+   * console.log(sample.a );
+   * // 2
+   * 
+   * console.log(store.isAtomItem("b"));
+   * // true
+   * 
+   * console.log(store.isAtomItem("d"));
+   * // true
+   * 
+   * console.log(store.isAtomItem("e"));
+   * // false
+   * 
+   * 
+   *```
+   */
+  observeObject(target) {
+    if (!isObject(target))
+      throw new Error(`obj must have an object type. obj = ${target}`);
+    let that = this;
+    for (let prop in target) {
+      let value = target[prop];
+      if (!this.hasItem(prop)) {
+        if (Array.isArray(value)) {
+          this.createCollectionItem(prop, value);
+          continue;
+        }
+        if (value instanceof Function || typeof value === "symbol") {
+          continue;
+        }
+        this.#registerAtom(prop, value);
+        continue;
+      } else {
+        if (this.isCollection(prop)) {
+          let _value = Array.isArray(value) ? value : [];
+          this.#setCollection(prop, _value);
+          continue;
+        }
+        if (this.isAtomItem(prop)) {
+          this.#setAtom(prop, value);
+          continue;
+        }
+      }
+    }
+    const handler = {
+      get(target2, prop) {
+        if (typeof prop == "string" && that.hasItem(prop)) {
+          return that.getItem(prop);
+        }
+        return target2[prop];
+      },
+      set(target2, item_name, value) {
+        that.setItems({ [item_name]: value });
+        return true;
+      },
+      deleteProperty: function(target2, item_name) {
+        if (typeof item_name == "string" && that.hasItem(item_name)) {
+          that.deleteItem(item_name);
+        }
+        delete target2[item_name];
+        return true;
+      }
+    };
+    return new Proxy(target, handler);
   }
 };
 function createStore(initObject) {
