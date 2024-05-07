@@ -1710,7 +1710,24 @@ export class Store {
      * @param {string} [name] 
      * @returns {Atom}
      * 
+     * @example
+     *```js
      * 
+     * var store = new Store;
+     * var foo = 0;
+     * 
+     * let a = store.createAtom(1);
+     * a.subscribe((details) => {
+     *     foo++;
+     * });
+     * 
+     * a.value++;
+     * a.value++;
+     * 
+     * 
+     * console.log(foo == 2);
+     * // outputs: true
+     *```
      */
     createAtom(value, name) {
         if (typeof name == "undefined") {
@@ -1721,7 +1738,29 @@ export class Store {
 
     /**
      * Returns an instance of the Atom if the item exists
-     * @param {string} item_name 
+     * @param {string} item_name     
+     * 
+     * @example
+     *```js
+     * var store = new Store;
+     * 
+     * let a = store.createAtom(1, "a");
+     * let b = store.getAtom("a");
+     * let value = store.getItem("a");
+     * 
+     * console.log(store.getItem("a") == a.value);
+     * // true
+     * 
+     * console.log(a.name === b.name);
+     * // true
+     * 
+     * console.log(a.value === b.value);
+     * // true
+     * 
+     * console.log(value === b.value);
+     * // true
+     * 
+     *```
      */
     getAtom(item_name) {
         if (this.isAtomItem(item_name)) {
@@ -1733,9 +1772,37 @@ export class Store {
 
     /**
      * Creates an instance of the Computed 
+     * 
      * @param {(store: Store) => any} callback 
      * @param {string} [name] 
      * @returns {Computed}
+     * 
+     * @example
+     *```js
+     * var store = new Store;
+     * 
+     * var foo = 0;
+     * 
+     * let a = store.createAtom(1);
+     * 
+     * let b = store.createComputed(() => {
+     *     return a.value + 1;
+     * });
+     * 
+     * b.subscribe(() => {
+     *     foo++;
+     * });
+     * 
+     * a.value++;
+     * a.value++;
+     * 
+     * console.log(b.value);
+     * // 3
+     * 
+     * console.log(foo);
+     * // 2
+     * 
+     *```
      */
     createComputed(callback, name) {
         if (typeof name == "undefined") {
@@ -1749,6 +1816,24 @@ export class Store {
     /**
      * Returns an instance of the Computed if the item exists
      * @param {string} item_name 
+     * 
+     * @example
+     *```js
+     * var store = new Store;
+     * 
+     * let a = store.createAtom(0);
+     * 
+     * let b = store.createComputed(() => { return a.value + 1 });
+     * let c = store.getComputed(b.name);
+     * 
+     * a.value++;
+     * 
+     * console.log(b.name === c.name);
+     * // true
+     * 
+     * console.log(c.value == 2);
+     * // true
+     *```
      */
     getComputed(item_name) {
         if (this.isComputedItem(item_name)) {
@@ -1763,6 +1848,36 @@ export class Store {
      * @param {any[]} value 
      * @param {string} [name] 
      * @returns {Collection}
+     * 
+     * @example
+     *```js
+     * var store = new Store;
+     * 
+     * var value_changed = 0;
+     * var length_changed = 0;
+     * 
+     * let a = store.createCollection([]);
+     * 
+     * a.subscribe((details) => {
+     * 
+     *     if (details.property == "length") {
+     *         length_changed++;
+     *         return;
+     *     }
+     * 
+     *     value_changed++;
+     * });
+     * 
+     * a.value.push(1);
+     * a.value.push(2);
+     * 
+     * console.log(value_changed);
+     * // 2
+     * 
+     * console.log(length_changed);
+     * // 2
+     * 
+     *```
      */
     createCollection(value, name) {
         if (typeof name == "undefined") {
@@ -1775,6 +1890,44 @@ export class Store {
     /**
      * Returns an instance of the Collection if the item exists 
      * @param {string} item_name 
+     * 
+     * @example
+     *```js
+     * var store = new Store;
+     * 
+     * var value_changed = 0;
+     * var length_changed = 0;
+     * 
+     * let b = store.createCollection([1, 2, 3], "b");
+     * 
+     * let a = store.getCollection("b");
+     * 
+     * a.subscribe((details) => {
+     * 
+     *     if (details.property == "length") {
+     *         length_changed++;
+     *         return;
+     *     }
+     * 
+     *     value_changed++;
+     * });
+     * 
+     * a.value.push(1);
+     * a.value.push(2);
+     * 
+     * console.log(a.value.length);
+     * // 5
+     * 
+     * console.log(a.name === b.name);
+     * // true
+     * 
+     * console.log(value_changed);
+     * // 2
+     * 
+     * console.log(length_changed);
+     * // 2
+     * 
+     *```
      */
     getCollection(item_name) {
         if (this.isCollection(item_name)) {
@@ -1789,6 +1942,59 @@ export class Store {
      * @template {Object} T
      * @param {T} target 
      * @returns {T & {store: Store}}
+     * 
+     * 
+     * @example
+     *```js
+     * class Sample {
+     *     a = 0;
+     *     b = null;
+     *     c = [];
+     * 
+     *     d = undefined;
+     * 
+     *     e = Symbol();
+     * 
+     *     incA () {
+     *         this.a++;
+     *     }
+     * }
+     * 
+     * var store = createStore();
+     * 
+     * var sample = store.observeObject(new Sample);
+     * 
+     * sample.store.subscribe("a", (details)=>{
+     *     //store.log(details);
+     * });
+     * 
+     * sample.store.subscribe("c", (details)=>{
+     *     //store.log(details);
+     * });
+     * 
+     * sample.incA();
+     * sample.incA();
+     * 
+     * sample.c.push("foo");
+     * 
+     * 
+     * console.log(store.getItem("a") == sample.a);
+     * // true
+     * 
+     * console.log(sample.a );
+     * // 2
+     * 
+     * console.log(store.isAtomItem("b"));
+     * // true
+     * 
+     * console.log(store.isAtomItem("d"));
+     * // true
+     * 
+     * console.log(store.isAtomItem("e"));
+     * // false
+     * 
+     * 
+     *```
      */
     observeObject(target) {
 
