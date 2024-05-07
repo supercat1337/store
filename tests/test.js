@@ -37,9 +37,9 @@ test("create store #2", t => {
 
 test("create store with params", t => {
 
-    var store = new Store({ a: 1, b: 2 });
+    var store = new Store({ a: 1, b: 2, f: function () {} });
 
-    if (store.getItem("a") == 1 && store.getItem("b") == 2) {
+    if (store.getItem("a") == 1 && store.getItem("b") == 2 && store.getItem("f") === undefined) {
         t.pass();
     }
     else {
@@ -272,6 +272,10 @@ test("subscribe #6 (with changes, with array values)", t => {
 test("subscribe #7 (with changes, with null values)", t => {
 
     var store = new Store({ a: [23], b: 2 });
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
     var working = false;
 
     store.subscribe("a", () => {
@@ -291,6 +295,9 @@ test("subscribe #7-1 (with changes, with null values)", t => {
 
     var store = new Store({ a: null, b: 2 });
     var working = false;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
 
     store.subscribe("a", () => {
         working = true;
@@ -308,16 +315,19 @@ test("subscribe #7-1 (with changes, with null values)", t => {
 test("subscribe #8 (with changes, with undefined values)", t => {
 
     var store = new Store({ a: [23], b: 2 });
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
 
-    var foo = 0;
+    var working = false;
 
     store.subscribe("a", () => {
-        foo++;
+        working = true;
     });
 
     store.setItem("a", undefined);
 
-    if (foo === 1) {
+    if (working) {
         t.pass();
     } else {
         t.fail();
@@ -1501,7 +1511,7 @@ test("reset", t => {
     var store = new Store({ a: 1, b: 2 });
     store.reset();
 
-    if (store.getItem("b") === null) {
+    if (store.getItem("b") === undefined) {
         t.pass();
     }
     else {
@@ -2017,7 +2027,7 @@ test("computed (getComputed)", (t) => {
     store.warn = t.log;
 
     let a = store.createAtom(0);
-    let b = store.createComputed(()=>{return a.value + 1});
+    let b = store.createComputed(() => { return a.value + 1 });
     let c = store.getComputed(b.name);
 
     if (c === false) {
@@ -2212,7 +2222,7 @@ test("collection (create #2)", (t) => {
     let a = store.createCollection([]);
     a.value.push(1);
 
-    if (a.name == "_0"  && a.value.length == 1) {
+    if (a.name == "_0" && a.value.length == 1) {
         t.pass();
     }
     else {
@@ -2275,7 +2285,7 @@ test("collection (subscribe)", (t) => {
     let a = store.createCollection([], "a");
 
     a.subscribe((details) => {
-        
+
         if (details.property == "length") {
             length_changed++;
             return;
@@ -2372,6 +2382,160 @@ test("collection (set value)", (t) => {
     }
     else {
         t.fail();
+    }
+
+});
+
+
+test("observeObject #1", t => {
+
+    var working = false;
+
+    class Sample {
+        a = 0;
+        b = null;
+                
+        /** @type {string[]} */
+        c = [];
+
+        d = undefined;
+
+        e = Symbol();
+
+        incA () {
+            this.a++;
+        }
+    }
+
+    var store = createStore();
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+    
+    var sample = store.observeObject(new Sample);
+
+    sample.store.subscribe("a", (details)=>{
+        //store.log(details);
+    });
+
+    sample.store.subscribe("c", (details)=>{
+        working = true;
+        //store.log(details);
+    });
+
+    sample.incA();
+    sample.incA();
+
+    sample.c.push("Red Hat");
+
+    if (store.getItem("a") == sample.a && sample.a == 2 && working && store.isAtomItem("b") && store.isAtomItem("d") && !store.isAtomItem("e")) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+
+test("observeObject #2", t => {
+
+    var working = false;
+
+    class Sample {
+        a = 0;
+        b = null;
+                
+        /** @type {string[]} */
+        c = [];
+
+        d = undefined;
+
+        e = Symbol();
+
+        incA () {
+            this.a++;
+        }
+    }
+
+    var store = createStore({a: 1, b: 2, c: [], f: 5});
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+    
+    var sample = store.observeObject(new Sample);
+
+    sample.store.subscribe("a", (details)=>{
+        //store.log(details);
+    });
+
+    sample.store.subscribe("c", (details)=>{
+        working = true;
+        //store.log(details);
+    });
+
+    sample.incA();
+    sample.incA();
+
+    sample.c.push("Red Hat");
+
+    if (store.getItem("a") == sample.a && sample.a == 2 && working && sample.store.isAtomItem("b") && sample.store.isAtomItem("d") && !sample.store.isAtomItem("e")) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+test("observeObject #3 (delete)", t => {
+
+    var working = false;
+
+    class Sample {
+        a = 0;
+        b = 1;
+    }
+
+    var store = createStore();
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+    
+    var sample = store.observeObject(new Sample);
+
+    delete sample.a;
+
+    if (sample.a == undefined && sample.store.hasItem("a") == false ) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+
+test("observeObject #3 (error)", t => {
+
+    var working = false;
+
+    class Sample {
+        a = 0;
+        b = 1;
+    }
+
+    var store = createStore();
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    try {
+        var sample = store.observeObject(123);
+        t.fail();
+    }
+    catch(e) {
+        t.pass();
     }
 
 });

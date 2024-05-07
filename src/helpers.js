@@ -44,3 +44,12 @@ export function debounce(func, wait) {
         timeout = setTimeout(later, wait);
     };
 }
+
+/**
+ * 
+ * @param {*} x 
+ * @returns {boolean}
+ */
+export function isObject(x) {
+    return typeof x === 'object' && !Array.isArray(x) && x !== null;
+}

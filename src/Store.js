@@ -6,7 +6,7 @@ import { EventEmitter } from "./../node_modules/@supercat1337/event-emitter/src/
 import { Atom } from "./Atom.js";
 import { Collection } from "./Collection.js";
 import { Computed } from "./Computed.js";
-import { compareObjects, debounce } from "./helpers.js";
+import { compareObjects, debounce, isObject } from "./helpers.js";
 
 /**
  * @preserve
@@ -138,7 +138,24 @@ export class Store {
     constructor(initObject) {
 
         if (initObject) {
-            this.setItems(initObject);
+
+            for (let prop in initObject) {
+                let value = initObject[prop];
+
+                if (value === null || value === undefined) {
+                    this.#registerAtom(prop, value);
+                    continue;
+                }
+
+                if (Array.isArray(value)) {
+                    this.createCollection(value, prop);
+                    continue;
+                }
+
+                if (value instanceof Function) continue;
+
+                this.#registerAtom(prop, value);
+            }
         }
 
     }
@@ -210,7 +227,6 @@ export class Store {
             throw new Error("You cannot change property values ​​while reactions are running. Use method next() in reaction");
         }
 
-
         property = property.toString();
 
         let collection = this.#collections.get(item_name);
@@ -277,7 +293,19 @@ export class Store {
      */
     #setCollection(item_name, array) {
 
+        if (!Array.isArray(array)) {
+            this.warn(`Cannot assign a non-array value to a collection. Now ${item_name} == [].`);
+            array = [];
+        }
+
         let old_array = this.#collections.get(item_name);
+        let old_array_copy = new Array(old_array.length);
+
+        for (let i = 0; i < old_array.length; i++) {
+            old_array_copy[i] = old_array[i];
+        }
+
+        //this.log(`old_array`, old_array);
         let equal = true;
         let details_arr = [];
 
@@ -285,7 +313,7 @@ export class Store {
 
         if (old_array.length > array.length)
             for (let i = array.length; i < old_array.length; i++) {
-                let details = this.#deleteCollectionItem(item_name, i.toString());
+                let details = this.#deleteCollectionItem(item_name, (old_array.length - i - 1).toString());
                 if (details) {
                     details_arr.push(details);
                     equal = false;
@@ -303,12 +331,15 @@ export class Store {
             }
         }
 
+        //this.log(details_arr);
+
         if (equal) return false;
 
         let main_details = new UpdateEventDetails;
         main_details.eventType = "set";
         main_details.item_name = item_name;
         main_details.value = array;
+        //main_details.old_value = old_array_copy;
 
 
         if (length != array.length) {
@@ -341,7 +372,7 @@ export class Store {
      * ```
      */
     hasItem(item_name) {
-        return this.#atoms.has(item_name) || this.#computed.has(item_name) || this.#collections.has(item_name);
+        return item_name == "store" || this.#atoms.has(item_name) || this.#computed.has(item_name) || this.#collections.has(item_name);
     }
 
     /**
@@ -471,7 +502,9 @@ export class Store {
             }
 
             if (is_collection) {
+                //this.log(`this.#setCollection(item_name, value);`, item_name, value);
                 let result = this.#setCollection(item_name, value);
+                //this.log(result);
 
                 if (result == false) continue;
                 has_changes = true;
@@ -484,6 +517,8 @@ export class Store {
             }
 
         }
+
+        //this.log(updated_items_arr);
 
         if (!has_changes) return;
 
@@ -897,7 +932,6 @@ export class Store {
         var length = array.length;
 
         if (this.hasItem(item_name)) {
-
             throw new Error(`Item name ${item_name} name already exists`);
         }
 
@@ -1275,7 +1309,7 @@ export class Store {
         }
 
         if (!this.hasItem(item_name)) {
-            return null;
+            return undefined;
         }
 
         if (this.isAtomItem(item_name)) {
@@ -1675,6 +1709,8 @@ export class Store {
      * @param {any} value 
      * @param {string} [name] 
      * @returns {Atom}
+     * 
+     * 
      */
     createAtom(value, name) {
         if (typeof name == "undefined") {
@@ -1724,7 +1760,7 @@ export class Store {
 
     /**
      * Creates an instance of the Collection 
-    * @param {any[]} value 
+     * @param {any[]} value 
      * @param {string} [name] 
      * @returns {Collection}
      */
@@ -1746,6 +1782,80 @@ export class Store {
         }
 
         return false;
+    }
+
+
+    /**
+     * @template {Object} T
+     * @param {T} target 
+     * @returns {T & {store: Store}}
+     */
+    observeObject(target) {
+
+        if (!isObject(target)) throw new Error(`obj must have an object type. obj = ${target}`)
+
+        let that = this;
+
+        for (let prop in target) {
+            let value = target[prop];
+
+            if (!this.hasItem(prop)) {
+
+                if (Array.isArray(value)) {
+                    this.createCollectionItem(prop, value);
+                    continue;
+                }
+    
+                if (value instanceof Function || typeof value === "symbol") {
+                    continue;
+                }
+    
+                this.#registerAtom(prop, value);
+                continue;
+            
+            } else {
+                if (this.isCollection(prop)) {
+                    let _value = Array.isArray(value)? value: []; 
+                    this.#setCollection(prop, _value);
+                    continue;
+                } 
+                
+                if (this.isAtomItem(prop)) {
+                    this.#setAtom(prop, value);
+                    continue;
+                }
+            }
+
+        }
+
+        /** @type {ProxyHandler} */
+        const handler = {
+            get(target, prop) {
+
+                if (typeof prop == "string" && that.hasItem(prop)) {
+                    return that.getItem(prop);
+                }
+
+                return target[prop];
+            },
+
+            set(target, item_name, value) {
+                that.setItems({ [item_name]: value });
+                return true;
+            },
+
+            deleteProperty: function (target, item_name) {
+                if (typeof item_name == "string" && that.hasItem(item_name)) {
+                    that.deleteItem(item_name);
+                }
+
+                delete target[item_name];
+                return true;
+            }
+
+        }
+
+        return new Proxy(target, handler);
     }
 
 
