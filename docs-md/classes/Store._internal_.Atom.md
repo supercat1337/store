@@ -50,7 +50,7 @@ Creates the atom item
 
 #### Defined in
 
-[src/Atom.js:25](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L25)
+[src/Atom.js:25](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Atom.js#L25)
 
 ## Properties
 
@@ -60,7 +60,7 @@ Creates the atom item
 
 #### Defined in
 
-[src/Atom.js:15](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L15)
+[src/Atom.js:15](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Atom.js#L15)
 
 ___
 
@@ -70,7 +70,7 @@ ___
 
 #### Defined in
 
-[src/Atom.js:17](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L17)
+[src/Atom.js:17](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Atom.js#L17)
 
 ## Accessors
 
@@ -84,7 +84,7 @@ ___
 
 #### Defined in
 
-[src/Atom.js:48](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L48)
+[src/Atom.js:48](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Atom.js#L48)
 
 ___
 
@@ -98,7 +98,7 @@ ___
 
 #### Defined in
 
-[src/Atom.js:78](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L78)
+[src/Atom.js:78](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Atom.js#L78)
 
 ___
 
@@ -112,7 +112,7 @@ ___
 
 #### Defined in
 
-[src/Atom.js:44](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L44)
+[src/Atom.js:44](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Atom.js#L44)
 
 • `set` **value**(`value`): `void`
 
@@ -130,7 +130,7 @@ Sets value
 
 #### Defined in
 
-[src/Atom.js:40](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L40)
+[src/Atom.js:40](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Atom.js#L40)
 
 ## Methods
 
@@ -144,21 +144,21 @@ Sets value
 
 #### Defined in
 
-[src/Atom.js:61](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L61)
+[src/Atom.js:61](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Atom.js#L61)
 
 ___
 
 ### hasSubscribers
 
-▸ **hasSubscribers**(): `void`
+▸ **hasSubscribers**(): `boolean`
 
 #### Returns
 
-`void`
+`boolean`
 
 #### Defined in
 
-[src/Atom.js:65](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L65)
+[src/Atom.js:65](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Atom.js#L65)
 
 ___
 
@@ -178,13 +178,13 @@ ___
 
 #### Defined in
 
-[src/Atom.js:74](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L74)
+[src/Atom.js:74](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Atom.js#L74)
 
 ___
 
 ### subscribe
 
-▸ **subscribe**(`callback`, `debounce_time?`): `void`
+▸ **subscribe**(`callback`, `debounce_time?`): [`Unsubscriber`](../modules/Store.md#unsubscriber)
 
 #### Parameters
 
@@ -195,8 +195,8 @@ ___
 
 #### Returns
 
-`void`
+[`Unsubscriber`](../modules/Store.md#unsubscriber)
 
 #### Defined in
 
-[src/Atom.js:57](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Atom.js#L57)
+[src/Atom.js:57](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Atom.js#L57)

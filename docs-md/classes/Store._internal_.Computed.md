@@ -18,6 +18,7 @@
 ### Accessors
 
 - [name](Store._internal_.Computed.md#name)
+- [store](Store._internal_.Computed.md#store)
 - [value](Store._internal_.Computed.md#value)
 
 ### Methods
@@ -25,7 +26,6 @@
 - [clearSubscribers](Store._internal_.Computed.md#clearsubscribers)
 - [hasSubscribers](Store._internal_.Computed.md#hassubscribers)
 - [recalc](Store._internal_.Computed.md#recalc)
-- [setCompareFunction](Store._internal_.Computed.md#setcomparefunction)
 - [subscribe](Store._internal_.Computed.md#subscribe)
 
 ## Constructors
@@ -50,7 +50,7 @@ Creates the atom item
 
 #### Defined in
 
-[src/Computed.js:24](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L24)
+[src/Computed.js:24](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L24)
 
 ## Properties
 
@@ -60,7 +60,7 @@ Creates the atom item
 
 #### Defined in
 
-[src/Computed.js:14](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L14)
+[src/Computed.js:14](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L14)
 
 ___
 
@@ -70,7 +70,7 @@ ___
 
 #### Defined in
 
-[src/Computed.js:16](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L16)
+[src/Computed.js:16](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L16)
 
 ## Accessors
 
@@ -84,7 +84,21 @@ ___
 
 #### Defined in
 
-[src/Computed.js:37](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L37)
+[src/Computed.js:37](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L37)
+
+___
+
+### store
+
+• `get` **store**(): [`Store`](Store.Store.md)
+
+#### Returns
+
+[`Store`](Store.Store.md)
+
+#### Defined in
+
+[src/Computed.js:62](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L62)
 
 ___
 
@@ -98,7 +112,7 @@ ___
 
 #### Defined in
 
-[src/Computed.js:33](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L33)
+[src/Computed.js:33](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L33)
 
 ## Methods
 
@@ -112,21 +126,21 @@ ___
 
 #### Defined in
 
-[src/Computed.js:50](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L50)
+[src/Computed.js:50](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L50)
 
 ___
 
 ### hasSubscribers
 
-▸ **hasSubscribers**(): `void`
+▸ **hasSubscribers**(): `boolean`
 
 #### Returns
 
-`void`
+`boolean`
 
 #### Defined in
 
-[src/Computed.js:54](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L54)
+[src/Computed.js:54](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L54)
 
 ___
 
@@ -140,33 +154,13 @@ ___
 
 #### Defined in
 
-[src/Computed.js:67](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L67)
-
-___
-
-### setCompareFunction
-
-▸ **setCompareFunction**(`func_or_null`): `boolean`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `func_or_null` | [`CompareFunction`](../modules/Store._internal_.md#comparefunction-1) |
-
-#### Returns
-
-`boolean`
-
-#### Defined in
-
-[src/Computed.js:63](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L63)
+[src/Computed.js:58](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L58)
 
 ___
 
 ### subscribe
 
-▸ **subscribe**(`callback`, `debounce_time?`): `void`
+▸ **subscribe**(`callback`, `debounce_time?`): [`Unsubscriber`](../modules/Store.md#unsubscriber)
 
 #### Parameters
 
@@ -177,8 +171,8 @@ ___
 
 #### Returns
 
-`void`
+[`Unsubscriber`](../modules/Store.md#unsubscriber)
 
 #### Defined in
 
-[src/Computed.js:46](https://github.com/supercat911/store/blob/565459dafff0d0e2377a08f89266cfdb34cdae3b/src/Computed.js#L46)
+[src/Computed.js:46](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L46)
