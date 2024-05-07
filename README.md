@@ -114,3 +114,37 @@ b_button_inc.addEventListener("click", () => {
 });
 ```
 
+Also you can work with objects and arrays.
+```js
+// @ts-check 
+import { Store } from "./../../index.js";
+
+class Sample {
+    a = 0;
+    c = [];
+
+    incA () {
+        this.a++;
+    }
+}
+
+var store = new Store;
+var sample = store.observeObject(new Sample);
+
+sample.store.subscribe("a", (details)=>{
+    // a is changed
+    //store.log(details);
+});
+
+sample.store.subscribe("c", (details)=>{
+    // c is changed
+    //store.log(details);
+});
+
+sample.incA();
+sample.incA();
+
+sample.c.push("foo");
+
+
+```
