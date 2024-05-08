@@ -2,7 +2,8 @@
 
 /** @module Store */
 
-import { EventEmitter } from "./../node_modules/@supercat1337/event-emitter/src/EventEmitter.js";
+import { EventEmitter } from "@supercat1337/event-emitter";
+//import { EventEmitter } from "./../node_modules/@supercat1337/event-emitter/src/EventEmitter.js";
 import { Atom } from "./Atom.js";
 import { Collection } from "./Collection.js";
 import { Computed } from "./Computed.js";
