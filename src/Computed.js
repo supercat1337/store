@@ -4,11 +4,6 @@
 
 import { Store, UpdateEventDetails } from "./Store.js";
 
-/** 
- * @typedef {(details:UpdateEventDetails, store:Store)=>void} Subscriber
- * @typedef {(a:any, b:any, item_name:string, property: (string | null))=>boolean} CompareFunction
-*/
-
 export class Computed {
     /** @type {String} */
     #name
@@ -40,7 +35,7 @@ export class Computed {
 
     /**
      * 
-     * @param {Subscriber} callback
+     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {

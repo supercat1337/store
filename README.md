@@ -4,7 +4,7 @@ Cross-browser storage for all use cases.
 
 > A store is simply an object with that allow interested parties to read the store value and be notified whenever it changes.
 
-* tiny size 11.5 kb
+* tiny (bundle size is 11.8 kb)
 * agnostic
 * reactive
 * support for instant and delayed reactions
@@ -63,7 +63,7 @@ index.html
 index.js
 ```js
 // @ts-check 
-import { Store } from "./../../index.js";
+import { Store } from "@supercat1337/store";
 
 var a_counter_value = /** @type {HTMLElement} */ (document.querySelector("#a_counter_value"));
 var a_button_dec = document.querySelector("#a_dec_button");
@@ -117,7 +117,7 @@ b_button_inc.addEventListener("click", () => {
 Also you can work with objects and arrays.
 ```js
 // @ts-check 
-import { Store } from "./../../index.js";
+import { Store } from "@supercat1337/store";
 
 class Sample {
     a = 0;

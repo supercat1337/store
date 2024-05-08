@@ -230,7 +230,7 @@ export class Store {
 
         property = property.toString();
 
-        let collection = this.#collections.get(item_name);
+        let collection = this.#collections.get(item_name) || [];
 
         let old_value = collection[property];
 
@@ -273,6 +273,7 @@ export class Store {
         property = property.toString();
 
         let collection = this.#collections.get(item_name);
+        if (collection === undefined) throw new Error(`#deleteCollectionItem error: ${item_name}`);
 
         let old_value = collection[property];
 
@@ -299,7 +300,7 @@ export class Store {
             array = [];
         }
 
-        let old_array = this.#collections.get(item_name);
+        let old_array = this.#collections.get(item_name)  || [];
         let old_array_copy = new Array(old_array.length);
 
         for (let i = 0; i < old_array.length; i++) {
@@ -618,7 +619,7 @@ export class Store {
      */
     #recalc(item_name) {
         let computed = this.#computed.get(item_name);
-        let store = this;
+        if (computed === undefined) throw new Error(`#recalc error: ${item_name}`);
 
         let old_value = computed.value;
 
@@ -911,7 +912,7 @@ export class Store {
      * creates a collection item
      * @template {any[]} T
      * @param {string} item_name 
-     * @param {T} [array] 
+     * @param {T} array 
      * 
      * @example
      *```js
@@ -1193,6 +1194,7 @@ export class Store {
         }
 
         this.#registerChangeEvent({ [item_name]: details }, "delete");
+        return true;
     }
 
     /**
@@ -1251,14 +1253,18 @@ export class Store {
      * 
      * @param {string} item_name 
      */
-    #getComputedValue(item_name) {
+    #getComputedValue(item_name) {        
         let computed = this.#computed.get(item_name);
+        if (computed === undefined) throw new Error(`#getComputedValue error: ${item_name}`);
 
         if (computed.stale) {
             this.#recalc(item_name);
         }
 
-        return this.#computed.get(item_name).value;
+        let computed_new = this.#computed.get(item_name);
+        if (computed_new === undefined) throw new Error(`#getComputedValue error: ${item_name}`);
+
+        return computed_new.value;
     }
 
     /**
@@ -1332,7 +1338,20 @@ export class Store {
      * @returns {string[]}
      */
     getItemNames() {
-        return [].concat(Array.from(this.#atoms.keys()), Array.from(this.#computed.keys()), Array.from(this.#collections.keys()));
+        let result = [];
+        for (let i of Object.keys(this.#atoms)) {
+            result.push(i);
+        }
+
+        for (let i of Object.keys(this.#computed)) {
+            result.push(i);
+        }
+
+        for (let i of Object.keys(this.#collections)) {
+            result.push(i);
+        }
+
+        return result;
     }
 
     /**

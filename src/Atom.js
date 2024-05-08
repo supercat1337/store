@@ -4,11 +4,6 @@
 
 import { Store, UpdateEventDetails } from "./Store.js";
 
-/** 
- * @typedef {(details:UpdateEventDetails, store:Store)=>void} Subscriber
- * @typedef {(a:any, b:any, item_name:string, property: (string | null))=>boolean} CompareFunction
-*/
-
 export class Atom {
 
     /** @type {String} */
@@ -51,7 +46,7 @@ export class Atom {
 
     /**
      * 
-     * @param {Subscriber} callback
+     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
@@ -68,7 +63,7 @@ export class Atom {
 
     /**
      * 
-     * @param {CompareFunction | null} func_or_null 
+     * @param {{(a:any, b:any, item_name:string, property: (string | null)):boolean} | null} func_or_null 
      * @returns {boolean}
      */
     setCompareFunction(func_or_null) {

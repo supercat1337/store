@@ -5,8 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "c8 ava",
-    "build": "node scripts/build.js",
-    "build2": "rollup ./src/Store.js --file ./dist/store.bundle.esm.js --format es",
+    "__build": "node scripts/build.js",
+    "build": "npm run build_esm && npm run build_esm_bundle && npm run build_esm_bundle_min",
+    "build_esm": "rollup ./src/Store.js --file ./dist/store.esm.js --format es",
+    "build_esm_bundle": "rollup ./src/Store.js --file ./dist/store.bundle.esm.js --format es -p ./node_modules/@rollup/plugin-node-resolve",
+    "build_esm_bundle_min": "esbuild --minify --bundle --platform=neutral --legal-comments=none ./src/Store.js --outfile=./dist/store.bundle.esm.min.js",
     "create_types": "npx -p typescript tsc --project my.tsconfig.json",
     "docs": "typedoc --tsconfig \"my.tsconfig.json\" --options \"typedoc.json\"",
     "docs-md": "typedoc --tsconfig \"my.tsconfig.json\" --options \"typedoc-md.json\""

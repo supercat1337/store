@@ -14,5 +14,6 @@
         ],
     },
     //Add any build/compiled folders here to stop vscode searching those
-    "exclude": ["node_modules", "dist", "**/node_modules"]
-  }
+    "exclude": ["dist"],
+    "include": ["./index.js", "node_modules/*"]
+}
