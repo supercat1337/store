@@ -63,7 +63,10 @@ index.html
 index.js
 ```js
 // @ts-check 
-import { Store } from "@supercat1337/store";
+
+//import { Store } from "@supercat1337/store";
+import { Store } from "https://cdn.jsdelivr.net/gh/supercat911/store@main/dist/store.bundle.esm.min.js";
+
 
 var a_counter_value = /** @type {HTMLElement} */ (document.querySelector("#a_counter_value"));
 var a_button_dec = document.querySelector("#a_dec_button");
@@ -97,19 +100,19 @@ c.subscribe(() => {
 }, 100);
 
 
-a_button_dec.addEventListener("click", () => {
+a_button_dec?.addEventListener("click", () => {
     a.value--;
 });
 
-a_button_inc.addEventListener("click", () => {
+a_button_inc?.addEventListener("click", () => {
     a.value++;
 });
 
-b_button_dec.addEventListener("click", () => {
+b_button_dec?.addEventListener("click", () => {
     b.value--;
 });
 
-b_button_inc.addEventListener("click", () => {
+b_button_inc?.addEventListener("click", () => {
     b.value++;
 });
 ```
