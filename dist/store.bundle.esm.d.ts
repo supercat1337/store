@@ -713,7 +713,7 @@ export class Store {
      * Creates an instance of the Atom
      * @param {any} value
      * @param {string} [name]
-     * @returns {Atom}
+     * @returns {TypeAtom}
      *
      * @example
      *```js
@@ -734,10 +734,11 @@ export class Store {
      * // outputs: true
      *```
      */
-    createAtom(value: any, name?: string): Atom;
+    createAtom(value: any, name?: string): TypeAtom;
     /**
      * Returns an instance of the Atom if the item exists
      * @param {string} item_name
+     * @returns {TypeAtom|false}
      *
      * @example
      *```js
@@ -761,13 +762,13 @@ export class Store {
      *
      *```
      */
-    getAtom(item_name: string): false | Atom;
+    getAtom(item_name: string): TypeAtom | false;
     /**
      * Creates an instance of the Computed
      *
      * @param {(store: Store) => any} callback
      * @param {string} [name]
-     * @returns {Computed}
+     * @returns {TypeComputed}
      *
      * @example
      *```js
@@ -796,10 +797,11 @@ export class Store {
      *
      *```
      */
-    createComputed(callback: (store: Store) => any, name?: string): Computed;
+    createComputed(callback: (store: Store) => any, name?: string): TypeComputed;
     /**
      * Returns an instance of the Computed if the item exists
      * @param {string} item_name
+     * @returns {TypeComputed|false}
      *
      * @example
      *```js
@@ -819,12 +821,12 @@ export class Store {
      * // true
      *```
      */
-    getComputed(item_name: string): false | Computed;
+    getComputed(item_name: string): TypeComputed | false;
     /**
      * Creates an instance of the Collection
      * @param {any[]} value
      * @param {string} [name]
-     * @returns {Collection}
+     * @returns {TypeCollection}
      *
      * @example
      *```js
@@ -856,10 +858,11 @@ export class Store {
      *
      *```
      */
-    createCollection(value: any[], name?: string): Collection;
+    createCollection(value: any[], name?: string): TypeCollection;
     /**
      * Returns an instance of the Collection if the item exists
      * @param {string} item_name
+     * @returns {TypeCollection | false}
      *
      * @example
      *```js
@@ -899,7 +902,7 @@ export class Store {
      *
      *```
      */
-    getCollection(item_name: string): false | Collection;
+    getCollection(item_name: string): TypeCollection | false;
     /**
      * @template {Object} T
      * @param {T} target

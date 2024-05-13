@@ -10,9 +10,9 @@
     "build_esm": "rollup ./src/Store.js --file ./dist/store.esm.js --format es",
     "build_esm_bundle": "rollup ./src/Store.js --file ./dist/store.bundle.esm.js --format es -p ./node_modules/@rollup/plugin-node-resolve",
     "build_esm_bundle_min": "esbuild --minify --bundle --platform=neutral --legal-comments=none ./src/Store.js --outfile=./dist/store.bundle.esm.min.js",
-    "create_types": "npx -p typescript tsc --project my.tsconfig.json",
-    "docs": "typedoc --tsconfig \"my.tsconfig.json\" --options \"typedoc.json\"",
-    "docs-md": "typedoc --tsconfig \"my.tsconfig.json\" --options \"typedoc-md.json\""
+    "create_types": "npx -p typescript tsc --project my.tsconfig.types.json",
+    "docs": "typedoc --tsconfig \"my.tsconfig.docs.json\" --options \"typedoc.json\"",
+    "docs-md": "typedoc --tsconfig \"my.tsconfig.docs.json\" --options \"typedoc-md.json\""
   },
   "keywords": [
     "store",

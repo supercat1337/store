@@ -34,9 +34,8 @@ export function compareObjects(a, b) {
  */
 export function debounce(func, wait) {
     var timeout;
-    var f = () => {
-        var context = this,
-            args = arguments;
+    var f = (...args) => {
+        var context = this;
         var later = function () {
             timeout = null;
             func.apply(context, args);

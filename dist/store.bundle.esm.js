@@ -318,9 +318,8 @@ function compareObjects(a, b) {
  */
 function debounce(func, wait) {
     var timeout;
-    var f = () => {
-        var context = this,
-            args = arguments;
+    var f = (...args) => {
+        var context = this;
         var later = function () {
             timeout = null;
             func.apply(context, args);
@@ -2071,7 +2070,7 @@ class Store {
      * Creates an instance of the Atom 
      * @param {any} value 
      * @param {string} [name] 
-     * @returns {Atom}
+     * @returns {TypeAtom}
      * 
      * @example
      *```js
@@ -2101,7 +2100,8 @@ class Store {
 
     /**
      * Returns an instance of the Atom if the item exists
-     * @param {string} item_name     
+     * @param {string} item_name   
+     * @returns {TypeAtom|false}  
      * 
      * @example
      *```js
@@ -2138,7 +2138,7 @@ class Store {
      * 
      * @param {(store: Store) => any} callback 
      * @param {string} [name] 
-     * @returns {Computed}
+     * @returns {TypeComputed}
      * 
      * @example
      *```js
@@ -2179,6 +2179,7 @@ class Store {
     /**
      * Returns an instance of the Computed if the item exists
      * @param {string} item_name 
+     * @returns {TypeComputed|false}
      * 
      * @example
      *```js
@@ -2210,7 +2211,7 @@ class Store {
      * Creates an instance of the Collection 
      * @param {any[]} value 
      * @param {string} [name] 
-     * @returns {Collection}
+     * @returns {TypeCollection}
      * 
      * @example
      *```js
@@ -2253,6 +2254,7 @@ class Store {
     /**
      * Returns an instance of the Collection if the item exists 
      * @param {string} item_name 
+     * @returns {TypeCollection | false}
      * 
      * @example
      *```js
