@@ -50,7 +50,7 @@ Creates the atom item
 
 #### Defined in
 
-[src/Computed.js:24](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L24)
+[src/Computed.js:19](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Computed.js#L19)
 
 ## Properties
 
@@ -60,7 +60,7 @@ Creates the atom item
 
 #### Defined in
 
-[src/Computed.js:14](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L14)
+[src/Computed.js:9](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Computed.js#L9)
 
 ___
 
@@ -70,7 +70,7 @@ ___
 
 #### Defined in
 
-[src/Computed.js:16](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L16)
+[src/Computed.js:11](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Computed.js#L11)
 
 ## Accessors
 
@@ -84,7 +84,7 @@ ___
 
 #### Defined in
 
-[src/Computed.js:37](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L37)
+[src/Computed.js:32](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Computed.js#L32)
 
 ___
 
@@ -98,7 +98,7 @@ ___
 
 #### Defined in
 
-[src/Computed.js:62](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L62)
+[src/Computed.js:57](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Computed.js#L57)
 
 ___
 
@@ -112,7 +112,7 @@ ___
 
 #### Defined in
 
-[src/Computed.js:33](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L33)
+[src/Computed.js:28](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Computed.js#L28)
 
 ## Methods
 
@@ -126,7 +126,7 @@ ___
 
 #### Defined in
 
-[src/Computed.js:50](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L50)
+[src/Computed.js:45](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Computed.js#L45)
 
 ___
 
@@ -140,7 +140,7 @@ ___
 
 #### Defined in
 
-[src/Computed.js:54](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L54)
+[src/Computed.js:49](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Computed.js#L49)
 
 ___
 
@@ -154,7 +154,7 @@ ___
 
 #### Defined in
 
-[src/Computed.js:58](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L58)
+[src/Computed.js:53](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Computed.js#L53)
 
 ___
 
@@ -166,7 +166,7 @@ ___
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `callback` | [`Subscriber`](../modules/Store._internal_.md#subscriber-1) |  |
+| `callback` | (`details`: [`UpdateEventDetails`](Store.UpdateEventDetails.md), `store`: [`Store`](Store.Store.md)) => `void` |  |
 | `debounce_time?` | `number` | debounce time |
 
 #### Returns
@@ -175,4 +175,4 @@ ___
 
 #### Defined in
 
-[src/Computed.js:46](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Computed.js#L46)
+[src/Computed.js:41](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Computed.js#L41)

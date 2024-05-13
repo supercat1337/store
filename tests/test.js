@@ -605,6 +605,8 @@ test("getItemNames", t => {
     var item_names = store.getItemNames().sort();
     var result = ["a", "b", "c", "d", "e"].sort();
 
+    t.log(JSON.stringify(item_names));
+    t.log(JSON.stringify(result));
 
     if (JSON.stringify(item_names) === JSON.stringify(result)) {
         t.pass();
@@ -2504,6 +2506,7 @@ test("observeObject #3 (delete)", t => {
     
     var sample = store.observeObject(new Sample);
 
+    // @ts-ignore
     delete sample.a;
 
     if (sample.a == undefined && sample.store.hasItem("a") == false ) {

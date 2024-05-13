@@ -13,7 +13,6 @@
         "stripInternal": true
     },
     "include": [
-        "src/*.js",
-        "node_modules/@supercat1337/event-emitter/src/*.js"
+        "./dist/store.bundle.esm.js"
     ]
 }

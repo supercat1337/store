@@ -227,15 +227,16 @@ function compareObjects(a, b) {
 
 /**
  * Debounce function that, as long as it continues to be invoked, will not be triggered.
- * @param {Function} func - Function to be debounced
+ * @template {(...args: any[]) => void} T
+ * @param {T} func - Function to be debounced
  * @param {number} wait - Time in milliseconds to wait before the function gets called.
- * @returns {Function}
+ * @returns {T}
  * @example
    window.addEventListener('resize', debounce((evt) => console.log(evt), 250));
  */
 function debounce(func, wait) {
     var timeout;
-    return function () {
+    var f = () => {
         var context = this,
             args = arguments;
         var later = function () {
@@ -245,6 +246,8 @@ function debounce(func, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
     };
+
+    return /** @type {T} */ (f);
 }
 
 /**
@@ -276,7 +279,7 @@ function isObject(x) {
  * @property {"set"|"delete"|null} eventType
  * @property {UpdatedItems} details
  * 
- * @typedef {Object} ComputedType
+ * @typedef {Object} TypeStructureOfComputed
  * @property {string} item_name
  * @property {string[]} dependencies
  * @property {()=>any} getter
@@ -284,6 +287,12 @@ function isObject(x) {
  * @property {boolean} stale
  * 
  */
+
+/**
+ * @typedef {Atom} TypeAtom
+ * @typedef {Computed} TypeComputed
+ * @typedef {Collection} TypeCollection
+*/
 
 class UpdateEventDetails {
 
@@ -311,7 +320,7 @@ class Store {
     /** @type {Map<string, any>} */
     #atoms = new Map;
 
-    /** @type {Map<string, ComputedType>} */
+    /** @type {Map<string, TypeStructureOfComputed>} */
     #computed = new Map
 
     /** @type {Map<string, Array>} */
@@ -995,7 +1004,7 @@ class Store {
 
     /**
      * 
-     * @param {ComputedType} computed 
+     * @param {TypeStructureOfComputed} computed 
      * @param {Set<string>} updated_item_names
      * @returns {boolean} Returns if value is stale 
      */
@@ -1588,18 +1597,20 @@ class Store {
      * @returns {string[]}
      */
     getItemNames() {
+        /** @type {string[]} */
         let result = [];
-        for (let i of Object.keys(this.#atoms)) {
-            result.push(i);
-        }
 
-        for (let i of Object.keys(this.#computed)) {
-            result.push(i);
-        }
+        this.#atoms.forEach((value, key)=>{
+            result.push(key);
+        });
 
-        for (let i of Object.keys(this.#collections)) {
-            result.push(i);
-        }
+        this.#computed.forEach((value, key)=>{
+            result.push(key);
+        });
+
+        this.#collections.forEach((value, key)=>{
+            result.push(key);
+        });
 
         return result;
     }

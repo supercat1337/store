@@ -1,6 +1,6 @@
 {
   "name": "@supercat1337/store",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Reactive store",
   "main": "index.js",
   "scripts": {

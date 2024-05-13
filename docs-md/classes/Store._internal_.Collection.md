@@ -49,7 +49,7 @@ Creates the atom item
 
 #### Defined in
 
-[src/Collection.js:26](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Collection.js#L26)
+[src/Collection.js:20](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Collection.js#L20)
 
 ## Properties
 
@@ -59,7 +59,7 @@ Creates the atom item
 
 #### Defined in
 
-[src/Collection.js:16](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Collection.js#L16)
+[src/Collection.js:10](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Collection.js#L10)
 
 ___
 
@@ -69,7 +69,7 @@ ___
 
 #### Defined in
 
-[src/Collection.js:18](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Collection.js#L18)
+[src/Collection.js:12](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Collection.js#L12)
 
 ## Accessors
 
@@ -83,7 +83,7 @@ ___
 
 #### Defined in
 
-[src/Collection.js:49](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Collection.js#L49)
+[src/Collection.js:43](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Collection.js#L43)
 
 ___
 
@@ -97,7 +97,7 @@ ___
 
 #### Defined in
 
-[src/Collection.js:70](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Collection.js#L70)
+[src/Collection.js:64](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Collection.js#L64)
 
 ___
 
@@ -111,7 +111,7 @@ ___
 
 #### Defined in
 
-[src/Collection.js:45](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Collection.js#L45)
+[src/Collection.js:39](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Collection.js#L39)
 
 • `set` **value**(`value`): `void`
 
@@ -129,7 +129,7 @@ Sets value
 
 #### Defined in
 
-[src/Collection.js:41](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Collection.js#L41)
+[src/Collection.js:35](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Collection.js#L35)
 
 ## Methods
 
@@ -143,7 +143,7 @@ Sets value
 
 #### Defined in
 
-[src/Collection.js:62](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Collection.js#L62)
+[src/Collection.js:56](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Collection.js#L56)
 
 ___
 
@@ -157,7 +157,7 @@ ___
 
 #### Defined in
 
-[src/Collection.js:66](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Collection.js#L66)
+[src/Collection.js:60](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Collection.js#L60)
 
 ___
 
@@ -169,7 +169,7 @@ ___
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `callback` | [`Subscriber`](../modules/Store._internal_.md#subscriber-2) |  |
+| `callback` | (`details`: [`UpdateEventDetails`](Store.UpdateEventDetails.md), `store`: [`Store`](Store.Store.md)) => `void` |  |
 | `debounce_time?` | `number` | debounce time |
 
 #### Returns
@@ -178,4 +178,4 @@ ___
 
 #### Defined in
 
-[src/Collection.js:58](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Collection.js#L58)
+[src/Collection.js:52](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Collection.js#L52)

@@ -4,8 +4,6 @@
 
 [Store](../modules/Store.md).UpdateEventDetails
 
-**`Preserve`**
-
 ## Table of contents
 
 ### Constructors
@@ -38,7 +36,7 @@
 
 #### Defined in
 
-[src/Store.js:49](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Store.js#L49)
+[src/Store.js:56](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Store.js#L56)
 
 ___
 
@@ -48,7 +46,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:46](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Store.js#L46)
+[src/Store.js:53](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Store.js#L53)
 
 ___
 
@@ -58,7 +56,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:43](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Store.js#L43)
+[src/Store.js:50](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Store.js#L50)
 
 ___
 
@@ -68,7 +66,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:52](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Store.js#L52)
+[src/Store.js:59](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Store.js#L59)
 
 ___
 
@@ -78,4 +76,4 @@ ___
 
 #### Defined in
 
-[src/Store.js:40](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Store.js#L40)
+[src/Store.js:47](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Store.js#L47)

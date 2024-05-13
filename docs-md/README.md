@@ -6,7 +6,7 @@ Cross-browser storage for all use cases.
 
 > A store is simply an object with that allow interested parties to read the store value and be notified whenever it changes.
 
-* tiny size ~7 kb
+* tiny (bundle size is 11.8 kb)
 * agnostic
 * reactive
 * support for instant and delayed reactions
@@ -65,7 +65,9 @@ index.html
 index.js
 ```js
 // @ts-check 
-import { Store } from "./../../index.js";
+
+//import { Store } from "@supercat1337/store";
+import { Store } from "https://cdn.jsdelivr.net/gh/supercat911/store@main/dist/store.bundle.esm.min.js";
 
 var a_counter_value = /** @type {HTMLElement} */ (document.querySelector("#a_counter_value"));
 var a_button_dec = document.querySelector("#a_dec_button");
@@ -98,19 +100,53 @@ c.subscribe(() => {
     c_counter_value.innerText = c.value;
 }, 100);
 
-a_button_dec.addEventListener("click", () => {
+a_button_dec?.addEventListener("click", () => {
     a.value--;
 });
 
-a_button_inc.addEventListener("click", () => {
+a_button_inc?.addEventListener("click", () => {
     a.value++;
 });
 
-b_button_dec.addEventListener("click", () => {
+b_button_dec?.addEventListener("click", () => {
     b.value--;
 });
 
-b_button_inc.addEventListener("click", () => {
+b_button_inc?.addEventListener("click", () => {
     b.value++;
 });
+```
+
+Also you can work with objects and arrays.
+```js
+// @ts-check 
+import { Store } from "@supercat1337/store";
+
+class Sample {
+    a = 0;
+    c = [];
+
+    incA () {
+        this.a++;
+    }
+}
+
+var store = new Store;
+var sample = store.observeObject(new Sample);
+
+sample.store.subscribe("a", (details)=>{
+    // a is changed
+    //store.log(details);
+});
+
+sample.store.subscribe("c", (details)=>{
+    // c is changed
+    //store.log(details);
+});
+
+sample.incA();
+sample.incA();
+
+sample.c.push("foo");
+
 ```

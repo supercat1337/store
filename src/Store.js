@@ -26,7 +26,7 @@ import { compareObjects, debounce, isObject } from "./helpers.js";
  * @property {"set"|"delete"|null} eventType
  * @property {UpdatedItems} details
  * 
- * @typedef {Object} ComputedType
+ * @typedef {Object} TypeStructureOfComputed
  * @property {string} item_name
  * @property {string[]} dependencies
  * @property {()=>any} getter
@@ -34,6 +34,12 @@ import { compareObjects, debounce, isObject } from "./helpers.js";
  * @property {boolean} stale
  * 
  */
+
+/**
+ * @typedef {Atom} TypeAtom
+ * @typedef {Computed} TypeComputed
+ * @typedef {Collection} TypeCollection
+*/
 
 export class UpdateEventDetails {
 
@@ -61,7 +67,7 @@ export class Store {
     /** @type {Map<string, any>} */
     #atoms = new Map;
 
-    /** @type {Map<string, ComputedType>} */
+    /** @type {Map<string, TypeStructureOfComputed>} */
     #computed = new Map
 
     /** @type {Map<string, Array>} */
@@ -745,7 +751,7 @@ export class Store {
 
     /**
      * 
-     * @param {ComputedType} computed 
+     * @param {TypeStructureOfComputed} computed 
      * @param {Set<string>} updated_item_names
      * @returns {boolean} Returns if value is stale 
      */
@@ -1338,18 +1344,20 @@ export class Store {
      * @returns {string[]}
      */
     getItemNames() {
+        /** @type {string[]} */
         let result = [];
-        for (let i of Object.keys(this.#atoms)) {
-            result.push(i);
-        }
 
-        for (let i of Object.keys(this.#computed)) {
-            result.push(i);
-        }
+        this.#atoms.forEach((value, key)=>{
+            result.push(key);
+        });
 
-        for (let i of Object.keys(this.#collections)) {
-            result.push(i);
-        }
+        this.#computed.forEach((value, key)=>{
+            result.push(key);
+        });
+
+        this.#collections.forEach((value, key)=>{
+            result.push(key);
+        });
 
         return result;
     }

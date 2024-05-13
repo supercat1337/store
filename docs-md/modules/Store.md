@@ -4,10 +4,6 @@
 
 ## Table of contents
 
-### References
-
-- [EventEmitter](Store.md#eventemitter)
-
 ### Modules
 
 - [\<internal\>](Store._internal_.md)
@@ -20,26 +16,27 @@
 ### Interfaces
 
 - [ChangeEventObject](../interfaces/Store.ChangeEventObject.md)
-- [ComputedType](../interfaces/Store.ComputedType.md)
+- [TypeStructureOfComputed](../interfaces/Store.TypeStructureOfComputed.md)
 
 ### Type Aliases
 
 - [ChangeEventSubscriber](Store.md#changeeventsubscriber)
 - [CompareFunction](Store.md#comparefunction)
 - [Subscriber](Store.md#subscriber)
+- [TypeAtom](Store.md#typeatom)
+- [TypeCollection](Store.md#typecollection)
+- [TypeComputed](Store.md#typecomputed)
 - [Unsubscriber](Store.md#unsubscriber)
 - [UpdatedItems](Store.md#updateditems)
+
+### Variables
+
+- [EventEmitter](Store.md#eventemitter)
 
 ### Functions
 
 - [createStore](Store.md#createstore)
 - [debounce](Store.md#debounce)
-
-## References
-
-### EventEmitter
-
-Re-exports [EventEmitter](../classes/EventEmitter.EventEmitter.md)
 
 ## Type Aliases
 
@@ -64,7 +61,7 @@ Re-exports [EventEmitter](../classes/EventEmitter.EventEmitter.md)
 
 #### Defined in
 
-[src/Store.js:20](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Store.js#L20)
+[src/Store.js:21](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Store.js#L21)
 
 ___
 
@@ -91,7 +88,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:14](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Store.js#L14)
+[src/Store.js:15](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Store.js#L15)
 
 ___
 
@@ -116,7 +113,37 @@ ___
 
 #### Defined in
 
-[src/Store.js:16](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Store.js#L16)
+[src/Store.js:17](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Store.js#L17)
+
+___
+
+### TypeAtom
+
+Ƭ **TypeAtom**\<\>: [`Atom`](../classes/Store._internal_.Atom.md)
+
+#### Defined in
+
+[src/Store.js:39](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Store.js#L39)
+
+___
+
+### TypeCollection
+
+Ƭ **TypeCollection**\<\>: [`Collection`](../classes/Store._internal_.Collection.md)
+
+#### Defined in
+
+[src/Store.js:41](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Store.js#L41)
+
+___
+
+### TypeComputed
+
+Ƭ **TypeComputed**\<\>: [`Computed`](../classes/Store._internal_.Computed.md)
+
+#### Defined in
+
+[src/Store.js:40](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Store.js#L40)
 
 ___
 
@@ -134,7 +161,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:18](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Store.js#L18)
+[src/Store.js:19](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Store.js#L19)
 
 ___
 
@@ -148,7 +175,13 @@ ___
 
 #### Defined in
 
-[src/Store.js:22](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Store.js#L22)
+[src/Store.js:23](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Store.js#L23)
+
+## Variables
+
+### EventEmitter
+
+• **EventEmitter**: `any`
 
 ## Functions
 
@@ -170,26 +203,32 @@ Create a store instance. Same as "new Store(initObject);"
 
 #### Defined in
 
-[src/Store.js:2075](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/Store.js#L2075)
+[src/Store.js:2103](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/Store.js#L2103)
 
 ___
 
 ### debounce
 
-▸ **debounce**(`func`, `wait`): `Function`
+▸ **debounce**\<`T`\>(`func`, `wait`): `T`
 
 Debounce function that, as long as it continues to be invoked, will not be triggered.
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `T` | extends (...`args`: `any`[]) => `void` |
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `func` | `Function` | Function to be debounced |
+| `func` | `T` | Function to be debounced |
 | `wait` | `number` | Time in milliseconds to wait before the function gets called. |
 
 #### Returns
 
-`Function`
+`T`
 
 **`Example`**
 
@@ -199,4 +238,4 @@ window.addEventListener('resize', debounce((evt) => console.log(evt), 250));
 
 #### Defined in
 
-[src/helpers.js:34](https://github.com/supercat911/store/blob/16260db142b39a71815a2e295e40b73206c20e5c/src/helpers.js#L34)
+[src/helpers.js:35](https://github.com/supercat911/store/blob/0de34b67f272a1b0055631ce512221802b5048a9/src/helpers.js#L35)

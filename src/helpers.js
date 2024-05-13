@@ -25,15 +25,16 @@ export function compareObjects(a, b) {
 
 /**
  * Debounce function that, as long as it continues to be invoked, will not be triggered.
- * @param {Function} func - Function to be debounced
+ * @template {(...args: any[]) => void} T
+ * @param {T} func - Function to be debounced
  * @param {number} wait - Time in milliseconds to wait before the function gets called.
- * @returns {Function}
+ * @returns {T}
  * @example
    window.addEventListener('resize', debounce((evt) => console.log(evt), 250));
  */
 export function debounce(func, wait) {
     var timeout;
-    return function () {
+    var f = () => {
         var context = this,
             args = arguments;
         var later = function () {
@@ -43,6 +44,8 @@ export function debounce(func, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
     };
+
+    return /** @type {T} */ (f);
 }
 
 /**
