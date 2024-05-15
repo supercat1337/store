@@ -1,7 +1,12 @@
 {
   "name": "@supercat1337/store",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "Reactive store",
+  "repository": {
+    "type": "git",
+    "directory": "https://github.com/supercat1337/store.git"
+  },
+  "homepage": "https://github.com/supercat1337/store",
   "main": "index.js",
   "scripts": {
     "test": "c8 ava",

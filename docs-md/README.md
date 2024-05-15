@@ -67,7 +67,9 @@ index.js
 // @ts-check 
 
 //import { Store } from "@supercat1337/store";
-import { Store } from "https://cdn.jsdelivr.net/gh/supercat911/store@main/dist/store.bundle.esm.min.js";
+//import { Store } from "https://cdn.jsdelivr.net/npm/@supercat1337/store@latest/dist/store.bundle.esm.min.js";
+
+import { Store } from "https://cdn.jsdelivr.net/npm/@supercat1337/store@latest/dist/store.bundle.esm.js";
 
 var a_counter_value = /** @type {HTMLElement} */ (document.querySelector("#a_counter_value"));
 var a_button_dec = document.querySelector("#a_dec_button");
