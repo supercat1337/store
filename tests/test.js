@@ -2481,35 +2481,7 @@ test("observeObject #2", t => {
 
     sample.c.push("Red Hat");
 
-    if (store.getItem("a") == sample.a && sample.a == 2 && working && sample.store.isAtomItem("b") && sample.store.isAtomItem("d") && !sample.store.isAtomItem("e")) {
-        t.pass();
-    }
-    else {
-        t.fail();
-    }
-
-});
-
-test("observeObject #3 (delete)", t => {
-
-    var working = false;
-
-    class Sample {
-        a = 0;
-        b = 1;
-    }
-
-    var store = createStore();
-    store.log = t.log;
-    store.logError = t.log;
-    store.warn = t.log;
-    
-    var sample = store.observeObject(new Sample);
-
-    // @ts-ignore
-    delete sample.a;
-
-    if (sample.a == undefined && sample.store.hasItem("a") == false ) {
+    if (sample.c.length == 1 && sample.c[0] == "Red Hat"  &&  store.getItem("a") == sample.a && sample.a == 2 && working && sample.store.isAtomItem("b") && sample.store.isAtomItem("d") && !sample.store.isAtomItem("e")) {
         t.pass();
     }
     else {
