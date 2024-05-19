@@ -18,7 +18,7 @@ Installation
 $ npm install @supercat1337/store
 ```
 
-You can find many code examples in our [documentation](https://github.com/supercat911/store/blob/main/docs-md/classes/Store.Store.md)
+You can find many code examples in our [documentation](https://github.com/supercat1337/store/blob/main/docs-md/classes/Store.Store.md)
 
 Basic example: counter with debounce
 

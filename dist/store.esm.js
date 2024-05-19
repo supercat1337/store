@@ -2279,14 +2279,36 @@ class Store {
      * 
      *```
      */
-    observeObject(target) {
+     observeObject(target) {
 
         if (!isObject(target)) throw new Error(`obj must have an object type. obj = ${target}`)
 
         let that = this;
+        /** @type { {[key:string]:any} } */
+        let props = {
+            store: {
+                get() {
+                    return that;
+                }
+            }
+        };
 
         for (let prop in target) {
             let value = target[prop];
+
+            if (! (value instanceof Function || typeof value === "symbol") ) {
+            
+                props[prop] = {
+                    get() {
+                        return that.getItem(prop);
+                    },
+                    set(value) {
+                        that.setItem(prop, value);
+                    },
+                    
+                };
+
+            }
 
             if (!this.hasItem(prop)) {
 
@@ -2300,6 +2322,7 @@ class Store {
                 }
     
                 this.#registerAtom(prop, value);
+
                 continue;
             
             } else {
@@ -2317,34 +2340,11 @@ class Store {
 
         }
 
-        /** @type {ProxyHandler} */
-        const handler = {
-            get(target, prop) {
 
-                if (typeof prop == "string" && that.hasItem(prop)) {
-                    return that.getItem(prop);
-                }
+        Object.defineProperties(target, props);
 
-                return target[prop];
-            },
-
-            set(target, item_name, value) {
-                that.setItems({ [item_name]: value });
-                return true;
-            },
-
-            deleteProperty: function (target, item_name) {
-                if (typeof item_name == "string" && that.hasItem(item_name)) {
-                    that.deleteItem(item_name);
-                }
-
-                delete target[item_name];
-                return true;
-            }
-
-        };
-
-        return new Proxy(target, handler);
+        // @ts-ignore
+        return target;
     }
 
 
