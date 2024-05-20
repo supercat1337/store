@@ -52,6 +52,10 @@ test("create store with params", t => {
 test("setItems #1 (try to set computed)", t => {
 
     var store = new Store({ a: 1, b: 2 });
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
     store.createComputedItem(
         "c",
         (store) => {
@@ -60,6 +64,8 @@ test("setItems #1 (try to set computed)", t => {
     );
 
     store.setItems({ a: 2, c: 100, "store": 1 });
+
+    t.log(store.getItem("c"));
 
     if (store.getItem("c") == 4 && store.getItem("store") === store) {
         t.pass();
@@ -420,8 +426,8 @@ test("onChange", t => {
 
         //store.log(data.details);
 
-        if (data.details["b"]) {
-            if (data.details["b"].value == 5) {
+        if (data["b"]) {
+            if (data["b"][0].value == 5) {
                 working = true;
             }
         }
@@ -486,6 +492,23 @@ test("onChangeAny #3 (no changes)", t => {
 
 });
 
+test("onChangeAny #4 (with Atoms)", t => {
+
+    var store = new Store();
+    var a = store.createAtom(0);
+    var b = store.createAtom(0);
+
+    var working = false;
+
+    store.onChangeAny([a, b], () => {
+        working = true;
+    });
+
+    a.value = 1;
+
+    if (working) t.pass(); else t.fail();
+
+});
 
 test("unsubscribe", t => {
 
@@ -1873,13 +1896,12 @@ test("atom (getAtom #2)", (t) => {
     store.logError = t.log;
     store.warn = t.log;
 
-    let b = store.getAtom("a");
-
-    if (b === false) {
-        t.pass();
-    }
-    else {
+    try {
+        let b = store.getAtom("a");
         t.fail();
+    }
+    catch (e) {
+        t.pass();
     }
 
 });
@@ -2032,11 +2054,6 @@ test("computed (getComputed)", (t) => {
     let b = store.createComputed(() => { return a.value + 1 });
     let c = store.getComputed(b.name);
 
-    if (c === false) {
-        t.fail();
-        return;
-    }
-
     a.value++;
 
     if (b.name === c.name && c.value == 2) {
@@ -2055,14 +2072,12 @@ test("computed (getComputed #2)", (t) => {
     store.logError = t.log;
     store.warn = t.log;
 
-    let a = store.createAtom(0);
-    let c = store.getComputed("foo");
-
-    if (c === false) {
-        t.pass();
-    }
-    else {
+    try {
+        let b = store.getComputed("foo");
         t.fail();
+    }
+    catch (e) {
+        t.pass();
     }
 
 });
@@ -2263,14 +2278,14 @@ test("atom (getCollection #2)", (t) => {
     store.logError = t.log;
     store.warn = t.log;
 
-    let b = store.getCollection("a");
-
-    if (b === false) {
-        t.pass();
-    }
-    else {
+    try {
+        let b = store.getCollection("foo");
         t.fail();
     }
+    catch (e) {
+        t.pass();
+    }
+
 
 });
 

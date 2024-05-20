@@ -36,7 +36,7 @@
 
 #### Defined in
 
-[src/Store.js:56](https://github.com/supercat911/store/blob/eed298d19e1b9ac09f316295e4a279c7eb77ea31/src/Store.js#L56)
+[src/Store.js:56](https://github.com/supercat911/store/blob/48d5d4d0b6f0b0257b295b5d9bb4d55fc85a0989/src/Store.js#L56)
 
 ___
 
@@ -46,7 +46,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:53](https://github.com/supercat911/store/blob/eed298d19e1b9ac09f316295e4a279c7eb77ea31/src/Store.js#L53)
+[src/Store.js:53](https://github.com/supercat911/store/blob/48d5d4d0b6f0b0257b295b5d9bb4d55fc85a0989/src/Store.js#L53)
 
 ___
 
@@ -56,7 +56,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:50](https://github.com/supercat911/store/blob/eed298d19e1b9ac09f316295e4a279c7eb77ea31/src/Store.js#L50)
+[src/Store.js:50](https://github.com/supercat911/store/blob/48d5d4d0b6f0b0257b295b5d9bb4d55fc85a0989/src/Store.js#L50)
 
 ___
 
@@ -66,7 +66,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:59](https://github.com/supercat911/store/blob/eed298d19e1b9ac09f316295e4a279c7eb77ea31/src/Store.js#L59)
+[src/Store.js:59](https://github.com/supercat911/store/blob/48d5d4d0b6f0b0257b295b5d9bb4d55fc85a0989/src/Store.js#L59)
 
 ___
 
@@ -76,4 +76,4 @@ ___
 
 #### Defined in
 
-[src/Store.js:47](https://github.com/supercat911/store/blob/eed298d19e1b9ac09f316295e4a279c7eb77ea31/src/Store.js#L47)
+[src/Store.js:47](https://github.com/supercat911/store/blob/48d5d4d0b6f0b0257b295b5d9bb4d55fc85a0989/src/Store.js#L47)
