@@ -257,15 +257,15 @@ export class Store {
 
         collection[property] = value;
 
-        if (collection_length_old!=collection.length) {
+        if (collection_length_old != collection.length) {
             let details = new UpdateEventDetails;
             details.eventType = "set";
             details.item_name = item_name;
             details.property = "length";
             details.value = value;
             details.old_value = old_value;
-    
-            this.#registerEvent(item_name, details);            
+
+            this.#registerEvent(item_name, details);
         }
 
         let details = new UpdateEventDetails;
@@ -673,18 +673,14 @@ export class Store {
             }
         }
 
-        this.#tracked_set.clear();
-        this.#track_deps_flag = true;
-        let value = __callback();
+        var result = this.getUsedItems(__callback);
 
-        var depsArray = Array.from(this.#tracked_set);
+        var value = result.value;
+        var depsArray = result.items.filter(item_name => this.isAtomItem(item_name) || this.isCollection(item_name));
 
         if (depsArray.length == 0) {
             throw new Error(`Computed item ${item_name} hasn't dependencies`);
         }
-
-        this.#track_deps_flag = false;
-        this.#tracked_set.clear();
 
         this.#computed.set(item_name, {
             item_name: item_name,
@@ -1019,7 +1015,7 @@ export class Store {
     /**
      * @typedef {string|TypeAtom|TypeCollection|TypeComputed} OnChangeParams
      */
-    
+
     /**
      * Sets a callback for the "change" event for elements whose names are specified in the array.
      * @param {OnChangeParams[]} items item names or item objects
@@ -1091,20 +1087,20 @@ export class Store {
         /** @type {string[]} */
         let arr_item_names = [];
 
-        for (let i=0; i<items.length; i++) {
+        for (let i = 0; i < items.length; i++) {
             let item = items[i];
-            
+
             if (typeof item == "string") {
                 if (this.hasItem(item)) {
                     arr_item_names.push(item);
                 }
-                
+
                 continue;
             }
 
             if (item instanceof Atom || item instanceof Computed || item instanceof Collection) {
                 if (item.store === this) {
-                    arr_item_names.push(item.name);   
+                    arr_item_names.push(item.name);
                 }
             }
         }
@@ -1261,6 +1257,10 @@ export class Store {
      * @param {string} item_name 
      */
     #getComputedValue(item_name) {
+        if (this.#track_deps_flag) {
+            this.#tracked_set.add(item_name);
+        }
+
         let computed = this.#computed.get(item_name);
         if (computed === undefined) throw new Error(`#getComputedValue error: ${item_name}`);
 
@@ -1970,6 +1970,7 @@ export class Store {
 
 
     /**
+     * Create item names from object
      * @template {Object} T
      * @param {T} target 
      * @returns {T & {store: Store}}
@@ -2094,6 +2095,161 @@ export class Store {
         // @ts-ignore
         return target;
     }
+
+    /**
+     * Tracks items used in a given function
+     * @param {()=>any} func 
+     * @returns {{value:any; items:string[]}}
+     */
+    getUsedItems(func) {
+        this.#tracked_set.clear();
+        this.#track_deps_flag = true;
+        let value = func();
+
+        var items = Array.from(this.#tracked_set);
+
+        this.#track_deps_flag = false;
+        this.#tracked_set.clear();
+        return {
+            value,
+            items
+        }
+    }
+
+    /**
+     * The autorun function accepts one function that should run every time anything it observes changes. 
+     * It also runs once when you create the autorun itself. It only responds to changes in observable state, 
+     * things you have annotated atom, collection or computed.
+     * @param {()=>any} func_to_track function to track items & reaction
+     * @returns {Unsubscriber | undefined} 
+     * 
+     * @example
+     *```js
+     * class State {
+     *   counter1 = 0;
+     *   counter2 = 0;
+     *   counter3 = 0;
+     * 
+     *   incr1 = () => {
+     *     this.counter1++;
+     *   };
+     * 
+     *   incr2 = () => {
+     *     this.counter2++;
+     *   };
+     * 
+     *   incr3 = () => {
+     *     this.counter3++;
+     *   };
+     * }
+     * 
+     * const store = new Store();
+     * const state = store.observeObject(new State());
+     * 
+     * const counter1div = document.createElement('div');
+     * const counter2div = document.createElement('div');
+     * const counter3div = document.createElement('div');
+     * 
+     * const btn1 = document.createElement('button');
+     * btn1.innerText = 'inct 1';
+     * btn1.addEventListener('click', state.incr1);
+     * 
+     * const btn2 = document.createElement('button');
+     * btn2.innerText = 'inct 2';
+     * btn2.addEventListener('click', () => {
+     *   state.counter2++;
+     * });
+     * 
+     * document.body.appendChild(counter1div);
+     * document.body.appendChild(counter2div);
+     * document.body.appendChild(counter3div);
+     * document.body.appendChild(btn1);
+     * document.body.appendChild(btn2);
+     * 
+     * (async () => {
+     *   await store.when(() => state.counter1 >= 3);
+     * 
+     *   alert('Another cool thing is when');
+     * })();
+     * 
+     * // Trigger when counter1 or counter2 changed
+     * store.autorun(() => {
+     *   counter1div.innerHTML = `counter 1: ${state.counter1}`;
+     *   counter2div.innerHTML = `counter 2: ${state.counter2}`;
+     * });
+     * 
+     * // Trigger when counter3 changed (another way)
+     * store.reaction(
+     *   () => [state.counter3],
+     *   () => {
+     *     counter3div.innerHTML = `counter 3: ${state.counter3}`;
+     *   }
+     * );
+     * 
+     * setInterval(state.incr3, 1000);
+     * 
+     *```
+     */
+    autorun(func_to_track) {
+        var result = this.getUsedItems(func_to_track);
+        if (result.items.length > 0) {
+            return this.onChangeAny(result.items, func_to_track);
+        }
+    }
+
+    /**
+     * reaction is like autorun, but gives more fine grained control on which observables will be tracked. 
+     * It takes two functions: the first, data function, is tracked and returns the data that is used as input for the second, effect function. 
+     * It is important to note that the side effect only reacts to data that was accessed in the data function, 
+     * which might be less than the data that is actually used in the effect function.
+     * @param {()=>any} data_function function to track items
+     * @param {ChangeEventSubscriber} effect_function reaction
+     * @returns {Unsubscriber | undefined} 
+     */
+    reaction(data_function, effect_function) {
+        var result = this.getUsedItems(data_function);
+        if (result.items.length > 0) {
+            return this.onChangeAny(result.items, effect_function);
+        }
+    }
+
+    /**
+     * when observes and runs the given predicate function until it returns true. 
+     * Once that happens, the given effect function is executed and the autorunner is disposed.
+     * The when function returns a disposer, allowing you to cancel it manually, 
+     * unless you don't pass in a second effect function, in which case it returns a Promise.
+     * @param {()=>boolean} predicate 
+     * @param {()=>void} [effect] 
+     * @returns {Unsubscriber | undefined | Promise<true>}
+     */
+    when(predicate, effect) {
+        var result = this.getUsedItems(predicate);
+
+        if (!effect)
+            return new Promise((resolve, reject) => {
+                var unsubscriber = this.onChangeAny(result.items, () => {
+                    let result = predicate();
+                    if (result) {
+                        if (unsubscriber) {
+                            unsubscriber();
+                        }
+                        resolve(result);
+                    }
+                });
+            })
+
+        return this.onChangeAny(result.items, () => {
+            try {
+                let result = predicate();
+                if (result) effect();
+            }
+            catch (e) {
+                this.logError(e);
+            }
+        });
+
+    }
+
 
 
 }

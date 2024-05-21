@@ -37,7 +37,7 @@ test("create store #2", t => {
 
 test("create store with params", t => {
 
-    var store = new Store({ a: 1, b: 2, f: function () {} });
+    var store = new Store({ a: 1, b: 2, f: function () { } });
 
     if (store.getItem("a") == 1 && store.getItem("b") == 2 && store.getItem("f") === undefined) {
         t.pass();
@@ -2411,7 +2411,7 @@ test("observeObject #1", t => {
     class Sample {
         a = 0;
         b = null;
-                
+
         /** @type {string[]} */
         c = [];
 
@@ -2419,7 +2419,7 @@ test("observeObject #1", t => {
 
         e = Symbol();
 
-        incA () {
+        incA() {
             this.a++;
         }
     }
@@ -2428,14 +2428,14 @@ test("observeObject #1", t => {
     store.log = t.log;
     store.logError = t.log;
     store.warn = t.log;
-    
+
     var sample = store.observeObject(new Sample);
 
-    sample.store.subscribe("a", (details)=>{
+    sample.store.subscribe("a", (details) => {
         //store.log(details);
     });
 
-    sample.store.subscribe("c", (details)=>{
+    sample.store.subscribe("c", (details) => {
         working = true;
         //store.log(details);
     });
@@ -2462,7 +2462,7 @@ test("observeObject #2", t => {
     class Sample {
         a = 0;
         b = null;
-                
+
         /** @type {string[]} */
         c = [];
 
@@ -2470,23 +2470,23 @@ test("observeObject #2", t => {
 
         e = Symbol();
 
-        incA () {
+        incA() {
             this.a++;
         }
     }
 
-    var store = createStore({a: 1, b: 2, c: [], f: 5});
+    var store = createStore({ a: 1, b: 2, c: [], f: 5 });
     store.log = t.log;
     store.logError = t.log;
     store.warn = t.log;
-    
+
     var sample = store.observeObject(new Sample);
 
-    sample.store.subscribe("a", (details)=>{
+    sample.store.subscribe("a", (details) => {
         //store.log(details);
     });
 
-    sample.store.subscribe("c", (details)=>{
+    sample.store.subscribe("c", (details) => {
         working = true;
         //store.log(details);
     });
@@ -2496,7 +2496,7 @@ test("observeObject #2", t => {
 
     sample.c.push("Red Hat");
 
-    if (sample.c.length == 1 && sample.c[0] == "Red Hat"  &&  store.getItem("a") == sample.a && sample.a == 2 && working && sample.store.isAtomItem("b") && sample.store.isAtomItem("d") && !sample.store.isAtomItem("e")) {
+    if (sample.c.length == 1 && sample.c[0] == "Red Hat" && store.getItem("a") == sample.a && sample.a == 2 && working && sample.store.isAtomItem("b") && sample.store.isAtomItem("d") && !sample.store.isAtomItem("e")) {
         t.pass();
     }
     else {
@@ -2524,8 +2524,272 @@ test("observeObject #3 (error)", t => {
         var sample = store.observeObject(123);
         t.fail();
     }
-    catch(e) {
+    catch (e) {
         t.pass();
     }
 
 });
+
+
+test("getUsedItems", (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    let a = store.createAtom(1, "a");
+    let b = store.createComputed(() => {
+        return a.value + 1;
+    }, "b");
+
+    let result = store.getUsedItems(() => {
+        return [a.value, b.value];
+    });
+
+    store.log(result);
+
+    if (result.items.length == 2 && result.items.indexOf("a") > -1 && result.items.indexOf("b") > -1) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+test("autorun", (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    var foo = 0;
+
+    class State {
+        counter1 = 0;
+        counter2 = 0;
+        counter3 = 0;
+
+        incr1 = () => {
+            this.counter1++;
+        };
+
+        incr2 = () => {
+            this.counter2++;
+        };
+
+        incr3 = () => {
+            this.counter3++;
+        };
+    }
+
+    const state = store.observeObject(new State());
+
+    // Trigger when counter1 or counter2 changed
+    store.autorun(() => {
+        foo++;
+        var qwe = state.counter1;
+    });
+
+    state.counter1++;
+
+    if (foo == 2) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+test("wait", (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    var foo = 0;
+
+    class State {
+        counter1 = 0;
+        counter2 = 0;
+        counter3 = 0;
+
+        incr1 = () => {
+            this.counter1++;
+        };
+
+        incr2 = () => {
+            this.counter2++;
+        };
+
+        incr3 = () => {
+            this.counter3++;
+        };
+    }
+
+    var foo = 0;
+
+    const state = store.observeObject(new State());
+
+    store.when(() => state.counter1 >= 3, () => {
+        foo++;
+    });
+
+    state.counter1++;
+    state.counter1++;
+    state.counter1++;
+
+    store.log(foo);
+
+    if (foo == 1) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+
+test("wait #2 (with error)", async (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    var foo = 0;
+
+    class State {
+        counter1 = 0;
+        counter2 = 0;
+        counter3 = 0;
+
+        incr1 = () => {
+            this.counter1++;
+        };
+
+        incr2 = () => {
+            this.counter2++;
+        };
+
+        incr3 = () => {
+            this.counter3++;
+        };
+    }
+
+    const state = store.observeObject(new State());
+
+    store.when(() => state.counter1 >= 3, () => {
+        foo++;
+        throw new Error;
+    });
+
+    state.counter1++;
+    state.counter1++;
+    state.counter1++;
+    state.counter1++;
+    state.counter1++;
+
+    t.log(foo);
+
+    if (foo === 3) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+
+
+test("wait #3 (no effect)", async (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    var foo = 0;
+
+    class State {
+        counter1 = 0;
+        counter2 = 0;
+        counter3 = 0;
+
+        incr1 = () => {
+            this.counter1++;
+        };
+
+        incr2 = () => {
+            this.counter2++;
+        };
+
+        incr3 = () => {
+            this.counter3++;
+        };
+    }
+
+    const state = store.observeObject(new State());
+
+    (async ()=>{
+        await store.when(() => state.counter1 >= 3);
+        t.pass();
+    })();
+
+    state.counter1++;
+    state.counter1++;
+    state.counter1++;
+    state.counter1++;
+    state.counter1++;
+
+});
+
+test("reaction", (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    var foo = 0;
+
+    class State {
+        counter1 = 0;
+        counter2 = 0;
+        counter3 = 0;
+
+        incr1 = () => {
+            this.counter1++;
+        };
+
+        incr2 = () => {
+            this.counter2++;
+        };
+
+        incr3 = () => {
+            this.counter3++;
+        };
+    }
+
+    const state = store.observeObject(new State());
+
+    store.reaction(
+        () => [state.counter3],
+        () => {
+            foo++;
+        }
+    );
+
+    state.counter3++;
+    state.counter1++;
+    state.counter2++;
+    state.counter3++;
+
+    if (foo == 2) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+});
+

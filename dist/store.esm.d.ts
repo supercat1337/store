@@ -1,13 +1,12 @@
 export type CompareFunction = (a: any, b: any, item_name: string, property: (string | null)) => boolean;
 export type Subscriber = (details: UpdateEventDetails, store: Store) => void;
 export type Unsubscriber = () => void;
-export type ChangeEventSubscriber = (details: ChangeEventObject, store: Store) => void;
+export type ChangeEventSubscriber = (data: ChangeEventObject, store: Store) => void;
 export type UpdatedItems = {
     [key: string]: UpdateEventDetails;
 };
 export type ChangeEventObject = {
-    eventType: "set" | "delete" | null;
-    details: UpdatedItems;
+    [key: string]: UpdateEventDetails[];
 };
 export type TypeStructureOfComputed = {
     item_name: string;
@@ -308,57 +307,68 @@ export class Store {
      * var store = new Store({ a: 1, b: 2 });
      *
      * store.onChange((data) => {
-     *     store.log(data.details);
+     *   store.log(data);
      * });
      *
      * store.setItem("a", 2);
-     * // outputs:
+     * //outputs:
      * //{
-     * //    a: UpdateEventDetails {
-     * //      eventType: 'set',
-     * //      item_name: 'a',
-     * //      old_value: 1,
-     * //      property: null,
+     * //  a: [
+     * //    UpdateEventDetails {
      * //      value: 2,
+     * //      old_value: 1,
+     * //      item_name: 'a',
+     * //      eventType: 'set',
+     * //      property: null
      * //    }
+     * //  ]
      * //}
      *
      * store.setItem("b", 5);
-     * // outputs:
+     * //outputs:
      * //{
-     * //  b: UpdateEventDetails {
-     * //    eventType: 'set',
-     * //    item_name: 'b',
-     * //    old_value: 2,
-     * //    property: null,
-     * //    value: 5,
-     * //},
-     * }
+     * //  b: [
+     * //    UpdateEventDetails {
+     * //      value: 5,
+     * //      old_value: 2,
+     * //      item_name: 'b',
+     * //      eventType: 'set',
+     * //      property: null
+     * //    }
+     * //  ]
+     * //}
      *
      * store.setItems({ a: 0, b: 0 });
-     * // outputs:
+     * //outputs:
      * //{
-     * //    a: UpdateEventDetails {
-     * //     eventType: 'set',
-     * //     item_name: 'a',
-     * //     old_value: 2,
-     * //     property: null,
-     * //     value: 0,
-     * //    },
-     * //    b: UpdateEventDetails {
-     * //     eventType: 'set',
-     * //     item_name: 'b',
-     * //     old_value: 5,
-     * //     property: null,
-     * //     value: 0,
-     * //    },
+     * //  a: [
+     * //    UpdateEventDetails {
+     * //      value: 0,
+     * //      old_value: 2,
+     * //      item_name: 'a',
+     * //      eventType: 'set',
+     * //      property: null
+     * //    }
+     * //  ],
+     * //  b: [
+     * //    UpdateEventDetails {
+     * //      value: 0,
+     * //      old_value: 5,
+     * //      item_name: 'b',
+     * //      eventType: 'set',
+     * //      property: null
+     * //    }
+     * //  ]
      * //}
      * ```
      */
     onChange(callback: ChangeEventSubscriber): Unsubscriber;
     /**
+     * @typedef {string|TypeAtom|TypeCollection|TypeComputed} OnChangeParams
+     */
+    /**
      * Sets a callback for the "change" event for elements whose names are specified in the array.
-     * @param {string[]} arr_item_names item names
+     * @param {OnChangeParams[]} items item names or item objects
      * @param {ChangeEventSubscriber} callback
      * @returns {Unsubscriber|undefined} unsubscriber
      *
@@ -367,24 +377,62 @@ export class Store {
      * var store = new Store({ a: 1, b: 2 });
      *
      * store.onChangeAny(["a", "b"], (data) => {
-     *     store.log(data.details);
+     *   store.log(data);
      * });
      *
      * store.setItem("a", 2);
+     * //outputs:
+     * //{
+     * //  a: [
+     * //    UpdateEventDetails {
+     * //      value: 2,
+     * //      old_value: 1,
+     * //      item_name: 'a',
+     * //      eventType: 'set',
+     * //      property: null
+     * //    }
+     * //  ]
+     * //}
      *
-     * // outputs:
-     * // {
-     * //   a: UpdateEventDetails {
-     * //     eventType: 'set',
-     * //     item_name: 'a',
-     * //     old_value: 1,
-     * //     property: null,
-     * //     value: 2,
-     * //   },
-     * // }
+     * store.setItem("b", 5);
+     * //outputs:
+     * //{
+     * //  b: [
+     * //    UpdateEventDetails {
+     * //      value: 5,
+     * //      old_value: 2,
+     * //      item_name: 'b',
+     * //      eventType: 'set',
+     * //      property: null
+     * //    }
+     * //  ]
+     * //}
+     *
+     * store.setItems({ a: 0, b: 0 });
+     * //outputs:
+     * //{
+     * //  a: [
+     * //    UpdateEventDetails {
+     * //      value: 0,
+     * //      old_value: 2,
+     * //      item_name: 'a',
+     * //      eventType: 'set',
+     * //      property: null
+     * //    }
+     * //  ],
+     * //  b: [
+     * //    UpdateEventDetails {
+     * //      value: 0,
+     * //      old_value: 5,
+     * //      item_name: 'b',
+     * //      eventType: 'set',
+     * //      property: null
+     * //    }
+     * //  ]
+     * //}
      * ```
      */
-    onChangeAny(arr_item_names: string[], callback: ChangeEventSubscriber): Unsubscriber | undefined;
+    onChangeAny(items: (string | Atom | Collection | Computed)[], callback: ChangeEventSubscriber): Unsubscriber | undefined;
     /**
      * Deletes an item from the store
      * @param {string} item_name
@@ -706,7 +754,7 @@ export class Store {
     /**
      * Returns an instance of the Atom if the item exists
      * @param {string} item_name
-     * @returns {TypeAtom|false}
+     * @returns {TypeAtom}
      *
      * @example
      *```js
@@ -730,7 +778,7 @@ export class Store {
      *
      *```
      */
-    getAtom(item_name: string): TypeAtom | false;
+    getAtom(item_name: string): TypeAtom;
     /**
      * Creates an instance of the Computed
      *
@@ -769,7 +817,7 @@ export class Store {
     /**
      * Returns an instance of the Computed if the item exists
      * @param {string} item_name
-     * @returns {TypeComputed|false}
+     * @returns {TypeComputed}
      *
      * @example
      *```js
@@ -789,7 +837,7 @@ export class Store {
      * // true
      *```
      */
-    getComputed(item_name: string): TypeComputed | false;
+    getComputed(item_name: string): TypeComputed;
     /**
      * Creates an instance of the Collection
      * @param {any[]} value
@@ -830,7 +878,7 @@ export class Store {
     /**
      * Returns an instance of the Collection if the item exists
      * @param {string} item_name
-     * @returns {TypeCollection | false}
+     * @returns {TypeCollection}
      *
      * @example
      *```js
@@ -870,7 +918,7 @@ export class Store {
      *
      *```
      */
-    getCollection(item_name: string): TypeCollection | false;
+    getCollection(item_name: string): TypeCollection;
     /**
      * @template {Object} T
      * @param {T} target
@@ -932,6 +980,35 @@ export class Store {
     observeObject<T_1 extends unknown>(target: T_1): T_1 & {
         store: Store;
     };
+    /**
+     *
+     * @param {()=>any} func
+     * @returns {{value:any; items:string[]}}
+     */
+    getUsedItems(func: () => any): {
+        value: any;
+        items: string[];
+    };
+    /**
+     *
+     * @param {()=>any} func_to_track function to track items & reaction
+     * @returns {Unsubscriber | undefined}
+     */
+    autorun(func_to_track: () => any): Unsubscriber | undefined;
+    /**
+     *
+     * @param {()=>any} func_to_track function to track items
+     * @param {ChangeEventSubscriber} callback reaction
+     * @returns {Unsubscriber | undefined}
+     */
+    reaction(func_to_track: () => any, callback: ChangeEventSubscriber): Unsubscriber | undefined;
+    /**
+     *
+     * @param {()=>boolean} predicate
+     * @param {*} [effect]
+     * @returns {Unsubscriber | undefined | Promise<true>}
+     */
+    when(predicate: () => boolean, effect?: any): Unsubscriber | undefined | Promise<true>;
     #private;
 }
 /**
@@ -943,11 +1020,11 @@ export class Store {
  *
  * @typedef {()=>void} Unsubscriber
  *
- * @typedef {(details:ChangeEventObject, store:Store)=>void} ChangeEventSubscriber
+ * @typedef {(data:ChangeEventObject, store:Store)=>void} ChangeEventSubscriber
  *
  * @typedef {{[key:string]: UpdateEventDetails}} UpdatedItems
  *
- * @typedef {Object} ChangeEventObject
+ * @typedef {{[key:string] : UpdateEventDetails[]}} ChangeEventObject
  * @property {"set"|"delete"|null} eventType
  * @property {UpdatedItems} details
  *
