@@ -1,5 +1,5 @@
 // @ts-check 
-import { Store } from "./../../index.js";
+import { Store } from "./../../src/Store.js";
 
 // Model
 const store = new Store;
@@ -15,11 +15,11 @@ const computed_length = store.createComputed(()=>{
 });
 
 // View
-const root_list = document.querySelector("#root_list");
-const add_todo_button = document.querySelector("#add_todo_button");
+const root_list = /** @type {HTMLElement} */ (document.querySelector("#root_list"));
+const add_todo_button = /** @type {HTMLButtonElement} */ (document.querySelector("#add_todo_button"));
 const add_todo_input = /** @type {HTMLInputElement} */ (document.querySelector("#add_todo_input"));
 
-const list_length_span = document.querySelector("#list_length_span");
+const list_length_span = /** @type {HTMLSpanElement} */ (document.querySelector("#list_length_span"));
 
 
 const list_item_template = /* html */`
@@ -44,7 +44,7 @@ function setListSize(size) {
 
     if (listItemsLength > size) {
         for (let i = size; i < listItemsLength; i++) {
-            root_list.lastElementChild.remove();
+            root_list.lastElementChild?.remove();
         }
     }
 }
@@ -82,36 +82,39 @@ function getTextAndClearInput() {
  * @returns {number}
  */
 function getChildElementIndex(element) {
-    return Array.prototype.indexOf.call(element.parentNode.children, element);
+    return Array.prototype.indexOf.call(element.parentNode?.children, element);
 }
 
 // Presenter
-add_todo_button.addEventListener("click", () => {
-    var todo_name = getTextAndClearInput();
-    if (todo_name == "") return;
-
-    todos.push(todo_name);
-});
-
-add_todo_input.addEventListener("keydown", (e) => {
-    if (e.key != "Enter") return;
+/**
+ * 
+ * @param {Event|KeyboardEvent} e 
+ */
+function addTodoCallback(e) {
+    if (e instanceof KeyboardEvent && e.key != "Enter") return;
 
     var todo_name = getTextAndClearInput();
     if (todo_name == "") return;
 
     todos.push(todo_name);
-});
+}
+
+add_todo_button.addEventListener("click", addTodoCallback);
+add_todo_input.addEventListener("keydown", addTodoCallback);
 
 root_list.addEventListener("click", (e) => {
     var closeButton = /** @type {HTMLElement} */ (e.target);
     if (!closeButton.classList.contains("btn-close")) return;
 
-    var listItem = closeButton.closest("li"); 
+    var listItem = /** @type {HTMLLIElement} */ (closeButton.closest("li")); 
     var index = getChildElementIndex(listItem);
     todos.splice(index, 1);
 });
 
 todos_collection.subscribe((details) => {
+    console.log(details);
+
+    if (details.property === null) return;
 
     if (details.property == "length") {
         setListSize(todos.length);

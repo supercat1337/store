@@ -587,20 +587,7 @@ class Store {
 
         if (equal) return false;
 
-        let collection_length_old = collection.length;
-
         collection[property] = value;
-
-        if (collection_length_old != collection.length) {
-            let details = new UpdateEventDetails;
-            details.eventType = "set";
-            details.item_name = item_name;
-            details.property = "length";
-            details.value = value;
-            details.old_value = old_value;
-
-            this.#registerEvent(item_name, details);
-        }
 
         let details = new UpdateEventDetails;
         details.eventType = "set";
@@ -664,15 +651,24 @@ class Store {
 
         let length = old_array.length;
 
+        if (length != array.length) {
+            let details = new UpdateEventDetails;
+            details.eventType = "set";
+            details.item_name = item_name;
+            details.property = "length";
+            details.value = array.length;
+            details.old_value = length;
+
+            this.#registerEvent(item_name, details);
+        }
+
         if (old_array.length > array.length) {
             for (let i = array.length; i < old_array.length; i++) {
                 let details = this.#deleteCollectionItem(item_name, (old_array.length - i - 1).toString());
                 if (details) {
                     equal = false;
                 }
-
             }
-
         }
 
         old_array.length = array.length;
@@ -691,17 +687,6 @@ class Store {
         main_details.item_name = item_name;
         main_details.value = array;
         main_details.old_value = undefined;
-
-        if (length != array.length) {
-            let details = new UpdateEventDetails;
-            details.eventType = "set";
-            details.item_name = item_name;
-            details.property = "length";
-            details.value = array.length;
-            details.old_value = length;
-
-            this.#registerEvent(item_name, details);
-        }
 
         this.#registerEvent(item_name, main_details);
         this.#sendSignalToComputedItems([item_name]);
@@ -1254,6 +1239,21 @@ class Store {
                     target[property] = value;
                 }
                 else if (typeof property == "string") {
+
+                    let collection = store.#collections.get(item_name) || [];
+                    let index = parseInt(property);
+                    let collection_length = collection.length;
+
+                    if (!isNaN(index) && index >= collection.length) {
+                        let details = new UpdateEventDetails;
+                        details.eventType = "set";
+                        details.item_name = item_name;
+                        details.property = "length";
+                        details.value = index + 1;
+                        details.old_value = collection_length;
+                        store.#registerEvent(item_name, details);
+                    }
+
                     let details = store.#setCollectionItem(item_name, property, value);
 
                     if (details) {

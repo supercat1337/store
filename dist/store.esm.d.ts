@@ -920,6 +920,7 @@ export class Store {
      */
     getCollection(item_name: string): TypeCollection;
     /**
+     * Create item names from object
      * @template {Object} T
      * @param {T} target
      * @returns {T & {store: Store}}
@@ -981,7 +982,7 @@ export class Store {
         store: Store;
     };
     /**
-     *
+     * Tracks items used in a given function
      * @param {()=>any} func
      * @returns {{value:any; items:string[]}}
      */
@@ -990,25 +991,100 @@ export class Store {
         items: string[];
     };
     /**
-     *
+     * The autorun function accepts one function that should run every time anything it observes changes.
+     * It also runs once when you create the autorun itself. It only responds to changes in observable state,
+     * things you have annotated atom, collection or computed.
      * @param {()=>any} func_to_track function to track items & reaction
      * @returns {Unsubscriber | undefined}
+     *
+     * @example
+     *```js
+     * class State {
+     *   counter1 = 0;
+     *   counter2 = 0;
+     *   counter3 = 0;
+     *
+     *   incr1 = () => {
+     *     this.counter1++;
+     *   };
+     *
+     *   incr2 = () => {
+     *     this.counter2++;
+     *   };
+     *
+     *   incr3 = () => {
+     *     this.counter3++;
+     *   };
+     * }
+     *
+     * const store = new Store();
+     * const state = store.observeObject(new State());
+     *
+     * const counter1div = document.createElement('div');
+     * const counter2div = document.createElement('div');
+     * const counter3div = document.createElement('div');
+     *
+     * const btn1 = document.createElement('button');
+     * btn1.innerText = 'inct 1';
+     * btn1.addEventListener('click', state.incr1);
+     *
+     * const btn2 = document.createElement('button');
+     * btn2.innerText = 'inct 2';
+     * btn2.addEventListener('click', () => {
+     *   state.counter2++;
+     * });
+     *
+     * document.body.appendChild(counter1div);
+     * document.body.appendChild(counter2div);
+     * document.body.appendChild(counter3div);
+     * document.body.appendChild(btn1);
+     * document.body.appendChild(btn2);
+     *
+     * (async () => {
+     *   await store.when(() => state.counter1 >= 3);
+     *
+     *   alert('Another cool thing is when');
+     * })();
+     *
+     * // Trigger when counter1 or counter2 changed
+     * store.autorun(() => {
+     *   counter1div.innerHTML = `counter 1: ${state.counter1}`;
+     *   counter2div.innerHTML = `counter 2: ${state.counter2}`;
+     * });
+     *
+     * // Trigger when counter3 changed (another way)
+     * store.reaction(
+     *   () => [state.counter3],
+     *   () => {
+     *     counter3div.innerHTML = `counter 3: ${state.counter3}`;
+     *   }
+     * );
+     *
+     * setInterval(state.incr3, 1000);
+     *
+     *```
      */
     autorun(func_to_track: () => any): Unsubscriber | undefined;
     /**
-     *
-     * @param {()=>any} func_to_track function to track items
-     * @param {ChangeEventSubscriber} callback reaction
+     * reaction is like autorun, but gives more fine grained control on which observables will be tracked.
+     * It takes two functions: the first, data function, is tracked and returns the data that is used as input for the second, effect function.
+     * It is important to note that the side effect only reacts to data that was accessed in the data function,
+     * which might be less than the data that is actually used in the effect function.
+     * @param {()=>any} data_function function to track items
+     * @param {ChangeEventSubscriber} effect_function reaction
      * @returns {Unsubscriber | undefined}
      */
-    reaction(func_to_track: () => any, callback: ChangeEventSubscriber): Unsubscriber | undefined;
+    reaction(data_function: () => any, effect_function: ChangeEventSubscriber): Unsubscriber | undefined;
     /**
-     *
+     * when observes and runs the given predicate function until it returns true.
+     * Once that happens, the given effect function is executed and the autorunner is disposed.
+     * The when function returns a disposer, allowing you to cancel it manually,
+     * unless you don't pass in a second effect function, in which case it returns a Promise.
      * @param {()=>boolean} predicate
-     * @param {*} [effect]
+     * @param {()=>void} [effect]
      * @returns {Unsubscriber | undefined | Promise<true>}
      */
-    when(predicate: () => boolean, effect?: any): Unsubscriber | undefined | Promise<true>;
+    when(predicate: () => boolean, effect?: () => void): Unsubscriber | undefined | Promise<true>;
     #private;
 }
 /**
