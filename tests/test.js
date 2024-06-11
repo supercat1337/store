@@ -2731,7 +2731,7 @@ test("wait #3 (no effect)", async (t) => {
 
     const state = store.observeObject(new State());
 
-    (async ()=>{
+    (async () => {
         await store.when(() => state.counter1 >= 3);
         t.pass();
     })();
@@ -2793,3 +2793,110 @@ test("reaction", (t) => {
 
 });
 
+
+
+test("computed (is_hard = true, option, computed is not changed)", (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    var foo = 0;
+
+    /**
+     * 
+     * @param {number} value 
+     * @returns 
+     */
+    function hard(value) {
+        foo++;
+        return value;
+    }
+
+
+    const A = store.createAtom(0, "A");
+    const B = store.createAtom(0, "B");
+    const C = store.createComputed(() => A.value % 2 + B.value, "C")
+
+    const E = store.createComputed(() => hard(C.value), "E", { is_hard: true })
+    const value_1 = E.value;
+
+    A.value = 2; // C is not changed
+    const value_2 = E.value;
+
+    if (foo == 1 && value_1 === value_2) {
+        t.pass();
+    }
+    else {
+        t.fail(String(foo));
+    }
+});
+
+test("computed (is_hard = true, option, computed is changed)", (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    var foo = 0;
+
+    /**
+     * 
+     * @param {number} value 
+     * @returns 
+     */
+    function hard(value) {
+        foo++;
+        return value;
+    }
+
+
+    const A = store.createAtom(0, "A");
+    const B = store.createAtom(0, "B");
+    const C = store.createComputed(() => A.value % 2 + B.value, "C")
+    const E = store.createComputed(() => hard(C.value), "E", { is_hard: true })
+
+    E.subscribe(()=>{
+
+    });
+
+    A.value = 1; // C is changed
+
+    A.value = 3; // C is not changed
+
+
+    if (foo == 2 ) {
+        t.pass();
+    }
+    else {
+        t.fail(String(foo));
+    }
+});
+
+test("computed (from computed)", (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    var foo = 0;
+
+    const A = store.createAtom(0);
+    const C = store.createComputed(() => A.value);
+    const D = store.createComputed(() => C.value * 2);
+    const E = store.createComputed(() => {
+        foo++;
+        return D.value * 2;
+    });
+    // foo is 1
+
+    A.value = 1; // C is changed
+    store.log(D.value);
+
+    if (foo == 1) {
+        t.pass();
+    } else {
+        t.fail();
+    }
+
+});

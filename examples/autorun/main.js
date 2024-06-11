@@ -1,5 +1,5 @@
 // @ts-check
-import { Store } from "../../dist/store.bundle.esm.js";
+import { Store } from "../../src/Store.js";
 
 class State {
   counter1 = 0;

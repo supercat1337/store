@@ -11,9 +11,15 @@ export type ChangeEventObject = {
 export type TypeStructureOfComputed = {
     item_name: string;
     dependencies: string[];
+    influences: Set<string>;
     getter: () => any;
     value: any;
     stale: boolean;
+    memo: string;
+    is_hard: boolean;
+};
+export type ComputedOptions = {
+    is_hard?: boolean;
 };
 export type TypeAtom = Atom;
 export type TypeComputed = Computed;
@@ -209,6 +215,7 @@ export class Store {
      * Creates a computed item
      * @param {string} item_name
      * @param {(store: Store)=>any} callback
+     * @param {ComputedOptions} [options={}]
      * @returns {boolean} is created
      *
      * @example
@@ -255,7 +262,7 @@ export class Store {
      * // outputs "#ERROR!"
      * ```
      */
-    createComputedItem(item_name: string, callback: (store: Store) => any): boolean;
+    createComputedItem(item_name: string, callback: (store: Store) => any, options?: ComputedOptions): boolean;
     /**
      *
      * @param {string} expression
@@ -784,6 +791,7 @@ export class Store {
      *
      * @param {(store: Store) => any} callback
      * @param {string} [name]
+     * @param {ComputedOptions} options
      * @returns {TypeComputed}
      *
      * @example
@@ -813,7 +821,7 @@ export class Store {
      *
      *```
      */
-    createComputed(callback: (store: Store) => any, name?: string): TypeComputed;
+    createComputed(callback: (store: Store) => any, name?: string, options?: ComputedOptions): TypeComputed;
     /**
      * Returns an instance of the Computed if the item exists
      * @param {string} item_name
@@ -1107,10 +1115,16 @@ export class Store {
  * @typedef {Object} TypeStructureOfComputed
  * @property {string} item_name
  * @property {string[]} dependencies
+ * @property {Set<string>} influences
  * @property {()=>any} getter
  * @property {any} value
  * @property {boolean} stale
+ * @property {string} memo
+ * @property {boolean} is_hard
  *
+ */
+/**
+ * @typedef { {is_hard?:boolean} } ComputedOptions
  */
 /**
  * @typedef {Atom} TypeAtom
@@ -1188,8 +1202,11 @@ declare class Computed {
      * @param {Store} store
      * @param {string} name
      * @param {(store: Store)=>any} [callback]
+     * @param {{is_hard?:boolean}} [options={}]
      */
-    constructor(store: Store, name: string, callback?: (store: Store) => any);
+    constructor(store: Store, name: string, callback?: (store: Store) => any, options?: {
+        is_hard?: boolean;
+    });
     get value(): any;
     get name(): string;
     /**

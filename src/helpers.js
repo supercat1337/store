@@ -55,3 +55,18 @@ export function debounce(func, wait) {
 export function isObject(x) {
     return typeof x === 'object' && !Array.isArray(x) && x !== null;
 }
+
+/**
+ * Converts array to set
+ * @template T
+ * @param {T[]} arr 
+ * @returns {Set<T>}
+ */
+export function arrayToSet(arr) {
+    var result = new Set;
+    for (let i = 0; i < arr.length; i++) {
+        result.add(arr[i]);
+    }
+    return result;
+}
+

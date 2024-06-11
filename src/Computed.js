@@ -15,13 +15,14 @@ export class Computed {
      * @param {Store} store 
      * @param {string} name 
      * @param {(store: Store)=>any} [callback] 
+     * @param {{is_hard?:boolean}} [options={}] 
      */
-    constructor(store, name, callback) {
+    constructor(store, name, callback, options = {}) {
         this.#store = store;
         this.#name = name;
 
         if (typeof callback != "undefined") {
-            this.#store.createComputedItem(this.#name, callback);
+            this.#store.createComputedItem(this.#name, callback, options);
         }
     }
 

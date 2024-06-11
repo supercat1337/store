@@ -32,7 +32,7 @@
 
 ### constructor
 
-• **new Computed**(`store`, `name`, `callback?`): [`Computed`](Store._internal_.Computed.md)
+• **new Computed**(`store`, `name`, `callback?`, `options?`): [`Computed`](Store._internal_.Computed.md)
 
 Creates the atom item
 
@@ -43,6 +43,8 @@ Creates the atom item
 | `store` | [`Store`](Store.Store.md) |
 | `name` | `string` |
 | `callback?` | (`store`: [`Store`](Store.Store.md)) => `any` |
+| `options?` | `Object` |
+| `options.is_hard?` | `boolean` |
 
 #### Returns
 
@@ -50,7 +52,7 @@ Creates the atom item
 
 #### Defined in
 
-[src/Computed.js:19](https://github.com/supercat911/store/blob/4ce2690b02438d095cf78c7e6db397219c282c9d/src/Computed.js#L19)
+[src/Computed.js:20](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Computed.js#L20)
 
 ## Properties
 
@@ -60,7 +62,7 @@ Creates the atom item
 
 #### Defined in
 
-[src/Computed.js:9](https://github.com/supercat911/store/blob/4ce2690b02438d095cf78c7e6db397219c282c9d/src/Computed.js#L9)
+[src/Computed.js:9](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Computed.js#L9)
 
 ___
 
@@ -70,7 +72,7 @@ ___
 
 #### Defined in
 
-[src/Computed.js:11](https://github.com/supercat911/store/blob/4ce2690b02438d095cf78c7e6db397219c282c9d/src/Computed.js#L11)
+[src/Computed.js:11](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Computed.js#L11)
 
 ## Accessors
 
@@ -84,7 +86,7 @@ ___
 
 #### Defined in
 
-[src/Computed.js:32](https://github.com/supercat911/store/blob/4ce2690b02438d095cf78c7e6db397219c282c9d/src/Computed.js#L32)
+[src/Computed.js:33](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Computed.js#L33)
 
 ___
 
@@ -98,7 +100,7 @@ ___
 
 #### Defined in
 
-[src/Computed.js:57](https://github.com/supercat911/store/blob/4ce2690b02438d095cf78c7e6db397219c282c9d/src/Computed.js#L57)
+[src/Computed.js:58](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Computed.js#L58)
 
 ___
 
@@ -112,7 +114,7 @@ ___
 
 #### Defined in
 
-[src/Computed.js:28](https://github.com/supercat911/store/blob/4ce2690b02438d095cf78c7e6db397219c282c9d/src/Computed.js#L28)
+[src/Computed.js:29](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Computed.js#L29)
 
 ## Methods
 
@@ -126,7 +128,7 @@ ___
 
 #### Defined in
 
-[src/Computed.js:45](https://github.com/supercat911/store/blob/4ce2690b02438d095cf78c7e6db397219c282c9d/src/Computed.js#L45)
+[src/Computed.js:46](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Computed.js#L46)
 
 ___
 
@@ -140,7 +142,7 @@ ___
 
 #### Defined in
 
-[src/Computed.js:49](https://github.com/supercat911/store/blob/4ce2690b02438d095cf78c7e6db397219c282c9d/src/Computed.js#L49)
+[src/Computed.js:50](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Computed.js#L50)
 
 ___
 
@@ -154,7 +156,7 @@ ___
 
 #### Defined in
 
-[src/Computed.js:53](https://github.com/supercat911/store/blob/4ce2690b02438d095cf78c7e6db397219c282c9d/src/Computed.js#L53)
+[src/Computed.js:54](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Computed.js#L54)
 
 ___
 
@@ -175,4 +177,4 @@ ___
 
 #### Defined in
 
-[src/Computed.js:41](https://github.com/supercat911/store/blob/4ce2690b02438d095cf78c7e6db397219c282c9d/src/Computed.js#L41)
+[src/Computed.js:42](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Computed.js#L42)

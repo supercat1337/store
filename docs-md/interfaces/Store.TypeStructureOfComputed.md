@@ -10,7 +10,10 @@
 
 - [dependencies](Store.TypeStructureOfComputed.md#dependencies)
 - [getter](Store.TypeStructureOfComputed.md#getter)
+- [influences](Store.TypeStructureOfComputed.md#influences)
+- [is\_hard](Store.TypeStructureOfComputed.md#is_hard)
 - [item\_name](Store.TypeStructureOfComputed.md#item_name)
+- [memo](Store.TypeStructureOfComputed.md#memo)
 - [stale](Store.TypeStructureOfComputed.md#stale)
 - [value](Store.TypeStructureOfComputed.md#value)
 
@@ -22,7 +25,7 @@
 
 #### Defined in
 
-[src/Store.js:31](https://github.com/supercat911/store/blob/4ce2690b02438d095cf78c7e6db397219c282c9d/src/Store.js#L31)
+[src/Store.js:31](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Store.js#L31)
 
 ___
 
@@ -40,7 +43,27 @@ ___
 
 #### Defined in
 
-[src/Store.js:32](https://github.com/supercat911/store/blob/4ce2690b02438d095cf78c7e6db397219c282c9d/src/Store.js#L32)
+[src/Store.js:33](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Store.js#L33)
+
+___
+
+### influences
+
+• **influences**: `Set`\<`string`\>
+
+#### Defined in
+
+[src/Store.js:32](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Store.js#L32)
+
+___
+
+### is\_hard
+
+• **is\_hard**: `boolean`
+
+#### Defined in
+
+[src/Store.js:37](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Store.js#L37)
 
 ___
 
@@ -50,7 +73,17 @@ ___
 
 #### Defined in
 
-[src/Store.js:30](https://github.com/supercat911/store/blob/4ce2690b02438d095cf78c7e6db397219c282c9d/src/Store.js#L30)
+[src/Store.js:30](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Store.js#L30)
+
+___
+
+### memo
+
+• **memo**: `string`
+
+#### Defined in
+
+[src/Store.js:36](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Store.js#L36)
 
 ___
 
@@ -60,7 +93,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:34](https://github.com/supercat911/store/blob/4ce2690b02438d095cf78c7e6db397219c282c9d/src/Store.js#L34)
+[src/Store.js:35](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Store.js#L35)
 
 ___
 
@@ -70,4 +103,4 @@ ___
 
 #### Defined in
 
-[src/Store.js:33](https://github.com/supercat911/store/blob/4ce2690b02438d095cf78c7e6db397219c282c9d/src/Store.js#L33)
+[src/Store.js:34](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Store.js#L34)

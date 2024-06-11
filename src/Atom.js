@@ -20,10 +20,7 @@ export class Atom {
     constructor(store, name, value) {
         this.#store = store;
         this.#name = name;
-
-        if (typeof value != "undefined") {
-            this.value = value;
-        }
+        this.value = value;
     }
 
 

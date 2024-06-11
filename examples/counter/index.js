@@ -1,6 +1,6 @@
 // @ts-check 
 
-import { Store} from "./../../index.js";
+import { Store } from "../../src/Store.js";
 
 var counter_value = /** @type {HTMLElement} */ (document.querySelector("#counter_value"));
 var counter_value_2 = /** @type {HTMLElement} */ (document.querySelector("#counter_value_2"));
@@ -30,7 +30,7 @@ const inc = () => {
 store.subscribe("counter", showValue);
 store.subscribe("counter", showValue_2);
 
-button_dec.addEventListener("click", dec);
-button_inc.addEventListener("click", inc);
+button_dec?.addEventListener("click", dec);
+button_inc?.addEventListener("click", inc);
 
 obj.counter = 0;

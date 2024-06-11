@@ -6,7 +6,7 @@ Cross-browser storage for all use cases.
 
 > A store is simply an object with that allow interested parties to read the store value and be notified whenever it changes.
 
-* tiny (bundle size is 11.8 kb)
+* tiny (bundle size is 12 kb)
 * agnostic
 * reactive
 * support for instant and delayed reactions
@@ -67,8 +67,8 @@ index.js
 // @ts-check 
 
 //import { Store } from "@supercat1337/store";
-//import { Store } from "https://cdn.jsdelivr.net/npm/@supercat1337/store@latest/dist/store.bundle.esm.min.js";
 
+// for web
 import { Store } from "https://cdn.jsdelivr.net/npm/@supercat1337/store@latest/dist/store.bundle.esm.js";
 
 var a_counter_value = /** @type {HTMLElement} */ (document.querySelector("#a_counter_value"));
@@ -119,36 +119,99 @@ b_button_inc?.addEventListener("click", () => {
 });
 ```
 
-Also you can work with objects and arrays.
+Also you can work with arrays
 ```js
 // @ts-check 
 import { Store } from "@supercat1337/store";
 
-class Sample {
-    a = 0;
-    c = [];
+var store = new Store;
 
-    incA () {
-        this.a++;
-    }
+var a = store.createCollection([]);
+var b = store.createComputed(()=>{
+    return a.value.length;
+});
+
+b.subscribe((details) => {
+    console.log(`b = ${details.value}`);
+});
+
+var arr = a.value;
+
+arr.push(1);
+// outputs: b = 1
+arr.push(2);
+// outputs: b = 2
+arr.pop()
+// outputs: b = 1
+
+```
+
+And objects
+```js
+
+// @ts-check
+import { Store } from '@supercat1337/store';
+
+class State {
+  counter1 = 0;
+  counter2 = 0;
+  counter3 = 0;
+
+  incr1 = () => {
+    this.counter1++;
+  };
+
+  incr2 = () => {
+    this.counter2++;
+  };
+
+  incr3 = () => {
+    this.counter3++;
+  };
 }
 
-var store = new Store;
-var sample = store.observeObject(new Sample);
+const store = new Store();
+const state = store.observeObject(new State());
 
-sample.store.subscribe("a", (details)=>{
-    // a is changed
-    //store.log(details);
+const counter1div = document.createElement('div');
+const counter2div = document.createElement('div');
+const counter3div = document.createElement('div');
+
+const btn1 = document.createElement('button');
+btn1.innerText = 'inct 1';
+btn1.addEventListener('click', state.incr1);
+
+const btn2 = document.createElement('button');
+btn2.innerText = 'inct 2';
+btn2.addEventListener('click', () => {
+  state.counter2++;
 });
 
-sample.store.subscribe("c", (details)=>{
-    // c is changed
-    //store.log(details);
+document.body.appendChild(counter1div);
+document.body.appendChild(counter2div);
+document.body.appendChild(counter3div);
+document.body.appendChild(btn1);
+document.body.appendChild(btn2);
+
+(async () => {
+  await store.when(() => state.counter1 >= 3);
+
+  alert('Another cool thing is when');
+})();
+
+// Trigger when counter1 or counter2 changed
+store.autorun(() => {
+  counter1div.innerHTML = `counter 1: ${state.counter1}`;
+  counter2div.innerHTML = `counter 2: ${state.counter2}`;
 });
 
-sample.incA();
-sample.incA();
+// Trigger when counter3 changed (another way)
+store.reaction(
+  () => [state.counter3],
+  () => {
+    counter3div.innerHTML = `counter 3: ${state.counter3}`;
+  }
+);
 
-sample.c.push("foo");
-
+setInterval(state.incr3, 1000);
 ```

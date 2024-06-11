@@ -20,10 +20,7 @@ class Atom {
     constructor(store, name, value) {
         this.#store = store;
         this.#name = name;
-
-        if (typeof value != "undefined") {
-            this.value = value;
-        }
+        this.value = value;
     }
 
 
@@ -156,13 +153,14 @@ class Computed {
      * @param {Store} store 
      * @param {string} name 
      * @param {(store: Store)=>any} [callback] 
+     * @param {{is_hard?:boolean}} [options={}] 
      */
-    constructor(store, name, callback) {
+    constructor(store, name, callback, options = {}) {
         this.#store = store;
         this.#name = name;
 
         if (typeof callback != "undefined") {
-            this.#store.createComputedItem(this.#name, callback);
+            this.#store.createComputedItem(this.#name, callback, options);
         }
     }
 
@@ -258,6 +256,20 @@ function isObject(x) {
     return typeof x === 'object' && !Array.isArray(x) && x !== null;
 }
 
+/**
+ * Converts array to set
+ * @template T
+ * @param {T[]} arr 
+ * @returns {Set<T>}
+ */
+function arrayToSet(arr) {
+    var result = new Set;
+    for (let i = 0; i < arr.length; i++) {
+        result.add(arr[i]);
+    }
+    return result;
+}
+
 // @ts-check
 
 
@@ -281,10 +293,17 @@ function isObject(x) {
  * @typedef {Object} TypeStructureOfComputed
  * @property {string} item_name
  * @property {string[]} dependencies
+ * @property {Set<string>} influences
  * @property {()=>any} getter
  * @property {any} value
  * @property {boolean} stale
+ * @property {string} memo
+ * @property {boolean} is_hard
  * 
+ */
+
+/**
+ * @typedef { {is_hard?:boolean} } ComputedOptions
  */
 
 /**
@@ -653,26 +672,33 @@ class Store {
 
     /**
      * 
-     * @param {string[]} item_names
+     * @param {string[]} item_names atoms & collections
      */
     #sendSignalToComputedItems(item_names) {
 
-        var updated_item_names = new Set;
-        for (let i = 0; i < item_names.length; i++) {
-            updated_item_names.add(item_names[i]);
-        }
+        var updated_item_names = arrayToSet(item_names);
+        var staled_computeds = new Set;
 
         this.#computed.forEach((computed) => {
-            let is_stale = this.#markStaleComputedValueIfNeeded(computed, updated_item_names);
-            if (!is_stale) return;
-
-            if (!this.hasSubscribers(computed.item_name)) return;
-
-            let details = this.#recalc(computed.item_name);
-            if (details === false) { return; }
+            //console.log(updated_item_names, staled_computeds);
+            this.#markStaleComputedValueIfNeeded(computed, updated_item_names, staled_computeds);
         });
 
+        var store = this;
+
+        var staled_computeds_with_subscribers = Array.from(staled_computeds).filter(item_name => store.hasSubscribers(item_name));
+
+        staled_computeds_with_subscribers.forEach(computed_name => {
+            let computed = store.#computed.get(computed_name);
+            if (!computed) return;
+
+            if (computed.stale) {
+                store.#recalc(computed.item_name);
+            }
+
+        });
     }
+
 
     /**
      * Sets values of items
@@ -809,15 +835,27 @@ class Store {
      * @returns {false|UpdateEventDetails}
      */
     #recalc(item_name) {
+
         let computed = this.#computed.get(item_name);
         if (computed === undefined) throw new Error(`#recalc error: ${item_name}`);
 
         let old_value = computed.value;
 
+        if (computed.is_hard) {
+            let old_memo = computed.memo;
+            let memo = JSON.stringify(computed.dependencies.map(dep => this.getItem(dep)));
+
+            if (old_memo === memo) {
+                computed.stale = false;
+                return false;
+            } else {
+                computed.memo = memo;
+            }
+        }
+
         computed.stale = true;
 
         let value = computed.getter();
-
         computed.stale = false;
 
         let equal = true;
@@ -895,8 +933,9 @@ class Store {
      * 
      * @param {string} item_name 
      * @param {(store: Store)=>any} callback
+     * @param {*} options 
      */
-    #registerComputed(item_name, callback) {
+    #registerComputed(item_name, callback, options = {}) {
 
         let store = this;
 
@@ -913,39 +952,92 @@ class Store {
         var result = this.getUsedItems(__callback);
 
         var value = result.value;
-        var depsArray = result.items.filter(item_name => this.isAtomItem(item_name) || this.isCollection(item_name));
+        var depsArray = result.items;//.filter(item_name => this.isAtomItem(item_name) || this.isCollection(item_name));
+
+        var depsComputed = result.items.filter(item_name => this.isComputedItem(item_name));
+
+        depsComputed.forEach(deps_item_name => {
+            let computed = this.#computed.get(deps_item_name);
+            computed?.influences.add(item_name);
+        });
 
         if (depsArray.length == 0) {
             throw new Error(`Computed item ${item_name} hasn't dependencies`);
         }
 
+        let is_hard = options.hasOwnProperty("is_hard")? options.is_hard: false;
+        let memo = "";
+
+        if (is_hard) {
+            memo = JSON.stringify(depsArray.map(item => this.getItem(item)));    
+        }
+
         this.#computed.set(item_name, {
             item_name: item_name,
             dependencies: depsArray,
+            influences: new Set, // влияет на другие компьютеды
             getter: __callback,
             value: value,
-            stale: false
+            stale: false,
+            memo,
+            is_hard
         });
-
     }
 
     /**
      * 
      * @param {TypeStructureOfComputed} computed 
      * @param {Set<string>} updated_item_names
+     * @param {Set<string>} staled_computeds 
      * @returns {boolean} Returns if value is stale 
      */
-    #markStaleComputedValueIfNeeded(computed, updated_item_names) {
+    #markStaleComputedValueIfNeeded(computed, updated_item_names, staled_computeds) {
+
+        if (computed.stale) return true;
+
+        //console.log(computed, updated_item_names, staled_computeds);
 
         var dependencies = computed.dependencies;
+        var computeds = computed.dependencies.filter(item_name => this.#computed.has(item_name));
 
         for (var i = 0; i < dependencies.length; i++) {
 
             if (updated_item_names.has(dependencies[i])) {
                 computed.stale = true;
-                return true;
+                staled_computeds.add(computed.item_name);
             }
         }
+
+        var store = this;
+        /**
+         * 
+         * @param {TypeStructureOfComputed} computed 
+         */
+        function f(computed) {
+
+            computed.influences.forEach(next_computed_name => {
+                let next_computed = store.#computed.get(next_computed_name);
+                if (!next_computed) return;
+
+                if (next_computed.stale) return;
+
+                next_computed.stale = true;
+                staled_computeds.add(next_computed_name);
+
+                if (next_computed.influences.size > 0) {
+                    f(next_computed);
+                }
+            });
+
+        }
+
+        computeds.forEach((computed_name) => {
+            let computed = store.#computed.get(computed_name);
+            if (!computed) return;
+
+            f(computed);
+        });
+
 
         return false;
     }
@@ -955,9 +1047,10 @@ class Store {
      * @param {string} item_name 
      * @param {(store: Store)=>any} callback 
      * @param {boolean} [skip_item_name_validation=false] 
+     * @param {ComputedOptions} [options={}] 
      * @returns {boolean}
      */
-    #createComputedItemExtended(item_name, callback, skip_item_name_validation = false) {
+    #createComputedItemExtended(item_name, callback, skip_item_name_validation = false, options = {}) {
 
         item_name = item_name.trim();
 
@@ -974,7 +1067,7 @@ class Store {
         }
 
 
-        this.#registerComputed(item_name, callback);
+        this.#registerComputed(item_name, callback, options);
         return true;
     }
 
@@ -982,6 +1075,7 @@ class Store {
      * Creates a computed item
      * @param {string} item_name 
      * @param {(store: Store)=>any} callback 
+     * @param {ComputedOptions} [options={}] 
      * @returns {boolean} is created
      * 
      * @example
@@ -1028,14 +1122,14 @@ class Store {
      * // outputs "#ERROR!"
      * ```
      */
-    createComputedItem(item_name, callback) {
+    createComputedItem(item_name, callback, options = {}) {
 
         if (this.#is_sealed) {
             this.logError(`Store is sealed. Can't create the item "${item_name}"`);
             return false;
         }
 
-        return this.#createComputedItemExtended(item_name, callback);
+        return this.#createComputedItemExtended(item_name, callback, false, options);
     }
 
     /**
@@ -2056,6 +2150,7 @@ class Store {
      * 
      * @param {(store: Store) => any} callback 
      * @param {string} [name] 
+     * @param {ComputedOptions} options 
      * @returns {TypeComputed}
      * 
      * @example
@@ -2085,12 +2180,12 @@ class Store {
      * 
      *```
      */
-    createComputed(callback, name) {
+    createComputed(callback, name, options = {}) {
         if (typeof name == "undefined") {
             name = this.#generateItemName();
         }
 
-        return new Computed(this, name, callback);
+        return new Computed(this, name, callback, options);
     }
 
 
