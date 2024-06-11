@@ -2597,7 +2597,7 @@ test("autorun", (t) => {
         t.pass();
     }
     else {
-        t.fail();
+        t.fail(String(foo));
     }
 
 });
@@ -2857,13 +2857,12 @@ test("computed (is_hard = true, option, computed is changed)", (t) => {
     const E = store.createComputed(() => hard(C.value), "E", { is_hard: true })
 
     E.subscribe(()=>{
-
+        t.log("C = ", C.value);
     });
 
     A.value = 1; // C is changed
 
     A.value = 3; // C is not changed
-
 
     if (foo == 2 ) {
         t.pass();

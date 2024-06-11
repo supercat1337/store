@@ -289,6 +289,14 @@ function arrayToSet(arr) {
  * @typedef {{[key:string] : UpdateEventDetails[]}} ChangeEventObject
  * @property {"set"|"delete"|null} eventType
  * @property {UpdatedItems} details
+ *
+ * @typedef {Object} TypeStructureOfAtom
+ * @property {any} value
+ * @property {number} version
+ * 
+ * @typedef {Object} TypeStructureOfCollection
+ * @property {*[]} value
+ * @property {number} version
  * 
  * @typedef {Object} TypeStructureOfComputed
  * @property {string} item_name
@@ -299,6 +307,7 @@ function arrayToSet(arr) {
  * @property {boolean} stale
  * @property {string} memo
  * @property {boolean} is_hard
+ * @property {number} version
  * 
  */
 
@@ -335,13 +344,13 @@ const item_name_pattern = /^([a-zA-Z_][a-zA-Z0-9_]*)$/;
 
 class Store {
 
-    /** @type {Map<string, any>} */
+    /** @type {Map<string, TypeStructureOfAtom>} */
     #atoms = new Map;
 
     /** @type {Map<string, TypeStructureOfComputed>} */
     #computed = new Map
 
-    /** @type {Map<string, Array>} */
+    /** @type {Map<string, TypeStructureOfCollection>} */
     #collections = new Map;
 
     /** @type {Map<string, Array>} */
@@ -454,8 +463,14 @@ class Store {
      * @returns {false|UpdateEventDetails}
      */
     #setAtom(item_name, value) {
-        let old_value = this.#atoms.get(item_name);
-        this.#atoms.set(item_name, value);
+        var old_value = undefined;
+
+        var atom = this.#atoms.get(item_name) || { version: 0, value: undefined };
+
+        if (atom) {
+            atom.version;
+            old_value = atom.value;
+        }
 
         let equal = true;
         if (this.#customCompareFunctions[item_name]) {
@@ -466,6 +481,11 @@ class Store {
         }
 
         if (!equal) {
+
+            atom.value = value;
+            atom.version++;
+            this.#atoms.set(item_name, atom);
+
             let details = new UpdateEventDetails;
             details.eventType = "set";
             details.item_name = item_name;
@@ -489,8 +509,8 @@ class Store {
         if (!this.#isValidItemName(item_name)) {
             throw new Error(`${item_name} is wrong store's item_name`);
         }
-
-        this.#atoms.set(item_name, value);
+        var atom = { version: 0, value };
+        this.#atoms.set(item_name, atom);
     }
 
 
@@ -508,7 +528,9 @@ class Store {
 
         property = property.toString();
 
-        let collection = this.#collections.get(item_name) || [];
+        var collection_obj = this.#collections.get(item_name) || { value: [], version: 0 };
+
+        let collection = collection_obj.value;
 
         let old_value = collection[property];
 
@@ -532,6 +554,7 @@ class Store {
         details.property = property;
         details.value = value;
         details.old_value = old_value;
+        collection_obj.version++;
 
         this.#registerEvent(item_name, details);
 
@@ -552,19 +575,22 @@ class Store {
 
         property = property.toString();
 
-        let collection = this.#collections.get(item_name);
+        var collection_obj = this.#collections.get(item_name) || { value: [], version: 0 };
+
+        var collection = collection_obj.value;
         if (collection === undefined) throw new Error(`#deleteCollectionItem error: ${item_name}`);
 
-        let old_value = collection[property];
+        var old_value = collection[property];
 
         delete collection[property];
 
-        let details = new UpdateEventDetails;
+        var details = new UpdateEventDetails;
         details.eventType = "delete";
         details.item_name = item_name;
         details.property = property;
         details.value = null;
         details.old_value = old_value;
+        collection_obj.version++;
 
         this.#registerEvent(item_name, details);
 
@@ -582,11 +608,13 @@ class Store {
             array = [];
         }
 
-        let old_array = this.#collections.get(item_name) || [];
+        var collection_obj = this.#collections.get(item_name) || { value: [], version: 0 };
 
-        let equal = true;
+        var old_array = collection_obj.value;
 
-        let length = old_array.length;
+        var equal = true;
+
+        var length = old_array.length;
 
         if (length != array.length) {
             let details = new UpdateEventDetails;
@@ -595,6 +623,7 @@ class Store {
             details.property = "length";
             details.value = array.length;
             details.old_value = length;
+            collection_obj.version++;
 
             this.#registerEvent(item_name, details);
         }
@@ -831,6 +860,26 @@ class Store {
 
     /**
      * 
+     * @param {string[]} item_names 
+     */
+    #calcMemo(item_names) {
+        return item_names.map(dep => {
+            var reactive = this.#atoms.get(dep) || this.#collections.get(dep);
+            if (reactive) return reactive.version;
+
+            var computed = this.#computed.get(dep);
+            if (!computed) return undefined;
+
+            if (!computed.stale) return computed.version;
+            
+            this.#getComputedValue(computed.item_name);
+
+            return computed.version;
+        }).join(",");
+    }
+
+    /**
+     * 
      * @param {string} item_name
      * @returns {false|UpdateEventDetails}
      */
@@ -843,7 +892,7 @@ class Store {
 
         if (computed.is_hard) {
             let old_memo = computed.memo;
-            let memo = JSON.stringify(computed.dependencies.map(dep => this.getItem(dep)));
+            let memo = this.#calcMemo(computed.dependencies);
 
             if (old_memo === memo) {
                 computed.stale = false;
@@ -854,7 +903,6 @@ class Store {
         }
 
         computed.stale = true;
-
         let value = computed.getter();
         computed.stale = false;
 
@@ -869,13 +917,13 @@ class Store {
         if (equal) return false;
 
         computed.value = value;
+        computed.version++;
 
         let details = new UpdateEventDetails;
         details.eventType = "set";
         details.item_name = item_name;
         details.value = value;
         details.old_value = old_value;
-
         this.#registerEvent(item_name, details);
 
         return details;
@@ -965,11 +1013,11 @@ class Store {
             throw new Error(`Computed item ${item_name} hasn't dependencies`);
         }
 
-        let is_hard = options.hasOwnProperty("is_hard")? options.is_hard: false;
-        let memo = "";
+        var is_hard = options.hasOwnProperty("is_hard") ? options.is_hard : false;
+        var memo = "";
 
         if (is_hard) {
-            memo = JSON.stringify(depsArray.map(item => this.getItem(item)));    
+            memo = this.#calcMemo(depsArray);
         }
 
         this.#computed.set(item_name, {
@@ -980,7 +1028,8 @@ class Store {
             value: value,
             stale: false,
             memo,
-            is_hard
+            is_hard,
+            version: 0
         });
     }
 
@@ -1252,7 +1301,10 @@ class Store {
                 }
                 else if (typeof property == "string") {
 
-                    let collection = store.#collections.get(item_name) || [];
+
+                    let collection_obj = store.#collections.get(item_name) || { value: [], version: 0 };
+
+                    let collection = collection_obj.value;
                     let index = parseInt(property);
                     let collection_length = collection.length;
 
@@ -1264,6 +1316,7 @@ class Store {
                         details.value = index + 1;
                         details.old_value = collection_length;
                         store.#registerEvent(item_name, details);
+                        collection_obj.version++;
                     }
 
                     let details = store.#setCollectionItem(item_name, property, value);
@@ -1282,7 +1335,7 @@ class Store {
             },
         });
 
-        store.#collections.set(item_name, array);
+        store.#collections.set(item_name, { version: 0, value: array });
         store.#collections_proxy.set(item_name, proxy);
 
         return proxy;
@@ -1548,7 +1601,7 @@ class Store {
 
     /**
      * 
-     * @returns {{[item_name:string]:any}}
+     * @returns {{[item_name:string]:TypeStructureOfAtom}}
      */
     #getAtoms() {
         return Object.fromEntries(this.#atoms);
@@ -1654,7 +1707,10 @@ class Store {
         if (this.#track_deps_flag) {
             this.#tracked_set.add(item_name);
         }
-        return this.#atoms.get(item_name);
+
+        var atom = this.#atoms.get(item_name);
+        var result = atom ? atom.value : undefined;
+        return result;
     }
 
     /**
@@ -2468,7 +2524,7 @@ class Store {
      * It also runs once when you create the autorun itself. It only responds to changes in observable state, 
      * things you have annotated atom, collection or computed.
      * @param {()=>any} func_to_track function to track items & reaction
-     * @returns {Unsubscriber | undefined} 
+     * @param {ComputedOptions} [options = {}] 
      * 
      * @example
      *```js
@@ -2537,11 +2593,9 @@ class Store {
      * 
      *```
      */
-    autorun(func_to_track) {
-        var result = this.getUsedItems(func_to_track);
-        if (result.items.length > 0) {
-            return this.onChangeAny(result.items, func_to_track);
-        }
+    autorun(func_to_track, options = {}) {
+        let computed = this.createComputed(func_to_track, undefined, options);
+        return computed.subscribe(()=>{});
     }
 
     /**
@@ -2550,13 +2604,17 @@ class Store {
      * It is important to note that the side effect only reacts to data that was accessed in the data function, 
      * which might be less than the data that is actually used in the effect function.
      * @param {()=>any} data_function function to track items
-     * @param {ChangeEventSubscriber} effect_function reaction
+     * @param {()=>any} effect_function reaction
+     * @param {ComputedOptions} [options = {}] 
      * @returns {Unsubscriber | undefined} 
      */
-    reaction(data_function, effect_function) {
+    reaction(data_function, effect_function, options = {}) {
         var result = this.getUsedItems(data_function);
         if (result.items.length > 0) {
-            return this.onChangeAny(result.items, effect_function);
+            let computed = this.createComputed(data_function, undefined, options);
+            return computed.subscribe(effect_function);
+
+            //return this.onChangeAny(result.items, effect_function);
         }
     }
 

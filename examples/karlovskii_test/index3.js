@@ -34,14 +34,9 @@ const E = store.createComputed(() => hard(C.value + A.value + D.value[0].x, 'E')
 const F = store.createComputed(() => hard(D.value[2].x || B.value, 'F'), "F", {is_hard: true});
 const G = store.createComputed(() => C.value + (C.value || E.value % 2) + D.value[4].x + F.value, "G");
 
-res.push(hard(G.value, 'H'));
-const H = G.subscribe(() => res.push(hard(G.value, 'H')));
-
-res.push(G.value)
-const I = G.subscribe(() => res.push(G.value));
-
-res.push(hard(F.value, 'J'));
-const J = F.subscribe(() => res.push(hard(F.value, 'J')));
+const H = store.autorun( ()=> res.push( hard( G.value, 'H' ) ), { is_hard: true } )
+const I = store.autorun( ()=> res.push( G.value ) )
+const J = store.autorun( ()=> res.push( hard( F.value, 'J' ) ), { is_hard: true } )
 
 res.length = 0;
 

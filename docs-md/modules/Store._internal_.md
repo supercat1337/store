@@ -22,4 +22,4 @@
 
 #### Defined in
 
-[src/Store.js:1098](https://github.com/supercat911/store/blob/dcf94f9bf5859da8b8a82002f194d5ec1e4d066b/src/Store.js#L1098)
+[src/Store.js:1152](https://github.com/supercat911/store/blob/492144ca91b765921f083b275f23923206d91a7b/src/Store.js#L1152)

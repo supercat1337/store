@@ -8,6 +8,14 @@ export type UpdatedItems = {
 export type ChangeEventObject = {
     [key: string]: UpdateEventDetails[];
 };
+export type TypeStructureOfAtom = {
+    value: any;
+    version: number;
+};
+export type TypeStructureOfCollection = {
+    value: any[];
+    version: number;
+};
 export type TypeStructureOfComputed = {
     item_name: string;
     dependencies: string[];
@@ -17,6 +25,7 @@ export type TypeStructureOfComputed = {
     stale: boolean;
     memo: string;
     is_hard: boolean;
+    version: number;
 };
 export type ComputedOptions = {
     is_hard?: boolean;
@@ -1003,7 +1012,7 @@ export class Store {
      * It also runs once when you create the autorun itself. It only responds to changes in observable state,
      * things you have annotated atom, collection or computed.
      * @param {()=>any} func_to_track function to track items & reaction
-     * @returns {Unsubscriber | undefined}
+     * @param {ComputedOptions} [options = {}]
      *
      * @example
      *```js
@@ -1072,17 +1081,18 @@ export class Store {
      *
      *```
      */
-    autorun(func_to_track: () => any): Unsubscriber | undefined;
+    autorun(func_to_track: () => any, options?: ComputedOptions): Unsubscriber;
     /**
      * reaction is like autorun, but gives more fine grained control on which observables will be tracked.
      * It takes two functions: the first, data function, is tracked and returns the data that is used as input for the second, effect function.
      * It is important to note that the side effect only reacts to data that was accessed in the data function,
      * which might be less than the data that is actually used in the effect function.
      * @param {()=>any} data_function function to track items
-     * @param {ChangeEventSubscriber} effect_function reaction
+     * @param {()=>any} effect_function reaction
+     * @param {ComputedOptions} [options = {}]
      * @returns {Unsubscriber | undefined}
      */
-    reaction(data_function: () => any, effect_function: ChangeEventSubscriber): Unsubscriber | undefined;
+    reaction(data_function: () => any, effect_function: () => any, options?: ComputedOptions): Unsubscriber | undefined;
     /**
      * when observes and runs the given predicate function until it returns true.
      * Once that happens, the given effect function is executed and the autorunner is disposed.
@@ -1112,6 +1122,14 @@ export class Store {
  * @property {"set"|"delete"|null} eventType
  * @property {UpdatedItems} details
  *
+ * @typedef {Object} TypeStructureOfAtom
+ * @property {any} value
+ * @property {number} version
+ *
+ * @typedef {Object} TypeStructureOfCollection
+ * @property {*[]} value
+ * @property {number} version
+ *
  * @typedef {Object} TypeStructureOfComputed
  * @property {string} item_name
  * @property {string[]} dependencies
@@ -1121,6 +1139,7 @@ export class Store {
  * @property {boolean} stale
  * @property {string} memo
  * @property {boolean} is_hard
+ * @property {number} version
  *
  */
 /**

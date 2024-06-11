@@ -6,7 +6,7 @@ Cross-browser storage for all use cases.
 
 > A store is simply an object with that allow interested parties to read the store value and be notified whenever it changes.
 
-* tiny (bundle size is 12 kb)
+* tiny (bundle size is 13 kb)
 * agnostic
 * reactive
 * support for instant and delayed reactions
