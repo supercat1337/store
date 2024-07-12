@@ -2,18 +2,18 @@
 
 /** @module Collection */
 
-import { Store, UpdateEventDetails } from "./Store.js";
+import { isObject } from "./helpers.js";
 
 export class Collection {
 
     /** @type {String} */
     #name
-    /** @type {Store} */
+    /** @type {import("./Store.js").TypeStore} */
     #store
 
     /**
      * Creates the atom item
-     * @param {Store} store 
+     * @param {import("./Store.js").TypeStore} store 
      * @param {string} name 
      * @param {any[]} [value] 
      */
@@ -36,7 +36,25 @@ export class Collection {
         this.#store.setItem(this.#name, value);
     }
 
+    /** @type {*[]} */
     get value() {
+        return this.#store.getItem(this.#name);
+    }
+
+    /**
+     * Sets value
+     *
+     * @type {any[]}
+     */
+    set content(value) {
+        this.#store.setItem(this.#name, value);
+    }
+
+    /** 
+     * Same as value
+     * @type {*[]} 
+     * */
+    get content() {
         return this.#store.getItem(this.#name);
     }
 
@@ -46,7 +64,7 @@ export class Collection {
 
     /**
      * 
-     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
+     * @param {(details:import("./Store.js").TypeUpdateEventDetails, store:import("./Store.js").TypeStore)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
@@ -63,6 +81,24 @@ export class Collection {
 
     get store() {
         return this.#store;
+    }
+
+    /**
+     * Sets update_data to the value of a collection element or extends the value of a collection element.
+     * @param {number} index 
+     * @param {*} update_data 
+     */
+    updateItemValue(index, update_data) {
+        var current_content = this.#store.getItem(this.#name);
+        var value;
+
+        if (isObject(current_content[index])) {
+            value = { ...current_content[index], ...update_data };
+        } else {
+            value = update_data;
+        }
+
+        current_content[index] = value;
     }
 
 }

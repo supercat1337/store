@@ -1,19 +1,20 @@
+// @ts-check
+
 import { EventEmitter } from '@supercat1337/event-emitter';
 export { EventEmitter } from '@supercat1337/event-emitter';
 
-// @ts-check
-
+/** @module Atom */
 
 class Atom {
 
     /** @type {String} */
     #name
-    /** @type {Store} */
+    /** @type {TypeStore} */
     #store
 
     /**
      * Creates the atom item
-     * @param {Store} store 
+     * @param {TypeStore} store 
      * @param {string} name 
      * @param {any} [value] 
      */
@@ -43,7 +44,7 @@ class Atom {
 
     /**
      * 
-     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
+     * @param {(details:TypeUpdateEventDetails, store:TypeStore)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
@@ -71,131 +72,6 @@ class Atom {
         return this.#store;
     }
 
-}
-
-// @ts-check
-
-
-class Collection {
-
-    /** @type {String} */
-    #name
-    /** @type {Store} */
-    #store
-
-    /**
-     * Creates the atom item
-     * @param {Store} store 
-     * @param {string} name 
-     * @param {any[]} [value] 
-     */
-    constructor(store, name, value) {
-        this.#store = store;
-        this.#name = name;
-
-        if (typeof value != "undefined") {
-            this.#store.createCollectionItem(this.#name, value);
-        }
-
-    }
-
-    /**
-     * Sets value
-     *
-     * @type {any[]}
-     */
-    set value(value) {
-        this.#store.setItem(this.#name, value);
-    }
-
-    get value() {
-        return this.#store.getItem(this.#name);
-    }
-
-    get name() {
-        return this.#name;
-    }
-
-    /**
-     * 
-     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
-     * @param {number|undefined} [debounce_time] debounce time
-     */
-    subscribe(callback, debounce_time) {
-        return this.#store.subscribe(this.#name, callback, debounce_time);
-    }
-
-    clearSubscribers() {
-        return this.#store.clearItemSubscribers(this.#name);
-    }
-
-    hasSubscribers() {
-        return this.#store.hasSubscribers(this.#name);
-    }
-
-    get store() {
-        return this.#store;
-    }
-
-}
-
-// @ts-check
-
-
-class Computed {
-    /** @type {String} */
-    #name
-    /** @type {Store} */
-    #store
-
-    /**
-     * Creates the atom item
-     * @param {Store} store 
-     * @param {string} name 
-     * @param {(store: Store)=>any} [callback] 
-     * @param {{is_hard?:boolean}} [options={}] 
-     */
-    constructor(store, name, callback, options = {}) {
-        this.#store = store;
-        this.#name = name;
-
-        if (typeof callback != "undefined") {
-            this.#store.createComputedItem(this.#name, callback, options);
-        }
-    }
-
-    get value() {
-        return this.#store.getItem(this.#name);
-    }
-
-    get name() {
-        return this.#name;
-    }
-
-    /**
-     * 
-     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
-     * @param {number|undefined} [debounce_time] debounce time
-     */
-    subscribe(callback, debounce_time) {
-        return this.#store.subscribe(this.#name, callback, debounce_time);
-    }
-
-    clearSubscribers() {
-        return this.#store.clearItemSubscribers(this.#name);
-    }
-
-    hasSubscribers() {
-        return this.#store.hasSubscribers(this.#name);
-    }
-
-    recalc() {
-        return this.#store.recalcComputed(this.#name);
-    }
-
-    get store() {
-        return this.#store;
-    }
 }
 
 // @ts-check
@@ -273,6 +149,168 @@ function arrayToSet(arr) {
 // @ts-check
 
 
+class Collection {
+
+    /** @type {String} */
+    #name
+    /** @type {TypeStore} */
+    #store
+
+    /**
+     * Creates the atom item
+     * @param {TypeStore} store 
+     * @param {string} name 
+     * @param {any[]} [value] 
+     */
+    constructor(store, name, value) {
+        this.#store = store;
+        this.#name = name;
+
+        if (typeof value != "undefined") {
+            this.#store.createCollectionItem(this.#name, value);
+        }
+
+    }
+
+    /**
+     * Sets value
+     *
+     * @type {any[]}
+     */
+    set value(value) {
+        this.#store.setItem(this.#name, value);
+    }
+
+    /** @type {*[]} */
+    get value() {
+        return this.#store.getItem(this.#name);
+    }
+
+    /**
+     * Sets value
+     *
+     * @type {any[]}
+     */
+    set content(value) {
+        this.#store.setItem(this.#name, value);
+    }
+
+    /** 
+     * Same as value
+     * @type {*[]} 
+     * */
+    get content() {
+        return this.#store.getItem(this.#name);
+    }
+
+    get name() {
+        return this.#name;
+    }
+
+    /**
+     * 
+     * @param {(details:TypeUpdateEventDetails, store:TypeStore)=>void} callback
+     * @param {number|undefined} [debounce_time] debounce time
+     */
+    subscribe(callback, debounce_time) {
+        return this.#store.subscribe(this.#name, callback, debounce_time);
+    }
+
+    clearSubscribers() {
+        return this.#store.clearItemSubscribers(this.#name);
+    }
+
+    hasSubscribers() {
+        return this.#store.hasSubscribers(this.#name);
+    }
+
+    get store() {
+        return this.#store;
+    }
+
+    /**
+     * Sets update_data to the value of a collection element or extends the value of a collection element.
+     * @param {number} index 
+     * @param {*} update_data 
+     */
+    updateItemValue(index, update_data) {
+        var current_content = this.#store.getItem(this.#name);
+        var value;
+
+        if (isObject(current_content[index])) {
+            value = { ...current_content[index], ...update_data };
+        } else {
+            value = update_data;
+        }
+
+        current_content[index] = value;
+    }
+
+}
+
+// @ts-check
+
+/** @module Computed */
+
+class Computed {
+    /** @type {String} */
+    #name
+    /** @type {TypeStore} */
+    #store
+
+    /**
+     * Creates the atom item
+     * @param {TypeStore} store 
+     * @param {string} name 
+     * @param {(store: TypeStore)=>any} [callback] 
+     * @param {{is_hard?:boolean}} [options={}] 
+     */
+    constructor(store, name, callback, options = {}) {
+        this.#store = store;
+        this.#name = name;
+
+        if (typeof callback != "undefined") {
+            this.#store.createComputedItem(this.#name, callback, options);
+        }
+    }
+
+    get value() {
+        return this.#store.getItem(this.#name);
+    }
+
+    get name() {
+        return this.#name;
+    }
+
+    /**
+     * 
+     * @param {(details:TypeUpdateEventDetails, store:TypeStore)=>void} callback
+     * @param {number|undefined} [debounce_time] debounce time
+     */
+    subscribe(callback, debounce_time) {
+        return this.#store.subscribe(this.#name, callback, debounce_time);
+    }
+
+    clearSubscribers() {
+        return this.#store.clearItemSubscribers(this.#name);
+    }
+
+    hasSubscribers() {
+        return this.#store.hasSubscribers(this.#name);
+    }
+
+    recalc() {
+        return this.#store.recalcComputed(this.#name);
+    }
+
+    get store() {
+        return this.#store;
+    }
+}
+
+// @ts-check
+
+
 /**
  * @preserve
  * 
@@ -320,6 +358,10 @@ function arrayToSet(arr) {
  * @typedef {Computed} TypeComputed
  * @typedef {Collection} TypeCollection
 */
+
+/** @typedef {Store} TypeStore */
+
+/** @typedef {UpdateEventDetails} TypeUpdateEventDetails */
 
 class UpdateEventDetails {
 

@@ -2,19 +2,17 @@
 
 /** @module Computed */
 
-import { Store, UpdateEventDetails } from "./Store.js";
-
 export class Computed {
     /** @type {String} */
     #name
-    /** @type {Store} */
+    /** @type {import("./Store.js").TypeStore} */
     #store
 
     /**
      * Creates the atom item
-     * @param {Store} store 
+     * @param {import("./Store.js").TypeStore} store 
      * @param {string} name 
-     * @param {(store: Store)=>any} [callback] 
+     * @param {(store: import("./Store.js").TypeStore)=>any} [callback] 
      * @param {{is_hard?:boolean}} [options={}] 
      */
     constructor(store, name, callback, options = {}) {
@@ -36,7 +34,7 @@ export class Computed {
 
     /**
      * 
-     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
+     * @param {(details:import("./Store.js").TypeUpdateEventDetails, store:import("./Store.js").TypeStore)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {

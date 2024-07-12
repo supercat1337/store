@@ -17,6 +17,7 @@
 
 ### Accessors
 
+- [content](Store._internal_.Collection.md#content)
 - [name](Store._internal_.Collection.md#name)
 - [store](Store._internal_.Collection.md#store)
 - [value](Store._internal_.Collection.md#value)
@@ -26,6 +27,7 @@
 - [clearSubscribers](Store._internal_.Collection.md#clearsubscribers)
 - [hasSubscribers](Store._internal_.Collection.md#hassubscribers)
 - [subscribe](Store._internal_.Collection.md#subscribe)
+- [updateItemValue](Store._internal_.Collection.md#updateitemvalue)
 
 ## Constructors
 
@@ -49,7 +51,7 @@ Creates the atom item
 
 #### Defined in
 
-[src/Collection.js:20](https://github.com/supercat911/store/blob/492144ca91b765921f083b275f23923206d91a7b/src/Collection.js#L20)
+[src/Collection.js:20](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L20)
 
 ## Properties
 
@@ -59,7 +61,7 @@ Creates the atom item
 
 #### Defined in
 
-[src/Collection.js:10](https://github.com/supercat911/store/blob/492144ca91b765921f083b275f23923206d91a7b/src/Collection.js#L10)
+[src/Collection.js:10](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L10)
 
 ___
 
@@ -69,9 +71,43 @@ ___
 
 #### Defined in
 
-[src/Collection.js:12](https://github.com/supercat911/store/blob/492144ca91b765921f083b275f23923206d91a7b/src/Collection.js#L12)
+[src/Collection.js:12](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L12)
 
 ## Accessors
+
+### content
+
+• `get` **content**(): `any`[]
+
+Same as value
+
+#### Returns
+
+`any`[]
+
+#### Defined in
+
+[src/Collection.js:57](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L57)
+
+• `set` **content**(`value`): `void`
+
+Sets value
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `value` | `any`[] |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+[src/Collection.js:49](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L49)
+
+___
 
 ### name
 
@@ -83,7 +119,7 @@ ___
 
 #### Defined in
 
-[src/Collection.js:43](https://github.com/supercat911/store/blob/492144ca91b765921f083b275f23923206d91a7b/src/Collection.js#L43)
+[src/Collection.js:61](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L61)
 
 ___
 
@@ -97,21 +133,21 @@ ___
 
 #### Defined in
 
-[src/Collection.js:64](https://github.com/supercat911/store/blob/492144ca91b765921f083b275f23923206d91a7b/src/Collection.js#L64)
+[src/Collection.js:82](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L82)
 
 ___
 
 ### value
 
-• `get` **value**(): `any`
+• `get` **value**(): `any`[]
 
 #### Returns
 
-`any`
+`any`[]
 
 #### Defined in
 
-[src/Collection.js:39](https://github.com/supercat911/store/blob/492144ca91b765921f083b275f23923206d91a7b/src/Collection.js#L39)
+[src/Collection.js:40](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L40)
 
 • `set` **value**(`value`): `void`
 
@@ -121,7 +157,7 @@ Sets value
 
 | Name | Type |
 | :------ | :------ |
-| `value` | `any` |
+| `value` | `any`[] |
 
 #### Returns
 
@@ -129,7 +165,7 @@ Sets value
 
 #### Defined in
 
-[src/Collection.js:35](https://github.com/supercat911/store/blob/492144ca91b765921f083b275f23923206d91a7b/src/Collection.js#L35)
+[src/Collection.js:35](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L35)
 
 ## Methods
 
@@ -143,7 +179,7 @@ Sets value
 
 #### Defined in
 
-[src/Collection.js:56](https://github.com/supercat911/store/blob/492144ca91b765921f083b275f23923206d91a7b/src/Collection.js#L56)
+[src/Collection.js:74](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L74)
 
 ___
 
@@ -157,7 +193,7 @@ ___
 
 #### Defined in
 
-[src/Collection.js:60](https://github.com/supercat911/store/blob/492144ca91b765921f083b275f23923206d91a7b/src/Collection.js#L60)
+[src/Collection.js:78](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L78)
 
 ___
 
@@ -178,4 +214,27 @@ ___
 
 #### Defined in
 
-[src/Collection.js:52](https://github.com/supercat911/store/blob/492144ca91b765921f083b275f23923206d91a7b/src/Collection.js#L52)
+[src/Collection.js:70](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L70)
+
+___
+
+### updateItemValue
+
+▸ **updateItemValue**(`index`, `update_data`): `void`
+
+Sets update_data to the value of a collection element or extends the value of a collection element.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `index` | `number` |
+| `update_data` | `any` |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+[src/Collection.js:91](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L91)

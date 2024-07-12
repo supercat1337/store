@@ -57,6 +57,10 @@ import { arrayToSet, compareObjects, debounce, isObject } from "./helpers.js";
  * @typedef {Collection} TypeCollection
 */
 
+/** @typedef {Store} TypeStore */
+
+/** @typedef {UpdateEventDetails} TypeUpdateEventDetails */
+
 export class UpdateEventDetails {
 
     /** @type {*} */

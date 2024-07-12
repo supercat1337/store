@@ -1,7 +1,11 @@
 // @ts-check
 
 import { compareObjects, debounce } from "./../src/helpers.js";
+
 import { createStore, Store } from "./../src/Store.js";
+//import { createStore, Store } from "./../dist/store.bundle.esm.js";
+//import { createStore, Store } from "./../dist/store.esm.js";
+//import { createStore, Store } from "./../dist/store.bundle.esm.min.js";
 
 import test from "./../node_modules/ava/entrypoints/main.mjs";
 
@@ -2856,7 +2860,7 @@ test("computed (is_hard = true, option, computed is changed)", (t) => {
     const C = store.createComputed(() => A.value % 2 + B.value, "C")
     const E = store.createComputed(() => hard(C.value), "E", { is_hard: true })
 
-    E.subscribe(()=>{
+    E.subscribe(() => {
         t.log("C = ", C.value);
     });
 
@@ -2864,7 +2868,7 @@ test("computed (is_hard = true, option, computed is changed)", (t) => {
 
     A.value = 3; // C is not changed
 
-    if (foo == 2 ) {
+    if (foo == 2) {
         t.pass();
     }
     else {
@@ -2895,6 +2899,81 @@ test("computed (from computed)", (t) => {
     if (foo == 1) {
         t.pass();
     } else {
+        t.fail();
+    }
+
+});
+
+test("collection (value, content)", (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    let collection = store.createCollection([1, 2, 3]);
+    collection.content[3] = 4;
+
+    if (collection.value === collection.content && collection.value[3] === collection.content[3]) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+});
+
+test("collection (set content)", (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    let collection = store.createCollection([]);
+    collection.content = [0, 1, 2, 3, 4];
+
+    if (collection.value === collection.content && collection.value[3] === collection.content[3]) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+});
+
+test("collection (updateItemValue)", (t) => {
+    var store = new Store;
+    store.log = t.log;
+    store.logError = t.log;
+    store.warn = t.log;
+
+    let collection = store.createCollection([]);
+    collection.content = [0, { a: 123 }, 2, 3, 4];
+
+    // update non-object value
+    collection.updateItemValue(0, 5);
+    if (collection.content[0] == 5) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+    // update object value
+    collection.updateItemValue(1, 5);
+
+    // nothing to change
+    if (collection.content[1].a == 123) {
+        t.pass();
+    }
+    else {
+        t.fail();
+    }
+
+    // expand object value 
+    collection.updateItemValue(1, { b: 321 });
+
+    if (collection.content[1].a == 123 && collection.content[1].b == 321) {
+        t.pass();
+    }
+    else {
         t.fail();
     }
 
