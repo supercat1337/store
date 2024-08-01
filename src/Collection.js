@@ -101,5 +101,23 @@ export class Collection {
         current_content[index] = value;
     }
 
+    /**
+     * On has-subscribers event
+     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback 
+     * @returns 
+     */
+    onHasSubscribers(callback) {
+        return this.#store.onHasSubscribers(this.#name, callback);
+    }
+
+    /**
+     * On no-subscribers event
+     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback 
+     * @returns 
+     */
+    onNoSubscribers(callback) {
+        return this.#store.onNoSubscribers(this.#name, callback);
+    }
+
 }
 

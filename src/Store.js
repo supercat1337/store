@@ -1539,7 +1539,18 @@ export class Store {
         var _callback = debounce_time <= 0 ? callback : debounce(callback, debounce_time);
 
         let unsubscriber = this.#eventEmitter.on(item_name, _callback);
-        return unsubscriber;
+
+        if (this.#eventEmitter.events[item_name].length == 1) {
+            this.#eventEmitter.emit("#has-subscribers:" + item_name, item_name, this);    
+        }
+
+        return ()=>{
+            unsubscriber();
+            if (this.#eventEmitter.events[item_name] && this.#eventEmitter.events[item_name].length == 0) {
+                this.#eventEmitter.emit("#no-subscribers:" + item_name, item_name, this);    
+            }
+    
+        };
     }
 
     /**
@@ -1603,7 +1614,16 @@ export class Store {
      * @param {string} item_name 
      */
     clearItemSubscribers(item_name) {
+        let should_emit_event = false;
+        if (this.#eventEmitter.events[item_name] && this.#eventEmitter.events[item_name].length > 0) {
+            should_emit_event = true;
+        }
+
         delete this.#eventEmitter.events[item_name];
+
+        if (should_emit_event) {
+            this.#eventEmitter.emit("#no-subscribers:" + item_name);
+        }
     }
 
     /**
@@ -2396,6 +2416,25 @@ export class Store {
 
     }
 
+    /**
+     * On has-subscribers event
+     * @param {string} item_name 
+     * @param {(item_name:string, store:Store)=>void} callback 
+     */
+    onHasSubscribers(item_name, callback) {
+        let unsubscriber = this.#eventEmitter.on("#has-subscribers:" + item_name, callback);
+        return unsubscriber;
+    }
+
+    /**
+     * On no-subscribers event
+     * @param {string} item_name 
+     * @param {(item_name:string, store:Store)=>void} callback 
+     */
+    onNoSubscribers(item_name, callback) {
+        let unsubscriber = this.#eventEmitter.on("#no-subscribers:" + item_name, callback);
+        return unsubscriber;
+    }
 
 
 }
