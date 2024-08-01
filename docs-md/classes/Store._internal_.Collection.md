@@ -26,6 +26,8 @@
 
 - [clearSubscribers](Store._internal_.Collection.md#clearsubscribers)
 - [hasSubscribers](Store._internal_.Collection.md#hassubscribers)
+- [onHasSubscribers](Store._internal_.Collection.md#onhassubscribers)
+- [onNoSubscribers](Store._internal_.Collection.md#onnosubscribers)
 - [subscribe](Store._internal_.Collection.md#subscribe)
 - [updateItemValue](Store._internal_.Collection.md#updateitemvalue)
 
@@ -51,7 +53,7 @@ Creates the atom item
 
 #### Defined in
 
-[src/Collection.js:20](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L20)
+[src/Collection.js:20](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Collection.js#L20)
 
 ## Properties
 
@@ -61,7 +63,7 @@ Creates the atom item
 
 #### Defined in
 
-[src/Collection.js:10](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L10)
+[src/Collection.js:10](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Collection.js#L10)
 
 ___
 
@@ -71,7 +73,7 @@ ___
 
 #### Defined in
 
-[src/Collection.js:12](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L12)
+[src/Collection.js:12](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Collection.js#L12)
 
 ## Accessors
 
@@ -87,7 +89,7 @@ Same as value
 
 #### Defined in
 
-[src/Collection.js:57](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L57)
+[src/Collection.js:57](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Collection.js#L57)
 
 • `set` **content**(`value`): `void`
 
@@ -105,7 +107,7 @@ Sets value
 
 #### Defined in
 
-[src/Collection.js:49](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L49)
+[src/Collection.js:49](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Collection.js#L49)
 
 ___
 
@@ -119,7 +121,7 @@ ___
 
 #### Defined in
 
-[src/Collection.js:61](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L61)
+[src/Collection.js:61](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Collection.js#L61)
 
 ___
 
@@ -133,7 +135,7 @@ ___
 
 #### Defined in
 
-[src/Collection.js:82](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L82)
+[src/Collection.js:82](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Collection.js#L82)
 
 ___
 
@@ -147,7 +149,7 @@ ___
 
 #### Defined in
 
-[src/Collection.js:40](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L40)
+[src/Collection.js:40](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Collection.js#L40)
 
 • `set` **value**(`value`): `void`
 
@@ -165,7 +167,7 @@ Sets value
 
 #### Defined in
 
-[src/Collection.js:35](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L35)
+[src/Collection.js:35](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Collection.js#L35)
 
 ## Methods
 
@@ -179,7 +181,7 @@ Sets value
 
 #### Defined in
 
-[src/Collection.js:74](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L74)
+[src/Collection.js:74](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Collection.js#L74)
 
 ___
 
@@ -193,7 +195,51 @@ ___
 
 #### Defined in
 
-[src/Collection.js:78](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L78)
+[src/Collection.js:78](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Collection.js#L78)
+
+___
+
+### onHasSubscribers
+
+▸ **onHasSubscribers**(`callback`): `any`
+
+On has-subscribers event
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `callback` | (`item_name`: `string`, `store`: [`Store`](Store.Store.md)) => `void` |
+
+#### Returns
+
+`any`
+
+#### Defined in
+
+[src/Collection.js:109](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Collection.js#L109)
+
+___
+
+### onNoSubscribers
+
+▸ **onNoSubscribers**(`callback`): `any`
+
+On no-subscribers event
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `callback` | (`item_name`: `string`, `store`: [`Store`](Store.Store.md)) => `void` |
+
+#### Returns
+
+`any`
+
+#### Defined in
+
+[src/Collection.js:118](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Collection.js#L118)
 
 ___
 
@@ -214,7 +260,7 @@ ___
 
 #### Defined in
 
-[src/Collection.js:70](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L70)
+[src/Collection.js:70](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Collection.js#L70)
 
 ___
 
@@ -237,4 +283,4 @@ Sets update_data to the value of a collection element or extends the value of a 
 
 #### Defined in
 
-[src/Collection.js:91](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Collection.js#L91)
+[src/Collection.js:91](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Collection.js#L91)

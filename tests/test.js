@@ -2978,3 +2978,123 @@ test("collection (updateItemValue)", (t) => {
     }
 
 });
+
+test("store (onHasSubscribers / onNoSubscribers)", t => {
+
+    var store = new Store({ a: 1, b: 2 });
+    var foo = 0;
+    var bar = 0;
+    
+    store.onHasSubscribers("a", ()=>{
+        foo++;
+    });
+
+    store.onNoSubscribers("a", ()=>{
+        bar++;
+    });
+
+    var unsubscriber = store.subscribe("a", () => {});
+
+    unsubscriber();
+
+    if (foo != 1) {
+        return t.fail(`foo = ${foo}`);
+    }
+
+    if (bar != 1) {
+        return t.fail(`bar = ${bar}`);
+    }
+
+    return t.pass(); 
+});
+
+test("atom (onHasSubscribers / onNoSubscribers)", t => {
+
+    var store = new Store();
+    var a = store.createAtom(0);
+    var foo = 0;
+    var bar = 0;
+    
+    a.onHasSubscribers(()=>{
+        foo++;
+    });
+
+    a.onNoSubscribers(()=>{
+        bar++;
+    });
+
+    var unsubscriber = a.subscribe(() => {});
+
+    unsubscriber();
+
+    if (foo != 1) {
+        return t.fail(`foo = ${foo}`);
+    }
+
+    if (bar != 1) {
+        return t.fail(`bar = ${bar}`);
+    }
+
+    return t.pass(); 
+});
+
+test("computed (onHasSubscribers / onNoSubscribers)", t => {
+
+    var store = new Store();
+    var a = store.createAtom(0);
+    var b = store.createComputed(()=>a.value + 1);
+    var foo = 0;
+    var bar = 0;
+    
+    b.onHasSubscribers(()=>{
+        foo++;
+    });
+
+    b.onNoSubscribers(()=>{
+        bar++;
+    });
+
+    var unsubscriber = b.subscribe(() => {});
+
+    unsubscriber();
+
+    if (foo != 1) {
+        return t.fail(`foo = ${foo}`);
+    }
+
+    if (bar != 1) {
+        return t.fail(`bar = ${bar}`);
+    }
+
+    return t.pass(); 
+});
+
+test("collection (onHasSubscribers / onNoSubscribers)", t => {
+
+    var store = new Store();
+    var a = store.createCollection([]);
+    var foo = 0;
+    var bar = 0;
+    
+    a.onHasSubscribers(()=>{
+        foo++;
+    });
+
+    a.onNoSubscribers(()=>{
+        bar++;
+    });
+
+    var unsubscriber = a.subscribe(() => {});
+
+    unsubscriber();
+
+    if (foo != 1) {
+        return t.fail(`foo = ${foo}`);
+    }
+
+    if (bar != 1) {
+        return t.fail(`bar = ${bar}`);
+    }
+
+    return t.pass(); 
+});

@@ -25,6 +25,8 @@
 
 - [clearSubscribers](Store._internal_.Atom.md#clearsubscribers)
 - [hasSubscribers](Store._internal_.Atom.md#hassubscribers)
+- [onHasSubscribers](Store._internal_.Atom.md#onhassubscribers)
+- [onNoSubscribers](Store._internal_.Atom.md#onnosubscribers)
 - [setCompareFunction](Store._internal_.Atom.md#setcomparefunction)
 - [subscribe](Store._internal_.Atom.md#subscribe)
 
@@ -50,7 +52,7 @@ Creates the atom item
 
 #### Defined in
 
-[src/Atom.js:18](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Atom.js#L18)
+[src/Atom.js:18](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Atom.js#L18)
 
 ## Properties
 
@@ -60,7 +62,7 @@ Creates the atom item
 
 #### Defined in
 
-[src/Atom.js:8](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Atom.js#L8)
+[src/Atom.js:8](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Atom.js#L8)
 
 ___
 
@@ -70,7 +72,7 @@ ___
 
 #### Defined in
 
-[src/Atom.js:10](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Atom.js#L10)
+[src/Atom.js:10](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Atom.js#L10)
 
 ## Accessors
 
@@ -84,7 +86,7 @@ ___
 
 #### Defined in
 
-[src/Atom.js:38](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Atom.js#L38)
+[src/Atom.js:38](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Atom.js#L38)
 
 ___
 
@@ -98,7 +100,7 @@ ___
 
 #### Defined in
 
-[src/Atom.js:68](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Atom.js#L68)
+[src/Atom.js:68](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Atom.js#L68)
 
 ___
 
@@ -112,7 +114,7 @@ ___
 
 #### Defined in
 
-[src/Atom.js:34](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Atom.js#L34)
+[src/Atom.js:34](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Atom.js#L34)
 
 • `set` **value**(`value`): `void`
 
@@ -130,7 +132,7 @@ Sets value
 
 #### Defined in
 
-[src/Atom.js:30](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Atom.js#L30)
+[src/Atom.js:30](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Atom.js#L30)
 
 ## Methods
 
@@ -144,7 +146,7 @@ Sets value
 
 #### Defined in
 
-[src/Atom.js:51](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Atom.js#L51)
+[src/Atom.js:51](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Atom.js#L51)
 
 ___
 
@@ -158,7 +160,51 @@ ___
 
 #### Defined in
 
-[src/Atom.js:55](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Atom.js#L55)
+[src/Atom.js:55](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Atom.js#L55)
+
+___
+
+### onHasSubscribers
+
+▸ **onHasSubscribers**(`callback`): `any`
+
+On has-subscribers event
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `callback` | (`item_name`: `string`, `store`: [`Store`](Store.Store.md)) => `void` |
+
+#### Returns
+
+`any`
+
+#### Defined in
+
+[src/Atom.js:77](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Atom.js#L77)
+
+___
+
+### onNoSubscribers
+
+▸ **onNoSubscribers**(`callback`): `any`
+
+On no-subscribers event
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `callback` | (`item_name`: `string`, `store`: [`Store`](Store.Store.md)) => `void` |
+
+#### Returns
+
+`any`
+
+#### Defined in
+
+[src/Atom.js:86](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Atom.js#L86)
 
 ___
 
@@ -178,7 +224,7 @@ ___
 
 #### Defined in
 
-[src/Atom.js:64](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Atom.js#L64)
+[src/Atom.js:64](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Atom.js#L64)
 
 ___
 
@@ -199,4 +245,4 @@ ___
 
 #### Defined in
 
-[src/Atom.js:47](https://github.com/supercat911/store/blob/944b5f4aac0b7be6f7fa9086b27740887eaf78cb/src/Atom.js#L47)
+[src/Atom.js:47](https://github.com/supercat911/store/blob/1f1d5645db60e14bbd16c4c9c2d9a5bd0e5ed379/src/Atom.js#L47)
