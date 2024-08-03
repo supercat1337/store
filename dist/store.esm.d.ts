@@ -33,6 +33,8 @@ export type ComputedOptions = {
 export type TypeAtom = Atom;
 export type TypeComputed = Computed;
 export type TypeCollection = Collection;
+export type TypeStore = Store;
+export type TypeUpdateEventDetails = UpdateEventDetails;
 export class Store {
     /**
      * Creates a store
@@ -1081,7 +1083,7 @@ export class Store {
      *
      *```
      */
-    autorun(func_to_track: () => any, options?: ComputedOptions): Unsubscriber;
+    autorun(func_to_track: () => any, options?: ComputedOptions): any;
     /**
      * reaction is like autorun, but gives more fine grained control on which observables will be tracked.
      * It takes two functions: the first, data function, is tracked and returns the data that is used as input for the second, effect function.
@@ -1103,6 +1105,18 @@ export class Store {
      * @returns {Unsubscriber | undefined | Promise<true>}
      */
     when(predicate: () => boolean, effect?: () => void): Unsubscriber | undefined | Promise<true>;
+    /**
+     * On has-subscribers event
+     * @param {string} item_name
+     * @param {(item_name:string, store:Store)=>void} callback
+     */
+    onHasSubscribers(item_name: string, callback: (item_name: string, store: Store) => void): any;
+    /**
+     * On no-subscribers event
+     * @param {string} item_name
+     * @param {(item_name:string, store:Store)=>void} callback
+     */
+    onNoSubscribers(item_name: string, callback: (item_name: string, store: Store) => void): any;
     #private;
 }
 /**
@@ -1150,6 +1164,8 @@ export class Store {
  * @typedef {Computed} TypeComputed
  * @typedef {Collection} TypeCollection
 */
+/** @typedef {Store} TypeStore */
+/** @typedef {UpdateEventDetails} TypeUpdateEventDetails */
 export class UpdateEventDetails {
     /** @type {*} */
     value: any;
@@ -1180,14 +1196,15 @@ export function createStore(initObject?: {
    window.addEventListener('resize', debounce((evt) => console.log(evt), 250));
  */
 export function debounce<T extends (...args: any[]) => void>(func: T, wait: number): T;
+/** @module Atom */
 declare class Atom {
     /**
      * Creates the atom item
-     * @param {Store} store
+     * @param {import("./Store.js").TypeStore} store
      * @param {string} name
      * @param {any} [value]
      */
-    constructor(store: Store, name: string, value?: any);
+    constructor(store: any, name: string, value?: any);
     /**
      * Sets value
      *
@@ -1198,12 +1215,12 @@ declare class Atom {
     get name(): string;
     /**
      *
-     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
+     * @param {(details:import("./Store.js").TypeUpdateEventDetails, store:import("./Store.js").TypeStore)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
-    subscribe(callback: (details: UpdateEventDetails, store: Store) => void, debounce_time?: number | undefined): Unsubscriber;
-    clearSubscribers(): void;
-    hasSubscribers(): boolean;
+    subscribe(callback: (details: any, store: any) => void, debounce_time?: number | undefined): any;
+    clearSubscribers(): any;
+    hasSubscribers(): any;
     /**
      *
      * @param {{(a:any, b:any, item_name:string, property: (string | null)):boolean} | null} func_or_null
@@ -1212,59 +1229,114 @@ declare class Atom {
     setCompareFunction(func_or_null: {
         (a: any, b: any, item_name: string, property: (string | null)): boolean;
     } | null): boolean;
-    get store(): Store;
+    get store(): any;
+    /**
+     * On has-subscribers event
+     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback
+     * @returns
+     */
+    onHasSubscribers(callback: (item_name: string, store: any) => void): any;
+    /**
+     * On no-subscribers event
+     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback
+     * @returns
+     */
+    onNoSubscribers(callback: (item_name: string, store: any) => void): any;
     #private;
 }
+/** @module Computed */
 declare class Computed {
     /**
      * Creates the atom item
-     * @param {Store} store
+     * @param {import("./Store.js").TypeStore} store
      * @param {string} name
-     * @param {(store: Store)=>any} [callback]
+     * @param {(store: import("./Store.js").TypeStore)=>any} [callback]
      * @param {{is_hard?:boolean}} [options={}]
      */
-    constructor(store: Store, name: string, callback?: (store: Store) => any, options?: {
+    constructor(store: any, name: string, callback?: (store: any) => any, options?: {
         is_hard?: boolean;
     });
     get value(): any;
     get name(): string;
     /**
      *
-     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
+     * @param {(details:import("./Store.js").TypeUpdateEventDetails, store:import("./Store.js").TypeStore)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
-    subscribe(callback: (details: UpdateEventDetails, store: Store) => void, debounce_time?: number | undefined): Unsubscriber;
-    clearSubscribers(): void;
-    hasSubscribers(): boolean;
-    recalc(): false | UpdateEventDetails;
-    get store(): Store;
+    subscribe(callback: (details: any, store: any) => void, debounce_time?: number | undefined): any;
+    clearSubscribers(): any;
+    hasSubscribers(): any;
+    recalc(): any;
+    get store(): any;
+    /**
+     * On has-subscribers event
+     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback
+     * @returns
+     */
+    onHasSubscribers(callback: (item_name: string, store: any) => void): any;
+    /**
+     * On no-subscribers event
+     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback
+     * @returns
+     */
+    onNoSubscribers(callback: (item_name: string, store: any) => void): any;
     #private;
 }
 declare class Collection {
     /**
      * Creates the atom item
-     * @param {Store} store
+     * @param {import("./Store.js").TypeStore} store
      * @param {string} name
      * @param {any[]} [value]
      */
-    constructor(store: Store, name: string, value?: any[]);
+    constructor(store: any, name: string, value?: any[]);
     /**
      * Sets value
      *
      * @type {any[]}
      */
-    set value(value: any);
-    get value(): any;
+    set value(value: any[]);
+    /** @type {*[]} */
+    get value(): any[];
+    /**
+     * Sets value
+     *
+     * @type {any[]}
+     */
+    set content(value: any[]);
+    /**
+     * Same as value
+     * @type {*[]}
+     * */
+    get content(): any[];
     get name(): string;
     /**
      *
-     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
+     * @param {(details:import("./Store.js").TypeUpdateEventDetails, store:import("./Store.js").TypeStore)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
-    subscribe(callback: (details: UpdateEventDetails, store: Store) => void, debounce_time?: number | undefined): Unsubscriber;
-    clearSubscribers(): void;
-    hasSubscribers(): boolean;
-    get store(): Store;
+    subscribe(callback: (details: any, store: any) => void, debounce_time?: number | undefined): any;
+    clearSubscribers(): any;
+    hasSubscribers(): any;
+    get store(): any;
+    /**
+     * Sets update_data to the value of a collection element or extends the value of a collection element.
+     * @param {number} index
+     * @param {*} update_data
+     */
+    updateItemValue(index: number, update_data: any): void;
+    /**
+     * On has-subscribers event
+     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback
+     * @returns
+     */
+    onHasSubscribers(callback: (item_name: string, store: any) => void): any;
+    /**
+     * On no-subscribers event
+     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback
+     * @returns
+     */
+    onNoSubscribers(callback: (item_name: string, store: any) => void): any;
     #private;
 }
 export {};

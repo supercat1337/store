@@ -1,6 +1,6 @@
 {
   "name": "@supercat1337/store",
-  "version": "1.0.26",
+  "version": "1.0.27",
   "description": "Reactive store",
   "repository": {
     "type": "git",
@@ -11,13 +11,14 @@
   "scripts": {
     "test": "c8 ava",
     "__build": "node scripts/build.js",
-    "build": "npm run build_esm && npm run build_esm_bundle && npm run build_esm_bundle_min && npm run create_types && npm run docs && npm run docs-md",
+    "build": "npm run remove_type_files && npm run build_esm && npm run build_esm_bundle && npm run build_esm_bundle_min && npm run create_types && npm run docs && npm run docs-md",
     "build_esm": "rollup ./src/Store.js --file ./dist/store.esm.js --format es",
     "build_esm_bundle": "rollup ./src/Store.js --file ./dist/store.bundle.esm.js --format es -p ./node_modules/@rollup/plugin-node-resolve",
     "build_esm_bundle_min": "esbuild --minify --bundle --platform=neutral --legal-comments=none ./src/Store.js --outfile=./dist/store.bundle.esm.min.js",
     "create_types": "npx -p typescript tsc --project my.tsconfig.types.json",
     "docs": "typedoc --tsconfig \"my.tsconfig.docs.json\" --options \"typedoc.json\"",
-    "docs-md": "typedoc --tsconfig \"my.tsconfig.docs.json\" --options \"typedoc-md.json\""
+    "docs-md": "typedoc --tsconfig \"my.tsconfig.docs.json\" --options \"typedoc-md.json\"",
+    "remove_type_files": "del /q *.d.ts *.d.ts.map && cd dist && del /s /q *.d.ts *.d.ts.map && cd ../src && del /s /q *.d.ts *.d.ts.map && cd .."
   },
   "keywords": [
     "store",

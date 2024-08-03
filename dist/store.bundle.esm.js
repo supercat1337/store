@@ -91,12 +91,12 @@ class Atom {
 
     /** @type {String} */
     #name
-    /** @type {TypeStore} */
+    /** @type {import("./Store.js").TypeStore} */
     #store
 
     /**
      * Creates the atom item
-     * @param {TypeStore} store 
+     * @param {import("./Store.js").TypeStore} store 
      * @param {string} name 
      * @param {any} [value] 
      */
@@ -126,7 +126,7 @@ class Atom {
 
     /**
      * 
-     * @param {(details:TypeUpdateEventDetails, store:TypeStore)=>void} callback
+     * @param {(details:import("./Store.js").TypeUpdateEventDetails, store:import("./Store.js").TypeStore)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
@@ -156,7 +156,7 @@ class Atom {
 
     /**
      * On has-subscribers event
-     * @param {(item_name:string, store:TypeStore)=>void} callback 
+     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback 
      * @returns 
      */
     onHasSubscribers(callback) {
@@ -165,7 +165,7 @@ class Atom {
 
     /**
      * On no-subscribers event
-     * @param {(item_name:string, store:TypeStore)=>void} callback 
+     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback 
      * @returns 
      */
     onNoSubscribers(callback) {
@@ -253,12 +253,12 @@ class Collection {
 
     /** @type {String} */
     #name
-    /** @type {TypeStore} */
+    /** @type {import("./Store.js").TypeStore} */
     #store
 
     /**
      * Creates the atom item
-     * @param {TypeStore} store 
+     * @param {import("./Store.js").TypeStore} store 
      * @param {string} name 
      * @param {any[]} [value] 
      */
@@ -309,7 +309,7 @@ class Collection {
 
     /**
      * 
-     * @param {(details:TypeUpdateEventDetails, store:TypeStore)=>void} callback
+     * @param {(details:import("./Store.js").TypeUpdateEventDetails, store:import("./Store.js").TypeStore)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
@@ -348,7 +348,7 @@ class Collection {
 
     /**
      * On has-subscribers event
-     * @param {(item_name:string, store:TypeStore)=>void} callback 
+     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback 
      * @returns 
      */
     onHasSubscribers(callback) {
@@ -357,7 +357,7 @@ class Collection {
 
     /**
      * On no-subscribers event
-     * @param {(item_name:string, store:TypeStore)=>void} callback 
+     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback 
      * @returns 
      */
     onNoSubscribers(callback) {
@@ -373,14 +373,14 @@ class Collection {
 class Computed {
     /** @type {String} */
     #name
-    /** @type {TypeStore} */
+    /** @type {import("./Store.js").TypeStore} */
     #store
 
     /**
      * Creates the atom item
-     * @param {TypeStore} store 
+     * @param {import("./Store.js").TypeStore} store 
      * @param {string} name 
-     * @param {(store: TypeStore)=>any} [callback] 
+     * @param {(store: import("./Store.js").TypeStore)=>any} [callback] 
      * @param {{is_hard?:boolean}} [options={}] 
      */
     constructor(store, name, callback, options = {}) {
@@ -402,7 +402,7 @@ class Computed {
 
     /**
      * 
-     * @param {(details:TypeUpdateEventDetails, store:TypeStore)=>void} callback
+     * @param {(details:import("./Store.js").TypeUpdateEventDetails, store:import("./Store.js").TypeStore)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
@@ -427,7 +427,7 @@ class Computed {
 
     /**
      * On has-subscribers event
-     * @param {(item_name:string, store:TypeStore)=>void} callback 
+     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback 
      * @returns 
      */
     onHasSubscribers(callback) {
@@ -436,7 +436,7 @@ class Computed {
 
     /**
      * On no-subscribers event
-     * @param {(item_name:string, store:TypeStore)=>void} callback 
+     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback 
      * @returns 
      */
     onNoSubscribers(callback) {
