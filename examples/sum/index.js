@@ -22,30 +22,30 @@ var c = store.createComputed(() => {
 });
 
 a.subscribe(() => {
-    a_counter_value.innerText = a.value;
+    a_counter_value.innerText = a.value.toString();
 }, 100);
 
 b.subscribe(() => {
-    b_counter_value.innerText = b.value;
+    b_counter_value.innerText = b.value.toString();
 }, 100);
 
 c.subscribe(() => {
-    c_counter_value.innerText = c.value;
+    c_counter_value.innerText = c.value.toString();
 }, 100);
 
 
-a_button_dec.addEventListener("click", () => {
+a_button_dec?.addEventListener("click", () => {
     a.value--;
 });
 
-a_button_inc.addEventListener("click", () => {
+a_button_inc?.addEventListener("click", () => {
     a.value++;
 });
 
-b_button_dec.addEventListener("click", () => {
+b_button_dec?.addEventListener("click", () => {
     b.value--;
 });
 
-b_button_inc.addEventListener("click", () => {
+b_button_inc?.addEventListener("click", () => {
     b.value++;
 });

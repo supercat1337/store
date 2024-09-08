@@ -5,7 +5,7 @@ import { Store } from "./../../src/Store.js";
 const store = new Store;
 globalThis.store = store;
 
-const todos_collection = store.createCollection([], "todos");
+const todos_collection = store.createCollection(/** @type {string[]} */ ([]), "todos");
 
 const todos = todos_collection.value;
 globalThis.todos = todos_collection.value;
