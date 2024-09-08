@@ -76,7 +76,6 @@
 - [isCollection](Store.Store.md#iscollection)
 - [isComputedItem](Store.Store.md#iscomputeditem)
 - [isSealed](Store.Store.md#issealed)
-- [loadExpression](Store.Store.md#loadexpression)
 - [next](Store.Store.md#next)
 - [observeObject](Store.Store.md#observeobject)
 - [onChange](Store.Store.md#onchange)
@@ -123,7 +122,7 @@ this.log(store.getItem("a"), store.getItem("b"));
 
 #### Defined in
 
-[src/Store.js:165](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L165)
+[src/Store.js:167](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L167)
 
 ## Properties
 
@@ -133,7 +132,7 @@ this.log(store.getItem("a"), store.getItem("b"));
 
 #### Defined in
 
-[src/Store.js:88](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L88)
+[src/Store.js:90](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L90)
 
 ___
 
@@ -143,7 +142,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:124](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L124)
+[src/Store.js:126](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L126)
 
 ___
 
@@ -153,7 +152,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:112](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L112)
+[src/Store.js:114](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L114)
 
 ___
 
@@ -163,7 +162,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:94](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L94)
+[src/Store.js:96](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L96)
 
 ___
 
@@ -173,7 +172,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:97](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L97)
+[src/Store.js:99](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L99)
 
 ___
 
@@ -183,7 +182,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:91](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L91)
+[src/Store.js:93](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L93)
 
 ___
 
@@ -197,7 +196,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:103](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L103)
+[src/Store.js:105](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L105)
 
 ___
 
@@ -207,7 +206,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:115](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L115)
+[src/Store.js:117](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L117)
 
 ___
 
@@ -217,7 +216,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:117](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L117)
+[src/Store.js:119](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L119)
 
 ___
 
@@ -227,7 +226,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:106](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L106)
+[src/Store.js:108](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L108)
 
 ___
 
@@ -237,7 +236,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:100](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L100)
+[src/Store.js:102](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L102)
 
 ___
 
@@ -247,7 +246,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:109](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L109)
+[src/Store.js:111](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L111)
 
 ___
 
@@ -257,7 +256,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:119](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L119)
+[src/Store.js:121](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L121)
 
 ___
 
@@ -267,7 +266,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:122](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L122)
+[src/Store.js:124](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L124)
 
 ___
 
@@ -302,7 +301,7 @@ test("create store", t => {
 
 #### Defined in
 
-[src/Store.js:151](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L151)
+[src/Store.js:153](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L153)
 
 ___
 
@@ -363,7 +362,7 @@ v0.1.100
 
 #### Defined in
 
-[src/Store.js:152](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L152)
+[src/Store.js:154](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L154)
 
 ___
 
@@ -408,7 +407,7 @@ v0.1.100
 
 #### Defined in
 
-[src/Store.js:153](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L153)
+[src/Store.js:155](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L155)
 
 ## Methods
 
@@ -428,7 +427,7 @@ v0.1.100
 
 #### Defined in
 
-[src/Store.js:606](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L606)
+[src/Store.js:608](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L608)
 
 ___
 
@@ -451,7 +450,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:843](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L843)
+[src/Store.js:845](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L845)
 
 ___
 
@@ -465,7 +464,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:1683](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1683)
+[src/Store.js:1630](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1630)
 
 ___
 
@@ -488,7 +487,7 @@ updated
 
 #### Defined in
 
-[src/Store.js:312](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L312)
+[src/Store.js:314](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L314)
 
 ___
 
@@ -502,7 +501,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:1815](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1815)
+[src/Store.js:1762](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1762)
 
 ___
 
@@ -516,7 +515,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:1890](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1890)
+[src/Store.js:1837](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1837)
 
 ___
 
@@ -536,7 +535,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:1447](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1447)
+[src/Store.js:1394](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1394)
 
 ___
 
@@ -550,7 +549,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:1347](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1347)
+[src/Store.js:1294](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1294)
 
 ___
 
@@ -570,7 +569,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:1421](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1421)
+[src/Store.js:1368](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1368)
 
 ___
 
@@ -590,7 +589,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:1399](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1399)
+[src/Store.js:1346](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1346)
 
 ___
 
@@ -604,7 +603,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:1433](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1433)
+[src/Store.js:1380](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1380)
 
 ___
 
@@ -624,7 +623,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:195](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L195)
+[src/Store.js:197](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L197)
 
 ___
 
@@ -648,7 +647,7 @@ Returns if value is stale
 
 #### Defined in
 
-[src/Store.js:784](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L784)
+[src/Store.js:786](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L786)
 
 ___
 
@@ -668,7 +667,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:627](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L627)
+[src/Store.js:629](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L629)
 
 ___
 
@@ -689,7 +688,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:248](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L248)
+[src/Store.js:250](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L250)
 
 ___
 
@@ -711,7 +710,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:727](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L727)
+[src/Store.js:729](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L729)
 
 ___
 
@@ -732,7 +731,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:1811](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1811)
+[src/Store.js:1758](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1758)
 
 ___
 
@@ -752,7 +751,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:447](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L447)
+[src/Store.js:449](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L449)
 
 ___
 
@@ -773,7 +772,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:205](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L205)
+[src/Store.js:207](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L207)
 
 ___
 
@@ -794,7 +793,7 @@ ___
 
 #### Defined in
 
-[src/Store.js:345](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L345)
+[src/Store.js:347](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L347)
 
 ___
 
@@ -818,7 +817,7 @@ updated
 
 #### Defined in
 
-[src/Store.js:265](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L265)
+[src/Store.js:267](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L267)
 
 ___
 
@@ -848,7 +847,7 @@ obj.b = 5; // same as store.setItem("b", 5);
 
 #### Defined in
 
-[src/Store.js:1671](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1671)
+[src/Store.js:1618](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1618)
 
 ___
 
@@ -941,7 +940,7 @@ setInterval(state.incr3, 1000);
 
 #### Defined in
 
-[src/Store.js:2357](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L2357)
+[src/Store.js:2305](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L2305)
 
 ___
 
@@ -981,7 +980,7 @@ store.setItem("a", 2);
 
 #### Defined in
 
-[src/Store.js:1616](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1616)
+[src/Store.js:1563](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1563)
 
 ___
 
@@ -1015,26 +1014,32 @@ store.setItem("a", 2);
 
 #### Defined in
 
-[src/Store.js:1591](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1591)
+[src/Store.js:1538](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1538)
 
 ___
 
 ### createAtom
 
-▸ **createAtom**(`value`, `name?`): [`Atom`](Store._internal_.Atom.md)
+▸ **createAtom**\<`T`\>(`value`, `name?`): [`Atom`](Store.Atom.md)\<`T`\>
 
 Creates an instance of the Atom
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `T` |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `value` | `any` |
+| `value` | `T` |
 | `name?` | `string` |
 
 #### Returns
 
-[`Atom`](Store._internal_.Atom.md)
+[`Atom`](Store.Atom.md)\<`T`\>
 
 **`Example`**
 
@@ -1057,26 +1062,32 @@ console.log(foo == 2);
 
 #### Defined in
 
-[src/Store.js:1923](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1923)
+[src/Store.js:1870](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1870)
 
 ___
 
 ### createCollection
 
-▸ **createCollection**(`value`, `name?`): [`Collection`](Store._internal_.Collection.md)
+▸ **createCollection**\<`T`\>(`value`, `name?`): [`Collection`](Store.Collection.md)\<`T`\>
 
 Creates an instance of the Collection
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `T` |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `value` | `any`[] |
+| `value` | `T`[] |
 | `name?` | `string` |
 
 #### Returns
 
-[`Collection`](Store._internal_.Collection.md)
+[`Collection`](Store.Collection.md)\<`T`\>
 
 **`Example`**
 
@@ -1111,7 +1122,7 @@ console.log(length_changed);
 
 #### Defined in
 
-[src/Store.js:2076](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L2076)
+[src/Store.js:2024](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L2024)
 
 ___
 
@@ -1156,27 +1167,33 @@ c[0] = 15;
 
 #### Defined in
 
-[src/Store.js:1002](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1002)
+[src/Store.js:948](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L948)
 
 ___
 
 ### createComputed
 
-▸ **createComputed**(`callback`, `name?`, `options?`): [`Computed`](Store._internal_.Computed.md)
+▸ **createComputed**\<`T`\>(`callback`, `name?`, `options?`): [`Computed`](Store.Computed.md)\<`T`\>
 
 Creates an instance of the Computed
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `T` |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `callback` | (`store`: [`Store`](Store.Store.md)) => `any` |
+| `callback` | (`store`: [`Store`](Store.Store.md)) => `T` |
 | `name?` | `string` |
 | `options` | [`ComputedOptions`](../modules/Store.md#computedoptions) |
 
 #### Returns
 
-[`Computed`](Store._internal_.Computed.md)
+[`Computed`](Store.Computed.md)\<`T`\>
 
 **`Example`**
 
@@ -1208,7 +1225,7 @@ console.log(foo);
 
 #### Defined in
 
-[src/Store.js:2000](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L2000)
+[src/Store.js:1947](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1947)
 
 ___
 
@@ -1281,7 +1298,7 @@ this.log(store.getItem("c"));
 
 #### Defined in
 
-[src/Store.js:915](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L915)
+[src/Store.js:917](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L917)
 
 ___
 
@@ -1328,13 +1345,13 @@ this.log(Object.keys(items).length);
 
 #### Defined in
 
-[src/Store.js:1305](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1305)
+[src/Store.js:1252](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1252)
 
 ___
 
 ### getAtom
 
-▸ **getAtom**(`item_name`): [`Atom`](Store._internal_.Atom.md)
+▸ **getAtom**(`item_name`): [`TypeAtom`](../modules/Store.md#typeatom)
 
 Returns an instance of the Atom if the item exists
 
@@ -1346,7 +1363,7 @@ Returns an instance of the Atom if the item exists
 
 #### Returns
 
-[`Atom`](Store._internal_.Atom.md)
+[`TypeAtom`](../modules/Store.md#typeatom)
 
 **`Example`**
 
@@ -1373,13 +1390,13 @@ console.log(value === b.value);
 
 #### Defined in
 
-[src/Store.js:1957](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1957)
+[src/Store.js:1904](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1904)
 
 ___
 
 ### getCollection
 
-▸ **getCollection**(`item_name`): [`Collection`](Store._internal_.Collection.md)
+▸ **getCollection**(`item_name`): [`TypeCollection`](../modules/Store.md#typecollection)
 
 Returns an instance of the Collection if the item exists
 
@@ -1391,7 +1408,7 @@ Returns an instance of the Collection if the item exists
 
 #### Returns
 
-[`Collection`](Store._internal_.Collection.md)
+[`TypeCollection`](../modules/Store.md#typecollection)
 
 **`Example`**
 
@@ -1434,13 +1451,13 @@ console.log(length_changed);
 
 #### Defined in
 
-[src/Store.js:2127](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L2127)
+[src/Store.js:2075](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L2075)
 
 ___
 
 ### getComputed
 
-▸ **getComputed**(`item_name`): [`Computed`](Store._internal_.Computed.md)
+▸ **getComputed**(`item_name`): [`TypeComputed`](../modules/Store.md#typecomputed)
 
 Returns an instance of the Computed if the item exists
 
@@ -1452,7 +1469,7 @@ Returns an instance of the Computed if the item exists
 
 #### Returns
 
-[`Computed`](Store._internal_.Computed.md)
+[`TypeComputed`](../modules/Store.md#typecomputed)
 
 **`Example`**
 
@@ -1475,7 +1492,7 @@ console.log(c.value == 2);
 
 #### Defined in
 
-[src/Store.js:2032](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L2032)
+[src/Store.js:1979](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1979)
 
 ___
 
@@ -1499,7 +1516,7 @@ returns the item's value
 
 #### Defined in
 
-[src/Store.js:1463](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1463)
+[src/Store.js:1410](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1410)
 
 ___
 
@@ -1515,7 +1532,7 @@ Returns an array of item names
 
 #### Defined in
 
-[src/Store.js:1490](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1490)
+[src/Store.js:1437](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1437)
 
 ___
 
@@ -1569,7 +1586,7 @@ store.log(items_2);
 
 #### Defined in
 
-[src/Store.js:1387](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1387)
+[src/Store.js:1334](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1334)
 
 ___
 
@@ -1596,7 +1613,7 @@ Tracks items used in a given function
 
 #### Defined in
 
-[src/Store.js:2268](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L2268)
+[src/Store.js:2216](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L2216)
 
 ___
 
@@ -1627,7 +1644,7 @@ this.log(store.hasItem("a"));
 
 #### Defined in
 
-[src/Store.js:417](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L417)
+[src/Store.js:419](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L419)
 
 ___
 
@@ -1649,7 +1666,7 @@ Returns whether the item has subscribers
 
 #### Defined in
 
-[src/Store.js:1560](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1560)
+[src/Store.js:1507](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1507)
 
 ___
 
@@ -1686,7 +1703,7 @@ this.log(store.isAtomItem("a"), store.isAtomItem("c"));
 
 #### Defined in
 
-[src/Store.js:579](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L579)
+[src/Store.js:581](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L581)
 
 ___
 
@@ -1719,7 +1736,7 @@ this.log(store.isCollection("a"), store.isCollection("c"));
 
 #### Defined in
 
-[src/Store.js:598](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L598)
+[src/Store.js:600](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L600)
 
 ___
 
@@ -1756,7 +1773,7 @@ this.log(store.isComputedItem("a"), store.isComputedItem("c"));
 
 #### Defined in
 
-[src/Store.js:556](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L556)
+[src/Store.js:558](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L558)
 
 ___
 
@@ -1772,43 +1789,7 @@ Returns true if the store is sealed
 
 #### Defined in
 
-[src/Store.js:1762](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1762)
-
-___
-
-### loadExpression
-
-▸ **loadExpression**(`expression`): `string`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `expression` | `string` |
-
-#### Returns
-
-`string`
-
-returns the name of computed item
-
-**`Example`**
-
-```js
-var store = new Store({ a: 1, b: 2 });
-
-// get name of computed item
-var item_name = store.loadExpression("$a + $b");
-
-store.setItem("a", 2);
-
-this.log(store.getItem(item_name));
-// outputs: 4
-```
-
-#### Defined in
-
-[src/Store.js:943](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L943)
+[src/Store.js:1709](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1709)
 
 ___
 
@@ -1857,7 +1838,7 @@ else {
 
 #### Defined in
 
-[src/Store.js:1881](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1881)
+[src/Store.js:1828](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1828)
 
 ___
 
@@ -1936,7 +1917,7 @@ console.log(store.isAtomItem("e"));
 
 #### Defined in
 
-[src/Store.js:2195](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L2195)
+[src/Store.js:2143](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L2143)
 
 ___
 
@@ -2021,7 +2002,7 @@ store.setItems({ a: 0, b: 0 });
 
 #### Defined in
 
-[src/Store.js:1150](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1150)
+[src/Store.js:1096](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1096)
 
 ___
 
@@ -2107,7 +2088,7 @@ store.setItems({ a: 0, b: 0 });
 
 #### Defined in
 
-[src/Store.js:1225](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1225)
+[src/Store.js:1172](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1172)
 
 ___
 
@@ -2130,7 +2111,7 @@ On has-subscribers event
 
 #### Defined in
 
-[src/Store.js:2424](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L2424)
+[src/Store.js:2372](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L2372)
 
 ___
 
@@ -2153,7 +2134,7 @@ On no-subscribers event
 
 #### Defined in
 
-[src/Store.js:2434](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L2434)
+[src/Store.js:2382](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L2382)
 
 ___
 
@@ -2180,7 +2161,7 @@ which might be less than the data that is actually used in the effect function.
 
 #### Defined in
 
-[src/Store.js:2372](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L2372)
+[src/Store.js:2320](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L2320)
 
 ___
 
@@ -2231,7 +2212,7 @@ store.recalcComputed("c");
 
 #### Defined in
 
-[src/Store.js:706](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L706)
+[src/Store.js:708](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L708)
 
 ___
 
@@ -2262,7 +2243,7 @@ this.log(store.getItem("a"));
 
 #### Defined in
 
-[src/Store.js:1646](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1646)
+[src/Store.js:1593](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1593)
 
 ___
 
@@ -2304,7 +2285,7 @@ store.log(items);
 
 #### Defined in
 
-[src/Store.js:1795](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1795)
+[src/Store.js:1742](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1742)
 
 ___
 
@@ -2347,7 +2328,7 @@ store.setItem("a", { value: 2, meta_info: { qwe: 900 } });
 
 #### Defined in
 
-[src/Store.js:1751](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1751)
+[src/Store.js:1698](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1698)
 
 ___
 
@@ -2369,7 +2350,7 @@ Sets default debounce time for subscribers
 
 #### Defined in
 
-[src/Store.js:1848](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1848)
+[src/Store.js:1795](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1795)
 
 ___
 
@@ -2402,7 +2383,7 @@ this.log(store.getItem("a"), store.getItem("b"));
 
 #### Defined in
 
-[src/Store.js:435](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L435)
+[src/Store.js:437](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L437)
 
 ___
 
@@ -2438,7 +2419,7 @@ else {
 
 #### Defined in
 
-[src/Store.js:490](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L490)
+[src/Store.js:492](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L492)
 
 ___
 
@@ -2482,7 +2463,7 @@ store.setItem("a", 3);
 
 #### Defined in
 
-[src/Store.js:1533](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1533)
+[src/Store.js:1480](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1480)
 
 ___
 
@@ -2498,7 +2479,7 @@ Unseals the store.
 
 #### Defined in
 
-[src/Store.js:1802](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L1802)
+[src/Store.js:1749](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1749)
 
 ___
 
@@ -2524,4 +2505,4 @@ unless you don't pass in a second effect function, in which case it returns a Pr
 
 #### Defined in
 
-[src/Store.js:2391](https://github.com/supercat911/store/blob/9eab26457994429fb3aea8c0bb95dc2c6a395287/src/Store.js#L2391)
+[src/Store.js:2339](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L2339)

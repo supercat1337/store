@@ -9,9 +9,11 @@ import { Collection } from "./Collection.js";
 import { Computed } from "./Computed.js";
 import { arrayToSet, compareObjects, debounce, isObject } from "./helpers.js";
 
+// type Modify<T, R> = Omit<T, keyof R> & R;
+
 /**
  * @preserve
- * 
+ *
  * @typedef {(a:any, b:any, item_name:string, property: (string | null))=>boolean} CompareFunction
  * 
  * @typedef {(details:UpdateEventDetails, store:Store)=>void} Subscriber
@@ -61,7 +63,7 @@ import { arrayToSet, compareObjects, debounce, isObject } from "./helpers.js";
 
 /** @typedef {UpdateEventDetails} TypeUpdateEventDetails */
 
-export class UpdateEventDetails {
+class UpdateEventDetails {
 
     /** @type {*} */
     value
@@ -82,7 +84,7 @@ export class UpdateEventDetails {
 
 const item_name_pattern = /^([a-zA-Z_][a-zA-Z0-9_]*)$/;
 
-export class Store {
+class Store {
 
     /** @type {Map<string, TypeStructureOfAtom>} */
     #atoms = new Map;
@@ -612,7 +614,7 @@ export class Store {
             if (!computed) return undefined;
 
             if (!computed.stale) return computed.version;
-            
+
             var value = this.#getComputedValue(computed.item_name);
 
             return computed.version;
@@ -923,62 +925,6 @@ export class Store {
     }
 
     /**
-     * 
-     * @param {string} expression 
-     * @returns {string} returns the name of computed item
-     * 
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: 2 });
-     * 
-     * // get name of computed item
-     * var item_name = store.loadExpression("$a + $b");
-     * 
-     * store.setItem("a", 2);
-     * 
-     * this.log(store.getItem(item_name));
-     * // outputs: 4
-     * ```
-     */
-    loadExpression(expression) {
-        expression = expression.trim();
-        //if (this.hasItem(expression)) return expression;
-
-        let item_name = `{${expression}}`;
-        if (this.hasItem(item_name)) return item_name;
-
-        /** @type {Set<string>} */
-        var used_items_set = new Set;
-
-        var input_string = expression;
-        //input_string = input_string.replace(/\.\s*[a-zA-Z_][a-zA-Z0-9_]*/g, "");
-
-        var matches = input_string.matchAll(/\$[a-zA-Z_][a-zA-Z0-9_]*/g);
-
-        for (const match of matches) {
-
-            let item_name = match[0].slice(1);
-
-            //this.log(item_name)
-            if (this.hasItem(item_name))
-                used_items_set.add(item_name);
-        }
-
-        var deps = Array.from(used_items_set);
-        var define_vars_block = deps.map((item) => `var $${item} = store.getItem("${item}");`).join("\n");
-
-        var callback = /** @type {(store: Store)=>any} @preserve */ (new Function("store", `
-    ${define_vars_block}
-    return ${expression};
-`));
-
-        // @ts-ignore @preserve
-        this.#createComputedItemExtended(item_name, callback, deps, true);
-        return item_name;
-    }
-
-
-    /**
      * creates a collection item
      * @template {any[]} T
      * @param {string} item_name 
@@ -1152,8 +1098,9 @@ export class Store {
         return unsubscriber;
     }
 
+
     /**
-     * @typedef {string|TypeAtom|TypeCollection|TypeComputed} OnChangeParams
+     * @typedef {string|Atom|Collection|Computed} OnChangeParams
      */
 
     /**
@@ -1541,15 +1488,15 @@ export class Store {
         let unsubscriber = this.#eventEmitter.on(item_name, _callback);
 
         if (this.#eventEmitter.events[item_name].length == 1) {
-            this.#eventEmitter.emit("#has-subscribers:" + item_name, item_name, this);    
+            this.#eventEmitter.emit("#has-subscribers:" + item_name, item_name, this);
         }
 
-        return ()=>{
+        return () => {
             unsubscriber();
             if (this.#eventEmitter.events[item_name] && this.#eventEmitter.events[item_name].length == 0) {
-                this.#eventEmitter.emit("#no-subscribers:" + item_name, item_name, this);    
+                this.#eventEmitter.emit("#no-subscribers:" + item_name, item_name, this);
             }
-    
+
         };
     }
 
@@ -1897,10 +1844,10 @@ export class Store {
 
     /**
      * Creates an instance of the Atom 
-     * @param {any} value 
+     * @template T
+     * @param {T} value 
      * @param {string} [name] 
-     * @returns {TypeAtom}
-     * 
+     * @returns {Atom<T>}
      * @example
      *```js
      * 
@@ -1956,7 +1903,7 @@ export class Store {
      */
     getAtom(item_name) {
         if (this.isAtomItem(item_name)) {
-            return new Atom(this, item_name);
+            return new Atom(this, item_name, this.getItem(item_name));
         }
 
         throw new Error(`Unknown atom ${item_name}`);
@@ -1964,11 +1911,11 @@ export class Store {
 
     /**
      * Creates an instance of the Computed 
-     * 
-     * @param {(store: Store) => any} callback 
+     * @template T
+     * @param {(store: Store) => T} callback 
      * @param {string} [name] 
      * @param {ComputedOptions} options 
-     * @returns {TypeComputed}
+     * @returns {Computed<T>}
      * 
      * @example
      *```js
@@ -2039,9 +1986,10 @@ export class Store {
 
     /**
      * Creates an instance of the Collection 
-     * @param {any[]} value 
+     * @template T
+     * @param {T[]} value 
      * @param {string} [name] 
-     * @returns {TypeCollection}
+     * @returns {Collection<T>} 
      * 
      * @example
      *```js
@@ -2356,7 +2304,7 @@ export class Store {
      */
     autorun(func_to_track, options = {}) {
         let computed = this.createComputed(func_to_track, undefined, options);
-        return computed.subscribe(()=>{});
+        return computed.subscribe(() => { });
     }
 
     /**
@@ -2444,8 +2392,8 @@ export class Store {
  * @param {{[key: string]: any}} [initObject] 
  * @returns {Store}
  */
-export function createStore(initObject) {
+function createStore(initObject) {
     return new Store(initObject)
 }
 
-export { EventEmitter, debounce };
+export { EventEmitter, debounce, Atom, Computed, Collection, Store, UpdateEventDetails, createStore };

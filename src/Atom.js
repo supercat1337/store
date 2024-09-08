@@ -1,23 +1,29 @@
 // @ts-check
 
+import { Store, UpdateEventDetails } from "./Store.js";
+
 /** @module Atom */
 
+/**
+ * @template V
+ */
 export class Atom {
 
     /** @type {String} */
     #name
-    /** @type {import("./Store.js").TypeStore} */
+    /** @type {Store} */
     #store
 
     /**
      * Creates the atom item
-     * @param {import("./Store.js").TypeStore} store 
+     * @param {Store} store 
      * @param {string} name 
-     * @param {any} [value] 
+     * @param {V} value 
      */
     constructor(store, name, value) {
         this.#store = store;
         this.#name = name;
+        /** @type {V} */
         this.value = value;
     }
 
@@ -25,12 +31,13 @@ export class Atom {
     /**
      * Sets value
      *
-     * @type {any}
+     * @param {V} value
      */
     set value(value) {
         this.#store.setItem(this.#name, value);
     }
 
+    /** @returns {V} */
     get value() {
         return this.#store.getItem(this.#name);
     }
@@ -41,7 +48,7 @@ export class Atom {
 
     /**
      * 
-     * @param {(details:import("./Store.js").TypeUpdateEventDetails, store:import("./Store.js").TypeStore)=>void} callback
+     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
@@ -71,7 +78,7 @@ export class Atom {
 
     /**
      * On has-subscribers event
-     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback 
+     * @param {(item_name:string, store:Store)=>void} callback 
      * @returns 
      */
     onHasSubscribers(callback) {
@@ -80,7 +87,7 @@ export class Atom {
 
     /**
      * On no-subscribers event
-     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback 
+     * @param {(item_name:string, store:Store)=>void} callback 
      * @returns 
      */
     onNoSubscribers(callback) {

@@ -3,24 +3,29 @@ export { EventEmitter } from '@supercat1337/event-emitter';
 
 // @ts-check
 
+
 /** @module Atom */
 
+/**
+ * @template V
+ */
 class Atom {
 
     /** @type {String} */
     #name
-    /** @type {import("./Store.js").TypeStore} */
+    /** @type {Store} */
     #store
 
     /**
      * Creates the atom item
-     * @param {import("./Store.js").TypeStore} store 
+     * @param {Store} store 
      * @param {string} name 
-     * @param {any} [value] 
+     * @param {V} value 
      */
     constructor(store, name, value) {
         this.#store = store;
         this.#name = name;
+        /** @type {V} */
         this.value = value;
     }
 
@@ -28,12 +33,13 @@ class Atom {
     /**
      * Sets value
      *
-     * @type {any}
+     * @param {V} value
      */
     set value(value) {
         this.#store.setItem(this.#name, value);
     }
 
+    /** @returns {V} */
     get value() {
         return this.#store.getItem(this.#name);
     }
@@ -44,7 +50,7 @@ class Atom {
 
     /**
      * 
-     * @param {(details:import("./Store.js").TypeUpdateEventDetails, store:import("./Store.js").TypeStore)=>void} callback
+     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
@@ -74,7 +80,7 @@ class Atom {
 
     /**
      * On has-subscribers event
-     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback 
+     * @param {(item_name:string, store:Store)=>void} callback 
      * @returns 
      */
     onHasSubscribers(callback) {
@@ -83,7 +89,7 @@ class Atom {
 
     /**
      * On no-subscribers event
-     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback 
+     * @param {(item_name:string, store:Store)=>void} callback 
      * @returns 
      */
     onNoSubscribers(callback) {
@@ -167,18 +173,21 @@ function arrayToSet(arr) {
 // @ts-check
 
 
+/**
+ * @template V
+ */
 class Collection {
 
     /** @type {String} */
     #name
-    /** @type {import("./Store.js").TypeStore} */
+    /** @type {Store} */
     #store
 
     /**
      * Creates the atom item
-     * @param {import("./Store.js").TypeStore} store 
+     * @param {Store} store 
      * @param {string} name 
-     * @param {any[]} [value] 
+     * @param {V[]} [value] 
      */
     constructor(store, name, value) {
         this.#store = store;
@@ -193,13 +202,13 @@ class Collection {
     /**
      * Sets value
      *
-     * @type {any[]}
+     * @param {V[]} value
      */
     set value(value) {
         this.#store.setItem(this.#name, value);
     }
 
-    /** @type {*[]} */
+    /** @returns {V[]} */
     get value() {
         return this.#store.getItem(this.#name);
     }
@@ -207,7 +216,7 @@ class Collection {
     /**
      * Sets value
      *
-     * @type {any[]}
+     * @param {V[]} value
      */
     set content(value) {
         this.#store.setItem(this.#name, value);
@@ -215,7 +224,7 @@ class Collection {
 
     /** 
      * Same as value
-     * @type {*[]} 
+     * @type {V[]} 
      * */
     get content() {
         return this.#store.getItem(this.#name);
@@ -227,7 +236,7 @@ class Collection {
 
     /**
      * 
-     * @param {(details:import("./Store.js").TypeUpdateEventDetails, store:import("./Store.js").TypeStore)=>void} callback
+     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
@@ -266,7 +275,7 @@ class Collection {
 
     /**
      * On has-subscribers event
-     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback 
+     * @param {(item_name:string, store:Store)=>void} callback 
      * @returns 
      */
     onHasSubscribers(callback) {
@@ -275,7 +284,7 @@ class Collection {
 
     /**
      * On no-subscribers event
-     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback 
+     * @param {(item_name:string, store:Store)=>void} callback 
      * @returns 
      */
     onNoSubscribers(callback) {
@@ -286,19 +295,23 @@ class Collection {
 
 // @ts-check
 
+
 /** @module Computed */
 
+/**
+ * @template V
+ */
 class Computed {
     /** @type {String} */
     #name
-    /** @type {import("./Store.js").TypeStore} */
+    /** @type {Store} */
     #store
 
     /**
      * Creates the atom item
-     * @param {import("./Store.js").TypeStore} store 
+     * @param {Store} store 
      * @param {string} name 
-     * @param {(store: import("./Store.js").TypeStore)=>any} [callback] 
+     * @param {(store: Store)=>V} [callback] 
      * @param {{is_hard?:boolean}} [options={}] 
      */
     constructor(store, name, callback, options = {}) {
@@ -310,6 +323,7 @@ class Computed {
         }
     }
 
+    /** @returns {V} */
     get value() {
         return this.#store.getItem(this.#name);
     }
@@ -320,7 +334,7 @@ class Computed {
 
     /**
      * 
-     * @param {(details:import("./Store.js").TypeUpdateEventDetails, store:import("./Store.js").TypeStore)=>void} callback
+     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
@@ -345,7 +359,7 @@ class Computed {
 
     /**
      * On has-subscribers event
-     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback 
+     * @param {(item_name:string, store:Store)=>void} callback 
      * @returns 
      */
     onHasSubscribers(callback) {
@@ -354,7 +368,7 @@ class Computed {
 
     /**
      * On no-subscribers event
-     * @param {(item_name:string, store:import("./Store.js").TypeStore)=>void} callback 
+     * @param {(item_name:string, store:Store)=>void} callback 
      * @returns 
      */
     onNoSubscribers(callback) {
@@ -366,9 +380,11 @@ class Computed {
 // @ts-check
 
 
+// type Modify<T, R> = Omit<T, keyof R> & R;
+
 /**
  * @preserve
- * 
+ *
  * @typedef {(a:any, b:any, item_name:string, property: (string | null))=>boolean} CompareFunction
  * 
  * @typedef {(details:UpdateEventDetails, store:Store)=>void} Subscriber
@@ -968,7 +984,7 @@ class Store {
             if (!computed) return undefined;
 
             if (!computed.stale) return computed.version;
-            
+
             this.#getComputedValue(computed.item_name);
 
             return computed.version;
@@ -1279,62 +1295,6 @@ class Store {
     }
 
     /**
-     * 
-     * @param {string} expression 
-     * @returns {string} returns the name of computed item
-     * 
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: 2 });
-     * 
-     * // get name of computed item
-     * var item_name = store.loadExpression("$a + $b");
-     * 
-     * store.setItem("a", 2);
-     * 
-     * this.log(store.getItem(item_name));
-     * // outputs: 4
-     * ```
-     */
-    loadExpression(expression) {
-        expression = expression.trim();
-        //if (this.hasItem(expression)) return expression;
-
-        let item_name = `{${expression}}`;
-        if (this.hasItem(item_name)) return item_name;
-
-        /** @type {Set<string>} */
-        var used_items_set = new Set;
-
-        var input_string = expression;
-        //input_string = input_string.replace(/\.\s*[a-zA-Z_][a-zA-Z0-9_]*/g, "");
-
-        var matches = input_string.matchAll(/\$[a-zA-Z_][a-zA-Z0-9_]*/g);
-
-        for (const match of matches) {
-
-            let item_name = match[0].slice(1);
-
-            //this.log(item_name)
-            if (this.hasItem(item_name))
-                used_items_set.add(item_name);
-        }
-
-        var deps = Array.from(used_items_set);
-        var define_vars_block = deps.map((item) => `var $${item} = store.getItem("${item}");`).join("\n");
-
-        var callback = /** @type {(store: Store)=>any} @preserve */ (new Function("store", `
-    ${define_vars_block}
-    return ${expression};
-`));
-
-        // @ts-ignore @preserve
-        this.#createComputedItemExtended(item_name, callback, deps, true);
-        return item_name;
-    }
-
-
-    /**
      * creates a collection item
      * @template {any[]} T
      * @param {string} item_name 
@@ -1508,8 +1468,9 @@ class Store {
         return unsubscriber;
     }
 
+
     /**
-     * @typedef {string|TypeAtom|TypeCollection|TypeComputed} OnChangeParams
+     * @typedef {string|Atom|Collection|Computed} OnChangeParams
      */
 
     /**
@@ -1897,15 +1858,15 @@ class Store {
         let unsubscriber = this.#eventEmitter.on(item_name, _callback);
 
         if (this.#eventEmitter.events[item_name].length == 1) {
-            this.#eventEmitter.emit("#has-subscribers:" + item_name, item_name, this);    
+            this.#eventEmitter.emit("#has-subscribers:" + item_name, item_name, this);
         }
 
-        return ()=>{
+        return () => {
             unsubscriber();
             if (this.#eventEmitter.events[item_name] && this.#eventEmitter.events[item_name].length == 0) {
-                this.#eventEmitter.emit("#no-subscribers:" + item_name, item_name, this);    
+                this.#eventEmitter.emit("#no-subscribers:" + item_name, item_name, this);
             }
-    
+
         };
     }
 
@@ -2253,10 +2214,10 @@ class Store {
 
     /**
      * Creates an instance of the Atom 
-     * @param {any} value 
+     * @template T
+     * @param {T} value 
      * @param {string} [name] 
-     * @returns {TypeAtom}
-     * 
+     * @returns {Atom<T>}
      * @example
      *```js
      * 
@@ -2312,7 +2273,7 @@ class Store {
      */
     getAtom(item_name) {
         if (this.isAtomItem(item_name)) {
-            return new Atom(this, item_name);
+            return new Atom(this, item_name, this.getItem(item_name));
         }
 
         throw new Error(`Unknown atom ${item_name}`);
@@ -2320,11 +2281,11 @@ class Store {
 
     /**
      * Creates an instance of the Computed 
-     * 
-     * @param {(store: Store) => any} callback 
+     * @template T
+     * @param {(store: Store) => T} callback 
      * @param {string} [name] 
      * @param {ComputedOptions} options 
-     * @returns {TypeComputed}
+     * @returns {Computed<T>}
      * 
      * @example
      *```js
@@ -2395,9 +2356,10 @@ class Store {
 
     /**
      * Creates an instance of the Collection 
-     * @param {any[]} value 
+     * @template T
+     * @param {T[]} value 
      * @param {string} [name] 
-     * @returns {TypeCollection}
+     * @returns {Collection<T>} 
      * 
      * @example
      *```js
@@ -2712,7 +2674,7 @@ class Store {
      */
     autorun(func_to_track, options = {}) {
         let computed = this.createComputed(func_to_track, undefined, options);
-        return computed.subscribe(()=>{});
+        return computed.subscribe(() => { });
     }
 
     /**
@@ -2804,4 +2766,4 @@ function createStore(initObject) {
     return new Store(initObject)
 }
 
-export { Store, UpdateEventDetails, createStore, debounce };
+export { Atom, Collection, Computed, Store, UpdateEventDetails, createStore, debounce };

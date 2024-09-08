@@ -8,6 +8,7 @@ import { createStore, Store } from "./../src/Store.js";
 //import { createStore, Store } from "./../dist/store.bundle.esm.min.js";
 
 import test from "./../node_modules/ava/entrypoints/main.mjs";
+import { type } from "os";
 
 test("create store", t => {
 
@@ -501,6 +502,8 @@ test("onChangeAny #4 (with Atoms)", t => {
     var store = new Store();
     var a = store.createAtom(0);
     var b = store.createAtom(0);
+
+    a.value = 2;
 
     var working = false;
 
@@ -1549,31 +1552,6 @@ test("reset", t => {
 
 });
 
-
-test("loadExpression", t => {
-
-    var store = new Store({ a: 1, b: 2 });
-    store.log = t.log;
-    store.logError = t.log;
-    store.warn = t.log;
-    var expression = "$a + $b";
-
-    var item_name = store.loadExpression(expression);
-    var item_name_2 = store.loadExpression(expression);
-
-    store.setItem("a", 2);
-
-
-    if (item_name === item_name_2 && store.getItem(item_name) === 4) {
-        t.pass();
-    }
-    else {
-        t.fail();
-    }
-
-});
-
-
 test("setCompareFunction (item doesn't exist)", t => {
 
     var store = new Store;
@@ -2038,7 +2016,6 @@ test("computed (create)", (t) => {
 
     store.setItem("a", 2);
 
-
     if (store.getItem("b") == b.value && b.name == "b" && b.store === store && b.value == 3) {
         t.pass();
     }
@@ -2221,7 +2198,7 @@ test("collection (create)", (t) => {
     store.logError = t.log;
     store.warn = t.log;
 
-    let a = store.createCollection([], "a");
+    let a = store.createCollection(/** @type {number[]} */ ([]), "a");
     a.value.push(1);
 
     if (store.getItem("a") == a.value && a.name == "a" && a.store === store && a.value.length == 1) {
@@ -2240,7 +2217,7 @@ test("collection (create #2)", (t) => {
     store.logError = t.log;
     store.warn = t.log;
 
-    let a = store.createCollection([]);
+    let a = store.createCollection(/** @type {number[]} */ ([]));
     a.value.push(1);
 
     if (a.name == "_0" && a.value.length == 1) {
@@ -2303,7 +2280,7 @@ test("collection (subscribe)", (t) => {
     var foo = 0;
     var length_changed = 0;
 
-    let a = store.createCollection([], "a");
+    let a = store.createCollection(/** @type {number[]} */ ([]), "a");
 
     a.subscribe((details) => {
 
@@ -2337,7 +2314,7 @@ test("collection (unsubscribe)", (t) => {
 
     var foo = 0;
 
-    let a = store.createCollection([], "a");
+    let a = store.createCollection(/** @type {number[]} */ ([]), "a");
     let unsubscribe = a.subscribe(() => {
         foo++;
     });
@@ -2365,7 +2342,7 @@ test("collection (clearSubscribers)", (t) => {
 
     var foo = 0;
 
-    let a = store.createCollection([], "a");
+    let a = store.createCollection(/** @type {number[]} */ ([]), "a");
     a.subscribe(() => {
         foo++;
     });
@@ -2393,7 +2370,7 @@ test("collection (set value)", (t) => {
     store.logError = t.log;
     store.warn = t.log;
 
-    let a = store.createCollection([], "a");
+    let a = store.createCollection(/** @type {number[]} */ ([]), "a");
     a.value.push(1);
 
     a.value = [1, 2, 3];
@@ -2927,7 +2904,7 @@ test("collection (set content)", (t) => {
     store.logError = t.log;
     store.warn = t.log;
 
-    let collection = store.createCollection([]);
+    let collection = store.createCollection(/** @type {number[]} */ ([]));
     collection.content = [0, 1, 2, 3, 4];
 
     if (collection.value === collection.content && collection.value[3] === collection.content[3]) {
@@ -2944,7 +2921,7 @@ test("collection (updateItemValue)", (t) => {
     store.logError = t.log;
     store.warn = t.log;
 
-    let collection = store.createCollection([]);
+    let collection = store.createCollection(/** @type {any[]} */([]));
     collection.content = [0, { a: 123 }, 2, 3, 4];
 
     // update non-object value
