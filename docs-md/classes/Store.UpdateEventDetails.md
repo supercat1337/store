@@ -1,8 +1,14 @@
 [@supercat1337/store](../README.md) / [Modules](../modules.md) / [Store](../modules/Store.md) / UpdateEventDetails
 
-# Class: UpdateEventDetails
+# Class: UpdateEventDetails\<T\>
 
 [Store](../modules/Store.md).UpdateEventDetails
+
+## Type parameters
+
+| Name |
+| :------ |
+| `T` |
 
 ## Table of contents
 
@@ -22,11 +28,17 @@
 
 ### constructor
 
-• **new UpdateEventDetails**(): [`UpdateEventDetails`](Store.UpdateEventDetails.md)
+• **new UpdateEventDetails**\<`T`\>(): [`UpdateEventDetails`](Store.UpdateEventDetails.md)\<`T`\>
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `T` |
 
 #### Returns
 
-[`UpdateEventDetails`](Store.UpdateEventDetails.md)
+[`UpdateEventDetails`](Store.UpdateEventDetails.md)\<`T`\>
 
 ## Properties
 
@@ -36,7 +48,7 @@
 
 #### Defined in
 
-[src/Store.js:78](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L78)
+[src/Store.js:81](https://github.com/supercat911/store/blob/e30e5a0d313f7eb1d078bc4bf75a36345baa8a01/src/Store.js#L81)
 
 ___
 
@@ -46,17 +58,17 @@ ___
 
 #### Defined in
 
-[src/Store.js:75](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L75)
+[src/Store.js:78](https://github.com/supercat911/store/blob/e30e5a0d313f7eb1d078bc4bf75a36345baa8a01/src/Store.js#L78)
 
 ___
 
 ### old\_value
 
-• **old\_value**: `any`
+• **old\_value**: `T`
 
 #### Defined in
 
-[src/Store.js:72](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L72)
+[src/Store.js:75](https://github.com/supercat911/store/blob/e30e5a0d313f7eb1d078bc4bf75a36345baa8a01/src/Store.js#L75)
 
 ___
 
@@ -66,14 +78,14 @@ ___
 
 #### Defined in
 
-[src/Store.js:81](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L81)
+[src/Store.js:84](https://github.com/supercat911/store/blob/e30e5a0d313f7eb1d078bc4bf75a36345baa8a01/src/Store.js#L84)
 
 ___
 
 ### value
 
-• **value**: `any`
+• **value**: `T`
 
 #### Defined in
 
-[src/Store.js:69](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L69)
+[src/Store.js:72](https://github.com/supercat911/store/blob/e30e5a0d313f7eb1d078bc4bf75a36345baa8a01/src/Store.js#L72)

@@ -25,7 +25,7 @@ import { arrayToSet, compareObjects, debounce, isObject } from "./helpers.js";
  * @typedef {{[key:string]: UpdateEventDetails}} UpdatedItems
  * 
  * @typedef {{[key:string] : UpdateEventDetails[]}} ChangeEventObject
- * @property {"set"|"delete"|null} eventType
+ * @property {"set"|"delete"} eventType
  * @property {UpdatedItems} details
  *
  * @typedef {Object} TypeStructureOfAtom
@@ -63,12 +63,15 @@ import { arrayToSet, compareObjects, debounce, isObject } from "./helpers.js";
 
 /** @typedef {UpdateEventDetails} TypeUpdateEventDetails */
 
+/**
+ * @template T
+ */
 class UpdateEventDetails {
 
-    /** @type {*} */
+    /** @type {T} */
     value
 
-    /** @type {*} */
+    /** @type {T} */
     old_value
 
     /** @type {string} */
@@ -199,10 +202,10 @@ class Store {
     }
 
     /**
-     * 
+     * @template ItemValue
      * @param {string} item_name 
-     * @param {any} value 
-     * @returns {false|UpdateEventDetails}
+     * @param {ItemValue} value 
+     * @returns {false|UpdateEventDetails<ItemValue>}
      */
     #setAtom(item_name, value) {
         var version = 0;
@@ -229,7 +232,7 @@ class Store {
             atom.version++;
             this.#atoms.set(item_name, atom);
 
-            let details = new UpdateEventDetails;
+            let details = /** @type {UpdateEventDetails<ItemValue>} */ (new UpdateEventDetails);
             details.eventType = "set";
             details.item_name = item_name;
             details.value = value;
@@ -449,6 +452,7 @@ class Store {
     #sendSignalToComputedItems(item_names) {
 
         var updated_item_names = arrayToSet(item_names);
+        /** @type {Set<string>} */
         var staled_computeds = new Set;
 
         this.#computed.forEach((computed) => {
@@ -1912,7 +1916,7 @@ class Store {
     /**
      * Creates an instance of the Computed 
      * @template T
-     * @param {(store: Store) => T} callback 
+     * @param {() => T} callback 
      * @param {string} [name] 
      * @param {ComputedOptions} options 
      * @returns {Computed<T>}
@@ -1977,11 +1981,11 @@ class Store {
      *```
      */
     getComputed(item_name) {
-        if (this.isComputedItem(item_name)) {
-            return new Computed(this, item_name);
+        if (!this.isComputedItem(item_name)) {
+            throw new Error(`Unknown computed ${item_name}`);
         }
 
-        throw new Error(`Unknown computed ${item_name}`);
+        return new Computed(this, item_name);
     }
 
     /**

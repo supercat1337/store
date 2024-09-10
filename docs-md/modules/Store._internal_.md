@@ -16,4 +16,4 @@
 
 #### Defined in
 
-[src/Store.js:1103](https://github.com/supercat911/store/blob/504c861e6daa9eca4a6684117c44ef78a2a0a44d/src/Store.js#L1103)
+[src/Store.js:1107](https://github.com/supercat911/store/blob/e30e5a0d313f7eb1d078bc4bf75a36345baa8a01/src/Store.js#L1107)

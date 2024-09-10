@@ -8,10 +8,16 @@ const numbers = Array.from(
     { length: 5 },
     (_, i) => i,
 )
+
+/**
+ * 
+ * @param {number} n 
+ * @returns {number}
+ */
 const fib = n => n < 2 ? 1
     : fib(n - 1) + fib(n - 2)
 
-const hard = ((n, l) => {
+const hard = (( /** @type {number} */ n, /** @type {string} */ l) => {
     console.log(l)
     return n + fib(18)
 });

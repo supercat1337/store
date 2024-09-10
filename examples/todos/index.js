@@ -1,11 +1,15 @@
 // @ts-check 
-import { Store } from "./../../src/Store.js";
+import { Store, UpdateEventDetails } from "./../../src/Store.js";
 
 // Model
 const store = new Store;
 globalThis.store = store;
 
-const todos_collection = store.createCollection(/** @type {string[]} */ ([]), "todos");
+/**
+ * @typedef {string} ItemValue
+ */
+
+const todos_collection = store.createCollection(/** @type {ItemValue[]} */ ([]), "todos");
 
 const todos = todos_collection.value;
 globalThis.todos = todos_collection.value;
@@ -112,8 +116,6 @@ root_list.addEventListener("click", (e) => {
 });
 
 todos_collection.subscribe((details) => {
-    console.log(details);
-
     if (details.property === null) return;
 
     if (details.property == "length") {
@@ -136,7 +138,7 @@ todos_collection.subscribe((details) => {
 });
 
 computed_length.subscribe((details)=>{
-    list_length_span.innerHTML = details.value;
+    list_length_span.innerHTML = details.value.toString();
 });
 
 // Init

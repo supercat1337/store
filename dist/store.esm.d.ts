@@ -1,12 +1,12 @@
 export type CompareFunction = (a: any, b: any, item_name: string, property: (string | null)) => boolean;
-export type Subscriber = (details: UpdateEventDetails, store: Store) => void;
+export type Subscriber = (details: UpdateEventDetails<any>, store: Store) => void;
 export type Unsubscriber = () => void;
 export type ChangeEventSubscriber = (data: ChangeEventObject, store: Store) => void;
 export type UpdatedItems = {
-    [key: string]: UpdateEventDetails;
+    [key: string]: UpdateEventDetails<any>;
 };
 export type ChangeEventObject = {
-    [key: string]: UpdateEventDetails[];
+    [key: string]: UpdateEventDetails<any>[];
 };
 export type TypeStructureOfAtom = {
     value: any;
@@ -34,44 +34,62 @@ export type TypeAtom = Atom<any>;
 export type TypeComputed = Computed<any>;
 export type TypeCollection = Collection<any>;
 export type TypeStore = Store;
-export type TypeUpdateEventDetails = UpdateEventDetails;
+export type TypeUpdateEventDetails = UpdateEventDetails<any>;
 /** @module Atom */
 /**
- * @template V
+ * @template ItemValue
  */
-export class Atom<V> {
+export class Atom<ItemValue> {
     /**
      * Creates the atom item
      * @param {Store} store
      * @param {string} name
-     * @param {V} value
+     * @param {ItemValue} value
      */
-    constructor(store: Store, name: string, value: V);
+    constructor(store: Store, name: string, value: ItemValue);
     /**
-     * Sets value
-     *
-     * @param {V} value
+     * Sets the value of this atom
+     * @param {ItemValue} value
      */
-    set value(value: V);
-    /** @returns {V} */
-    get value(): V;
+    set value(value: ItemValue);
+    /**
+     * Returns the current value of this atom
+     * @returns {ItemValue}
+     */
+    get value(): ItemValue;
+    /**
+     * Returns the name of the atom
+     * @returns {string}
+     */
     get name(): string;
     /**
-     *
-     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
+     * Subscribe to this atom
+     * @param {(details:UpdateEventDetails<ItemValue>, store:Store)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
-    subscribe(callback: (details: UpdateEventDetails, store: Store) => void, debounce_time?: number | undefined): Unsubscriber;
+    subscribe(callback: (details: UpdateEventDetails<ItemValue>, store: Store) => void, debounce_time?: number | undefined): Unsubscriber;
+    /**
+     * Deletes all subscribers
+     * @returns {void}
+     */
     clearSubscribers(): void;
+    /**
+     * Returns whether the atom has subscribers
+     * @returns {boolean}
+     */
     hasSubscribers(): boolean;
     /**
      *
-     * @param {{(a:any, b:any, item_name:string, property: (string | null)):boolean} | null} func_or_null
+     * @param {{(a:ItemValue, b:ItemValue, item_name:string, property: (string | null)):boolean} | null} func_or_null
      * @returns {boolean}
      */
     setCompareFunction(func_or_null: {
-        (a: any, b: any, item_name: string, property: (string | null)): boolean;
+        (a: ItemValue, b: ItemValue, item_name: string, property: (string | null)): boolean;
     } | null): boolean;
+    /**
+     * Returns the store object
+     * @returns {Store}
+     */
     get store(): Store;
     /**
      * On has-subscribers event
@@ -88,44 +106,61 @@ export class Atom<V> {
     #private;
 }
 /**
- * @template V
+ * @template ItemValue
  */
-export class Collection<V> {
+export class Collection<ItemValue> {
     /**
-     * Creates the atom item
+     * Creates the collection item
      * @param {Store} store
      * @param {string} name
-     * @param {V[]} [value]
+     * @param {ItemValue[]} [value]
      */
-    constructor(store: Store, name: string, value?: V[]);
+    constructor(store: Store, name: string, value?: ItemValue[]);
     /**
-     * Sets value
-     *
-     * @param {V[]} value
+     * Sets a value
+     * @param {ItemValue[]} value
      */
-    set value(value: V[]);
-    /** @returns {V[]} */
-    get value(): V[];
+    set value(value: ItemValue[]);
     /**
-     * Sets value
-     *
-     * @param {V[]} value
+     * Gets a value
+     * @type {ItemValue[]}
      */
-    set content(value: V[]);
+    get value(): ItemValue[];
     /**
-     * Same as value
-     * @type {V[]}
-     * */
-    get content(): V[];
+     * Sets a value
+     * @param {ItemValue[]} value
+     */
+    set content(value: ItemValue[]);
+    /**
+     * Gets a value
+     * @type {ItemValue[]}
+     */
+    get content(): ItemValue[];
+    /**
+     * Returns the name of the collection
+     * @returns {string}
+     */
     get name(): string;
     /**
-     *
-     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
+     * Subscribes for changes of the collection
+     * @param {(details:UpdateEventDetails<any>, store:Store)=>void} callback callback function
      * @param {number|undefined} [debounce_time] debounce time
      */
-    subscribe(callback: (details: UpdateEventDetails, store: Store) => void, debounce_time?: number | undefined): Unsubscriber;
+    subscribe(callback: (details: UpdateEventDetails<any>, store: Store) => void, debounce_time?: number | undefined): Unsubscriber;
+    /**
+     * Deletes all subscribers of the collection
+     * @returns {void}
+     */
     clearSubscribers(): void;
+    /**
+     * Returns whether the collection has subscribers
+     * @returns {boolean}
+     */
     hasSubscribers(): boolean;
+    /**
+     * Returns the store object
+     * @returns {Store}
+     */
     get store(): Store;
     /**
      * Sets update_data to the value of a collection element or extends the value of a collection element.
@@ -149,31 +184,54 @@ export class Collection<V> {
 }
 /** @module Computed */
 /**
- * @template V
+ * @template ItemValue
  */
-export class Computed<V> {
+export class Computed<ItemValue> {
     /**
-     * Creates the atom item
+     * Creates the computed item
      * @param {Store} store
      * @param {string} name
-     * @param {(store: Store)=>V} [callback]
+     * @param {() => ItemValue} [callback]
      * @param {{is_hard?:boolean}} [options={}]
      */
-    constructor(store: Store, name: string, callback?: (store: Store) => V, options?: {
+    constructor(store: Store, name: string, callback?: () => ItemValue, options?: {
         is_hard?: boolean;
     });
-    /** @returns {V} */
-    get value(): V;
+    /**
+     * Gets the value of the computed item
+     * @returns {ItemValue}
+     */
+    get value(): ItemValue;
+    /**
+     * Returns the name of the computed item
+     * @returns {string}
+     */
     get name(): string;
     /**
      *
-     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
+     * @param {(details:UpdateEventDetails<ItemValue>, store:Store)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
-    subscribe(callback: (details: UpdateEventDetails, store: Store) => void, debounce_time?: number | undefined): Unsubscriber;
+    subscribe(callback: (details: UpdateEventDetails<ItemValue>, store: Store) => void, debounce_time?: number | undefined): Unsubscriber;
+    /**
+     * Deletes all subscribers of the computed item
+     * @returns {void}
+     */
     clearSubscribers(): void;
+    /**
+     * Returns whether the computed item has subscribers
+     * @returns {boolean}
+     */
     hasSubscribers(): boolean;
-    recalc(): false | UpdateEventDetails;
+    /**
+     * Recalculates a computed item
+     * @returns {false | UpdateEventDetails<ItemValue>} false if the computed item has no subscribers
+     */
+    recalc(): false | UpdateEventDetails<ItemValue>;
+    /**
+     * Returns the store object
+     * @returns {Store}
+     */
     get store(): Store;
     /**
      * On has-subscribers event
@@ -375,7 +433,7 @@ export class Store {
      *
      * ```
      */
-    recalcComputed(item_name: string): false | UpdateEventDetails;
+    recalcComputed(item_name: string): false | UpdateEventDetails<any>;
     /**
      * Creates a computed item
      * @param {string} item_name
@@ -935,7 +993,7 @@ export class Store {
     /**
      * Creates an instance of the Computed
      * @template T
-     * @param {(store: Store) => T} callback
+     * @param {() => T} callback
      * @param {string} [name]
      * @param {ComputedOptions} options
      * @returns {Computed<T>}
@@ -967,7 +1025,7 @@ export class Store {
      *
      *```
      */
-    createComputed<T_2>(callback: (store: Store) => T_2, name?: string, options?: ComputedOptions): Computed<T_2>;
+    createComputed<T_2>(callback: () => T_2, name?: string, options?: ComputedOptions): Computed<T_2>;
     /**
      * Returns an instance of the Computed if the item exists
      * @param {string} item_name
@@ -1269,7 +1327,7 @@ export class Store {
  * @typedef {{[key:string]: UpdateEventDetails}} UpdatedItems
  *
  * @typedef {{[key:string] : UpdateEventDetails[]}} ChangeEventObject
- * @property {"set"|"delete"|null} eventType
+ * @property {"set"|"delete"} eventType
  * @property {UpdatedItems} details
  *
  * @typedef {Object} TypeStructureOfAtom
@@ -1302,11 +1360,14 @@ export class Store {
 */
 /** @typedef {Store} TypeStore */
 /** @typedef {UpdateEventDetails} TypeUpdateEventDetails */
-export class UpdateEventDetails {
-    /** @type {*} */
-    value: any;
-    /** @type {*} */
-    old_value: any;
+/**
+ * @template T
+ */
+export class UpdateEventDetails<T> {
+    /** @type {T} */
+    value: T;
+    /** @type {T} */
+    old_value: T;
     /** @type {string} */
     item_name: string;
     /** @type {"set"|"delete"} */

@@ -1838,6 +1838,11 @@ test("atom (create)", (t) => {
     store.warn = t.log;
 
     let a = store.createAtom(1, "a");
+    /*
+    a.subscribe((details) => {
+        let value = details.value;
+    });
+    */
     store.setItem("a", 2);
 
 
@@ -2198,8 +2203,8 @@ test("collection (create)", (t) => {
     store.logError = t.log;
     store.warn = t.log;
 
-    let a = store.createCollection(/** @type {number[]} */ ([]), "a");
-    a.value.push(1);
+    let a = store.createCollection(/** @type {boolean[]} */([]), "a");
+    a.value.push(true);
 
     if (store.getItem("a") == a.value && a.name == "a" && a.store === store && a.value.length == 1) {
         t.pass();
@@ -2217,7 +2222,7 @@ test("collection (create #2)", (t) => {
     store.logError = t.log;
     store.warn = t.log;
 
-    let a = store.createCollection(/** @type {number[]} */ ([]));
+    let a = store.createCollection(/** @type {number[]} */([]));
     a.value.push(1);
 
     if (a.name == "_0" && a.value.length == 1) {
@@ -2280,7 +2285,7 @@ test("collection (subscribe)", (t) => {
     var foo = 0;
     var length_changed = 0;
 
-    let a = store.createCollection(/** @type {number[]} */ ([]), "a");
+    let a = store.createCollection(/** @type {number[]} */([]), "a");
 
     a.subscribe((details) => {
 
@@ -2314,7 +2319,7 @@ test("collection (unsubscribe)", (t) => {
 
     var foo = 0;
 
-    let a = store.createCollection(/** @type {number[]} */ ([]), "a");
+    let a = store.createCollection(/** @type {number[]} */([]), "a");
     let unsubscribe = a.subscribe(() => {
         foo++;
     });
@@ -2342,7 +2347,7 @@ test("collection (clearSubscribers)", (t) => {
 
     var foo = 0;
 
-    let a = store.createCollection(/** @type {number[]} */ ([]), "a");
+    let a = store.createCollection(/** @type {number[]} */([]), "a");
     a.subscribe(() => {
         foo++;
     });
@@ -2370,7 +2375,7 @@ test("collection (set value)", (t) => {
     store.logError = t.log;
     store.warn = t.log;
 
-    let a = store.createCollection(/** @type {number[]} */ ([]), "a");
+    let a = store.createCollection(/** @type {number[]} */([]), "a");
     a.value.push(1);
 
     a.value = [1, 2, 3];
@@ -2904,7 +2909,7 @@ test("collection (set content)", (t) => {
     store.logError = t.log;
     store.warn = t.log;
 
-    let collection = store.createCollection(/** @type {number[]} */ ([]));
+    let collection = store.createCollection(/** @type {number[]} */([]));
     collection.content = [0, 1, 2, 3, 4];
 
     if (collection.value === collection.content && collection.value[3] === collection.content[3]) {
@@ -2961,16 +2966,16 @@ test("store (onHasSubscribers / onNoSubscribers)", t => {
     var store = new Store({ a: 1, b: 2 });
     var foo = 0;
     var bar = 0;
-    
-    store.onHasSubscribers("a", ()=>{
+
+    store.onHasSubscribers("a", () => {
         foo++;
     });
 
-    store.onNoSubscribers("a", ()=>{
+    store.onNoSubscribers("a", () => {
         bar++;
     });
 
-    var unsubscriber = store.subscribe("a", () => {});
+    var unsubscriber = store.subscribe("a", () => { });
 
     unsubscriber();
 
@@ -2982,7 +2987,7 @@ test("store (onHasSubscribers / onNoSubscribers)", t => {
         return t.fail(`bar = ${bar}`);
     }
 
-    return t.pass(); 
+    return t.pass();
 });
 
 test("atom (onHasSubscribers / onNoSubscribers)", t => {
@@ -2991,16 +2996,16 @@ test("atom (onHasSubscribers / onNoSubscribers)", t => {
     var a = store.createAtom(0);
     var foo = 0;
     var bar = 0;
-    
-    a.onHasSubscribers(()=>{
+
+    a.onHasSubscribers(() => {
         foo++;
     });
 
-    a.onNoSubscribers(()=>{
+    a.onNoSubscribers(() => {
         bar++;
     });
 
-    var unsubscriber = a.subscribe(() => {});
+    var unsubscriber = a.subscribe(() => { });
 
     unsubscriber();
 
@@ -3012,26 +3017,26 @@ test("atom (onHasSubscribers / onNoSubscribers)", t => {
         return t.fail(`bar = ${bar}`);
     }
 
-    return t.pass(); 
+    return t.pass();
 });
 
 test("computed (onHasSubscribers / onNoSubscribers)", t => {
 
     var store = new Store();
     var a = store.createAtom(0);
-    var b = store.createComputed(()=>a.value + 1);
+    var b = store.createComputed(() => a.value + 1);
     var foo = 0;
     var bar = 0;
-    
-    b.onHasSubscribers(()=>{
+
+    b.onHasSubscribers(() => {
         foo++;
     });
 
-    b.onNoSubscribers(()=>{
+    b.onNoSubscribers(() => {
         bar++;
     });
 
-    var unsubscriber = b.subscribe(() => {});
+    var unsubscriber = b.subscribe(() => { });
 
     unsubscriber();
 
@@ -3043,7 +3048,7 @@ test("computed (onHasSubscribers / onNoSubscribers)", t => {
         return t.fail(`bar = ${bar}`);
     }
 
-    return t.pass(); 
+    return t.pass();
 });
 
 test("collection (onHasSubscribers / onNoSubscribers)", t => {
@@ -3052,16 +3057,16 @@ test("collection (onHasSubscribers / onNoSubscribers)", t => {
     var a = store.createCollection([]);
     var foo = 0;
     var bar = 0;
-    
-    a.onHasSubscribers(()=>{
+
+    a.onHasSubscribers(() => {
         foo++;
     });
 
-    a.onNoSubscribers(()=>{
+    a.onNoSubscribers(() => {
         bar++;
     });
 
-    var unsubscriber = a.subscribe(() => {});
+    var unsubscriber = a.subscribe(() => { });
 
     unsubscriber();
 
@@ -3073,5 +3078,5 @@ test("collection (onHasSubscribers / onNoSubscribers)", t => {
         return t.fail(`bar = ${bar}`);
     }
 
-    return t.pass(); 
+    return t.pass();
 });

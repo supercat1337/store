@@ -89,7 +89,7 @@ class EventEmitter {
 /** @module Atom */
 
 /**
- * @template V
+ * @template ItemValue
  */
 class Atom {
 
@@ -102,60 +102,78 @@ class Atom {
      * Creates the atom item
      * @param {Store} store 
      * @param {string} name 
-     * @param {V} value 
+     * @param {ItemValue} value 
      */
     constructor(store, name, value) {
         this.#store = store;
         this.#name = name;
-        /** @type {V} */
+        /** @type {ItemValue} */
         this.value = value;
     }
 
 
     /**
-     * Sets value
-     *
-     * @param {V} value
+     * Sets the value of this atom
+     * @param {ItemValue} value
      */
     set value(value) {
         this.#store.setItem(this.#name, value);
     }
 
-    /** @returns {V} */
+    /**
+     * Returns the current value of this atom
+     * @returns {ItemValue}
+     */
     get value() {
         return this.#store.getItem(this.#name);
     }
 
+    /**
+     * Returns the name of the atom
+     * @returns {string}
+     */
     get name() {
         return this.#name;
     }
 
     /**
-     * 
-     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
+     * Subscribe to this atom
+     * @param {(details:UpdateEventDetails<ItemValue>, store:Store)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
         return this.#store.subscribe(this.#name, callback, debounce_time);
     }
 
+    /**
+     * Deletes all subscribers
+     * @returns {void}
+     */
     clearSubscribers() {
         return this.#store.clearItemSubscribers(this.#name);
     }
 
+    /**
+     * Returns whether the atom has subscribers
+     * @returns {boolean}
+     */
     hasSubscribers() {
         return this.#store.hasSubscribers(this.#name);
     }
 
     /**
      * 
-     * @param {{(a:any, b:any, item_name:string, property: (string | null)):boolean} | null} func_or_null 
+     * @param {{(a:ItemValue, b:ItemValue, item_name:string, property: (string | null)):boolean} | null} func_or_null 
      * @returns {boolean}
      */
     setCompareFunction(func_or_null) {
         return this.#store.setCompareFunction(this.#name, func_or_null);
     }
 
+    /**
+     * Returns the store object
+     * @returns {Store}
+     */
     get store() {
         return this.#store;
     }
@@ -183,9 +201,10 @@ class Atom {
 // @ts-check
 
 /**
- * 
- * @param {*} a 
- * @param {*} b 
+ * Checks if two objects are equal. If objects are arrays, then check if stringified versions of them are equal.
+ * If objects are not arrays, then check if sorted stringified versions of them are equal.
+ * @param {any} a
+ * @param {any} b
  * @returns {boolean}
  */
 function compareObjects(a, b) {
@@ -230,9 +249,9 @@ function debounce(func, wait) {
 }
 
 /**
- * 
- * @param {*} x 
- * @returns {boolean}
+ * Checks if a given value is an object.
+ * @param {any} x - value to check
+ * @returns {boolean} - true if the value is an object, false otherwise
  */
 function isObject(x) {
     return typeof x === 'object' && !Array.isArray(x) && x !== null;
@@ -255,8 +274,9 @@ function arrayToSet(arr) {
 // @ts-check
 
 
+
 /**
- * @template V
+ * @template ItemValue
  */
 class Collection {
 
@@ -266,10 +286,10 @@ class Collection {
     #store
 
     /**
-     * Creates the atom item
+     * Creates the collection item
      * @param {Store} store 
      * @param {string} name 
-     * @param {V[]} [value] 
+     * @param {ItemValue[]} [value] 
      */
     constructor(store, name, value) {
         this.#store = store;
@@ -282,57 +302,76 @@ class Collection {
     }
 
     /**
-     * Sets value
-     *
-     * @param {V[]} value
+     * Sets a value 
+     * @param {ItemValue[]} value
      */
     set value(value) {
         this.#store.setItem(this.#name, value);
     }
 
-    /** @returns {V[]} */
+    /**
+     * Gets a value
+     * @type {ItemValue[]}
+     */
     get value() {
         return this.#store.getItem(this.#name);
     }
 
+
     /**
-     * Sets value
-     *
-     * @param {V[]} value
+     * Sets a value
+     * @param {ItemValue[]} value
      */
     set content(value) {
         this.#store.setItem(this.#name, value);
     }
 
-    /** 
-     * Same as value
-     * @type {V[]} 
-     * */
+    /**
+     * Gets a value
+     * @type {ItemValue[]}
+     */
     get content() {
         return this.#store.getItem(this.#name);
     }
 
+    /**
+     * Returns the name of the collection
+     * @returns {string}
+     */
     get name() {
         return this.#name;
     }
 
     /**
-     * 
-     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
+     * Subscribes for changes of the collection
+     * @param {(details:UpdateEventDetails<any>, store:Store)=>void} callback callback function
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
+        // @ts-ignore
         return this.#store.subscribe(this.#name, callback, debounce_time);
     }
 
+    /**
+     * Deletes all subscribers of the collection
+     * @returns {void}
+     */
     clearSubscribers() {
         return this.#store.clearItemSubscribers(this.#name);
     }
 
+    /**
+     * Returns whether the collection has subscribers
+     * @returns {boolean}
+     */
     hasSubscribers() {
         return this.#store.hasSubscribers(this.#name);
     }
 
+    /**
+     * Returns the store object
+     * @returns {Store}
+     */
     get store() {
         return this.#store;
     }
@@ -354,6 +393,7 @@ class Collection {
 
         current_content[index] = value;
     }
+
 
     /**
      * On has-subscribers event
@@ -381,7 +421,7 @@ class Collection {
 /** @module Computed */
 
 /**
- * @template V
+ * @template ItemValue
  */
 class Computed {
     /** @type {String} */
@@ -390,10 +430,10 @@ class Computed {
     #store
 
     /**
-     * Creates the atom item
-     * @param {Store} store 
-     * @param {string} name 
-     * @param {(store: Store)=>V} [callback] 
+     * Creates the computed item
+     * @param {Store} store
+     * @param {string} name
+     * @param {() => ItemValue} [callback]
      * @param {{is_hard?:boolean}} [options={}] 
      */
     constructor(store, name, callback, options = {}) {
@@ -405,36 +445,59 @@ class Computed {
         }
     }
 
-    /** @returns {V} */
+    /**
+     * Gets the value of the computed item
+     * @returns {ItemValue}
+     */
     get value() {
         return this.#store.getItem(this.#name);
     }
 
+    /**
+     * Returns the name of the computed item
+     * @returns {string}
+     */
     get name() {
         return this.#name;
     }
 
     /**
      * 
-     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
+     * @param {(details:UpdateEventDetails<ItemValue>, store:Store)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
         return this.#store.subscribe(this.#name, callback, debounce_time);
     }
 
+    /**
+     * Deletes all subscribers of the computed item
+     * @returns {void}
+     */
     clearSubscribers() {
         return this.#store.clearItemSubscribers(this.#name);
     }
 
+    /**
+     * Returns whether the computed item has subscribers
+     * @returns {boolean}
+     */
     hasSubscribers() {
         return this.#store.hasSubscribers(this.#name);
     }
 
+    /**
+     * Recalculates a computed item
+     * @returns {false | UpdateEventDetails<ItemValue>} false if the computed item has no subscribers
+     */
     recalc() {
         return this.#store.recalcComputed(this.#name);
     }
 
+    /**
+     * Returns the store object
+     * @returns {Store}
+     */
     get store() {
         return this.#store;
     }
@@ -478,7 +541,7 @@ class Computed {
  * @typedef {{[key:string]: UpdateEventDetails}} UpdatedItems
  * 
  * @typedef {{[key:string] : UpdateEventDetails[]}} ChangeEventObject
- * @property {"set"|"delete"|null} eventType
+ * @property {"set"|"delete"} eventType
  * @property {UpdatedItems} details
  *
  * @typedef {Object} TypeStructureOfAtom
@@ -516,12 +579,15 @@ class Computed {
 
 /** @typedef {UpdateEventDetails} TypeUpdateEventDetails */
 
+/**
+ * @template T
+ */
 class UpdateEventDetails {
 
-    /** @type {*} */
+    /** @type {T} */
     value
 
-    /** @type {*} */
+    /** @type {T} */
     old_value
 
     /** @type {string} */
@@ -652,10 +718,10 @@ class Store {
     }
 
     /**
-     * 
+     * @template ItemValue
      * @param {string} item_name 
-     * @param {any} value 
-     * @returns {false|UpdateEventDetails}
+     * @param {ItemValue} value 
+     * @returns {false|UpdateEventDetails<ItemValue>}
      */
     #setAtom(item_name, value) {
         var old_value = undefined;
@@ -681,7 +747,7 @@ class Store {
             atom.version++;
             this.#atoms.set(item_name, atom);
 
-            let details = new UpdateEventDetails;
+            let details = /** @type {UpdateEventDetails<ItemValue>} */ (new UpdateEventDetails);
             details.eventType = "set";
             details.item_name = item_name;
             details.value = value;
@@ -901,6 +967,7 @@ class Store {
     #sendSignalToComputedItems(item_names) {
 
         var updated_item_names = arrayToSet(item_names);
+        /** @type {Set<string>} */
         var staled_computeds = new Set;
 
         this.#computed.forEach((computed) => {
@@ -2364,7 +2431,7 @@ class Store {
     /**
      * Creates an instance of the Computed 
      * @template T
-     * @param {(store: Store) => T} callback 
+     * @param {() => T} callback 
      * @param {string} [name] 
      * @param {ComputedOptions} options 
      * @returns {Computed<T>}
@@ -2429,11 +2496,11 @@ class Store {
      *```
      */
     getComputed(item_name) {
-        if (this.isComputedItem(item_name)) {
-            return new Computed(this, item_name);
+        if (!this.isComputedItem(item_name)) {
+            throw new Error(`Unknown computed ${item_name}`);
         }
 
-        throw new Error(`Unknown computed ${item_name}`);
+        return new Computed(this, item_name);
     }
 
     /**

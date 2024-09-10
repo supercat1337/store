@@ -5,8 +5,9 @@
 import { isObject } from "./helpers.js";
 import { Store, UpdateEventDetails } from "./Store.js";
 
+
 /**
- * @template V
+ * @template ItemValue
  */
 export class Collection {
 
@@ -16,10 +17,10 @@ export class Collection {
     #store
 
     /**
-     * Creates the atom item
+     * Creates the collection item
      * @param {Store} store 
      * @param {string} name 
-     * @param {V[]} [value] 
+     * @param {ItemValue[]} [value] 
      */
     constructor(store, name, value) {
         this.#store = store;
@@ -32,57 +33,76 @@ export class Collection {
     }
 
     /**
-     * Sets value
-     *
-     * @param {V[]} value
+     * Sets a value 
+     * @param {ItemValue[]} value
      */
     set value(value) {
         this.#store.setItem(this.#name, value);
     }
 
-    /** @returns {V[]} */
+    /**
+     * Gets a value
+     * @type {ItemValue[]}
+     */
     get value() {
         return this.#store.getItem(this.#name);
     }
 
+
     /**
-     * Sets value
-     *
-     * @param {V[]} value
+     * Sets a value
+     * @param {ItemValue[]} value
      */
     set content(value) {
         this.#store.setItem(this.#name, value);
     }
 
-    /** 
-     * Same as value
-     * @type {V[]} 
-     * */
+    /**
+     * Gets a value
+     * @type {ItemValue[]}
+     */
     get content() {
         return this.#store.getItem(this.#name);
     }
 
+    /**
+     * Returns the name of the collection
+     * @returns {string}
+     */
     get name() {
         return this.#name;
     }
 
     /**
-     * 
-     * @param {(details:UpdateEventDetails, store:Store)=>void} callback
+     * Subscribes for changes of the collection
+     * @param {(details:UpdateEventDetails<any>, store:Store)=>void} callback callback function
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
+        // @ts-ignore
         return this.#store.subscribe(this.#name, callback, debounce_time);
     }
 
+    /**
+     * Deletes all subscribers of the collection
+     * @returns {void}
+     */
     clearSubscribers() {
         return this.#store.clearItemSubscribers(this.#name);
     }
 
+    /**
+     * Returns whether the collection has subscribers
+     * @returns {boolean}
+     */
     hasSubscribers() {
         return this.#store.hasSubscribers(this.#name);
     }
 
+    /**
+     * Returns the store object
+     * @returns {Store}
+     */
     get store() {
         return this.#store;
     }
@@ -104,6 +124,7 @@ export class Collection {
 
         current_content[index] = value;
     }
+
 
     /**
      * On has-subscribers event

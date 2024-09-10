@@ -1,9 +1,10 @@
 // @ts-check
 
 /**
- * 
- * @param {*} a 
- * @param {*} b 
+ * Checks if two objects are equal. If objects are arrays, then check if stringified versions of them are equal.
+ * If objects are not arrays, then check if sorted stringified versions of them are equal.
+ * @param {any} a
+ * @param {any} b
  * @returns {boolean}
  */
 export function compareObjects(a, b) {
@@ -48,9 +49,9 @@ export function debounce(func, wait) {
 }
 
 /**
- * 
- * @param {*} x 
- * @returns {boolean}
+ * Checks if a given value is an object.
+ * @param {any} x - value to check
+ * @returns {boolean} - true if the value is an object, false otherwise
  */
 export function isObject(x) {
     return typeof x === 'object' && !Array.isArray(x) && x !== null;
