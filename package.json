@@ -1,6 +1,6 @@
 {
   "name": "@supercat1337/store",
-  "version": "1.0.29",
+  "version": "1.0.30",
   "description": "Reactive store",
   "repository": {
     "type": "git",
@@ -31,16 +31,17 @@
   "moduleResolution": "nodenext",
   "author": "Supercat",
   "license": "MIT",
-  "dependencies": {
-    "@supercat1337/event-emitter": "^1.0.5"
-  },
   "devDependencies": {
+    "@rollup/plugin-node-resolve": "^16.0.1",
     "@types/node": "^20.12.2",
     "ava": "^6.1.2",
     "c8": "^9.1.0",
-    "esbuild": "^0.20.2",
+    "esbuild": "^0.25.1",
     "typedoc": "^0.25.13",
     "typedoc-plugin-markdown": "^3.17.1",
     "typedoc-plugin-missing-exports": "^2.2.0"
+  },
+  "dependencies": {
+    "@supercat1337/event-emitter-ext": "^1.0.5"
   }
 }

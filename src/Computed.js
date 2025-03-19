@@ -15,10 +15,10 @@ export class Computed {
 
     /**
      * Creates the computed item
-     * @param {Store} store
-     * @param {string} name
+     * @param {Store} store - the store
+     * @param {string} name - the name of the item
      * @param {() => ItemValue} [callback]
-     * @param {{is_hard?:boolean}} [options={}] 
+     * @param {{is_hard?:boolean}} [options={}] - options. Use is_hard  when computing is expensive. 
      */
     constructor(store, name, callback, options = {}) {
         this.#store = store;
@@ -102,6 +102,15 @@ export class Computed {
      */
     onNoSubscribers(callback) {
         return this.#store.onNoSubscribers(this.#name, callback);
+    }
+
+    /**
+     * 
+     * @param {{(a:ItemValue, b:ItemValue, item_name:string, property: (string | null)):boolean} | null} func_or_null 
+     * @returns {boolean}
+     */
+    setCompareFunction(func_or_null) {
+        return this.#store.setCompareFunction(this.#name, func_or_null);
     }
 
 }

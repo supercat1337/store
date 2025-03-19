@@ -2,25 +2,23 @@
 
 /** @module Collection */
 
-import { isObject } from "./helpers.js";
+import { isPlainObject } from "./helpers.js";
 import { Store, UpdateEventDetails } from "./Store.js";
-
 
 /**
  * @template ItemValue
  */
 export class Collection {
-
     /** @type {String} */
-    #name
+    #name;
     /** @type {Store} */
-    #store
+    #store;
 
     /**
      * Creates the collection item
-     * @param {Store} store 
-     * @param {string} name 
-     * @param {ItemValue[]} [value] 
+     * @param {Store} store
+     * @param {string} name
+     * @param {ItemValue[]} [value]
      */
     constructor(store, name, value) {
         this.#store = store;
@@ -29,11 +27,10 @@ export class Collection {
         if (typeof value != "undefined") {
             this.#store.createCollectionItem(this.#name, value);
         }
-
     }
 
     /**
-     * Sets a value 
+     * Sets a value
      * @param {ItemValue[]} value
      */
     set value(value) {
@@ -47,7 +44,6 @@ export class Collection {
     get value() {
         return this.#store.getItem(this.#name);
     }
-
 
     /**
      * Sets a value
@@ -109,14 +105,14 @@ export class Collection {
 
     /**
      * Sets update_data to the value of a collection element or extends the value of a collection element.
-     * @param {number} index 
-     * @param {*} update_data 
+     * @param {number} index
+     * @param {*} update_data
      */
     updateItemValue(index, update_data) {
         var current_content = this.#store.getItem(this.#name);
         var value;
 
-        if (isObject(current_content[index])) {
+        if (isPlainObject(current_content[index])) {
             value = { ...current_content[index], ...update_data };
         } else {
             value = update_data;
@@ -125,11 +121,10 @@ export class Collection {
         current_content[index] = value;
     }
 
-
     /**
      * On has-subscribers event
-     * @param {(item_name:string, store:Store)=>void} callback 
-     * @returns 
+     * @param {(item_name:string, store:Store)=>void} callback
+     * @returns
      */
     onHasSubscribers(callback) {
         return this.#store.onHasSubscribers(this.#name, callback);
@@ -137,12 +132,10 @@ export class Collection {
 
     /**
      * On no-subscribers event
-     * @param {(item_name:string, store:Store)=>void} callback 
-     * @returns 
+     * @param {(item_name:string, store:Store)=>void} callback
+     * @returns
      */
     onNoSubscribers(callback) {
         return this.#store.onNoSubscribers(this.#name, callback);
     }
-
 }
-

@@ -1,27 +1,89 @@
 // @ts-check
 
 /**
+ * Checks if a given value is a plain object.
+ * @param {*} obj - The value to check.
+ * @returns {boolean} true if the value is a plain object, false otherwise.
+ */
+export function isPlainObject(obj) {
+    return typeof obj === "object" && obj !== null && !Array.isArray(obj);
+}
+
+/**
+ * Checks if two arrays are equal. If the arrays are not the same length, then this function returns false.
+ * Otherwise, this function checks if each element of the two arrays is equal, using the compareAny function.
+ * @param {any[]} a - The first array to compare.
+ * @param {any[]} b - The second array to compare.
+ * @returns {boolean} True if the two arrays are equal, false otherwise.
+ */
+export function compareArrays(a, b) {
+    if (a.length !== b.length) {
+        return false;
+    }
+
+    for (let i = 0; i < a.length; i++) {
+        if (!compareAny(a[i], b[i])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * Checks if two plain objects are equal. If the objects do not have the same set of keys, then this function returns false.
+ * Otherwise, this function checks if each value of the two objects is equal, using the compareAny function.
+ * @param {Object} a - The first object to compare.
+ * @param {Object} b - The second object to compare.
+ * @returns {boolean} True if the two objects are equal, false otherwise.
+ */
+export function comparePlainObjects(a, b) {
+    if (a === b) return true;
+    if (!isPlainObject(a) || !isPlainObject(b)) return false;
+
+    let keysA = Object.keys(a);
+    let keysB = Object.keys(b);
+
+    if (keysA.length !== keysB.length) return false;
+
+    for (let i = 0; i < keysA.length; i++) {
+        let key = keysA[i];
+        let hasProperty = Object.prototype.hasOwnProperty.call(b, key);
+        if (!hasProperty) {
+            return false;
+        }
+
+        if (!compareAny(a[key], b[key])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
  * Checks if two objects are equal. If objects are arrays, then check if stringified versions of them are equal.
  * If objects are not arrays, then check if sorted stringified versions of them are equal.
- * @param {any} a
- * @param {any} b
+ * @param {unknown} a
+ * @param {unknown} b
  * @returns {boolean}
  */
-export function compareObjects(a, b) {
+export function compareAny(a, b) {
     if (a === b) return true;
+    if (typeof a != typeof b) return false;
 
     if (a === null || b === null) return false;
     if (a === undefined || b === undefined) return false;
 
-    if (typeof a != typeof b) return false;
-
     if (Array.isArray(a) || Array.isArray(b)) {
-        return JSON.stringify(a) === JSON.stringify(b);
+        if (!(Array.isArray(a) && Array.isArray(b))) {
+            return false;
+        }
+
+        return compareArrays(a, b);
     }
 
-    let a_json = JSON.stringify(a, Object.keys(a).sort());
-    let b_json = JSON.stringify(b, Object.keys(b).sort());
-    return a_json === b_json;
+    return comparePlainObjects(a, b);
 }
 
 /**
@@ -49,25 +111,15 @@ export function debounce(func, wait) {
 }
 
 /**
- * Checks if a given value is an object.
- * @param {any} x - value to check
- * @returns {boolean} - true if the value is an object, false otherwise
- */
-export function isObject(x) {
-    return typeof x === 'object' && !Array.isArray(x) && x !== null;
-}
-
-/**
  * Converts array to set
  * @template T
- * @param {T[]} arr 
+ * @param {T[]} arr
  * @returns {Set<T>}
  */
 export function arrayToSet(arr) {
-    var result = new Set;
+    var result = new Set();
     for (let i = 0; i < arr.length; i++) {
         result.add(arr[i]);
     }
     return result;
 }
-
