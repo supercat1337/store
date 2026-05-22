@@ -1,47 +1,72 @@
 {
-  "name": "@supercat1337/store",
-  "version": "1.0.30",
-  "description": "Reactive store",
-  "repository": {
-    "type": "git",
-    "directory": "https://github.com/supercat1337/store.git"
-  },
-  "homepage": "https://github.com/supercat1337/store",
-  "main": "index.js",
-  "scripts": {
-    "test": "c8 ava",
-    "__build": "node scripts/build.js",
-    "build": "npm run remove_type_files && npm run build_esm && npm run build_esm_bundle && npm run build_esm_bundle_min && npm run create_types && npm run docs && npm run docs-md",
-    "build_esm": "rollup ./src/Store.js --file ./dist/store.esm.js --format es",
-    "build_esm_bundle": "rollup ./src/Store.js --file ./dist/store.bundle.esm.js --format es -p ./node_modules/@rollup/plugin-node-resolve",
-    "build_esm_bundle_min": "esbuild --minify --bundle --platform=neutral --legal-comments=none ./src/Store.js --outfile=./dist/store.bundle.esm.min.js",
-    "create_types": "npx -p typescript tsc --project my.tsconfig.types.json",
-    "docs": "typedoc --tsconfig \"my.tsconfig.docs.json\" --options \"typedoc.json\"",
-    "docs-md": "typedoc --tsconfig \"my.tsconfig.docs.json\" --options \"typedoc-md.json\"",
-    "remove_type_files": "del /q *.d.ts *.d.ts.map && cd dist && del /s /q *.d.ts *.d.ts.map && cd ../src && del /s /q *.d.ts *.d.ts.map && cd .."
-  },
-  "keywords": [
-    "store",
-    "reactive",
-    "vanilla",
-    "supercat1337",
-    "supercat"
-  ],
-  "type": "module",
-  "moduleResolution": "nodenext",
-  "author": "Supercat",
-  "license": "MIT",
-  "devDependencies": {
-    "@rollup/plugin-node-resolve": "^16.0.1",
-    "@types/node": "^20.12.2",
-    "ava": "^6.1.2",
-    "c8": "^9.1.0",
-    "esbuild": "^0.25.1",
-    "typedoc": "^0.25.13",
-    "typedoc-plugin-markdown": "^3.17.1",
-    "typedoc-plugin-missing-exports": "^2.2.0"
-  },
-  "dependencies": {
-    "@supercat1337/event-emitter-ext": "^1.0.5"
-  }
+    "name": "@supercat1337/store",
+    "version": "1.1.0",
+    "description": "A lightweight, zero-dependency reactive state manager with automated dependency tracking, cyclic loop detection, and atomic/computed architecture.",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/supercat1337/store.git"
+    },
+    "homepage": "https://github.com/supercat1337/store#readme",
+    "main": "dist/store.esm.js",
+    "types": "dist/types.d.ts",
+    "scripts": {
+        "test": "c8 ava",
+        "clean": "shx rm -rf ./dist && shx mkdir ./dist",
+        "build_esm": "rollup ./src/index.js --file ./dist/store.esm.js --format es",
+        "build_esm_bundle": "rollup ./src/Store.js --file ./dist/store.bundle.esm.js --format es -p ./node_modules/@rollup/plugin-node-resolve",
+        "gen_types": "npx tsc --project my.tsconfig.types.json",
+        "bundle_types": "node scripts/bundle-types.js",
+        "build": "npm run clean && npm run build_esm && npm run gen_types && npm run bundle_types && shx rm -rf dist/types-temp && npm run build_esm_bundle",
+        "docs": "typedoc --tsconfig \"my.tsconfig.docs.json\" --options \"typedoc.json\""
+    },
+    "keywords": [
+        "store",
+        "reactive",
+        "state-management",
+        "state-manager",
+        "vanilla-js",
+        "atoms",
+        "computed",
+        "collections",
+        "dependency-graph",
+        "reactivity",
+        "data-binding",
+        "supercat"
+    ],
+    "type": "module",
+    "moduleResolution": "nodenext",
+    "author": "Supercat",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/supercat1337/store/issues"
+    },
+    "devDependencies": {
+        "@rollup/plugin-node-resolve": "^16.0.3",
+        "ava": "^7.0.0",
+        "c8": "^11.0.0",
+        "rollup": "^4.60.1",
+        "shx": "^0.4.0",
+        "typedoc": "^0.28.19",
+        "typedoc-plugin-missing-exports": "^4.1.3"
+    },
+    "ava": {
+        "files": [
+            "tests/**/*.test.js"
+        ],
+        "nodeArguments": [
+            "--experimental-vm-modules"
+        ],
+        "extensions": [
+            "js"
+        ]
+    },
+    "dependencies": {
+        "@supercat1337/event-emitter": "^2.0.1"
+    },
+    "files": [
+        "dist/store.esm.js",
+        "dist/types.d.ts",
+        "README.md",
+        "AI_DOCS.md"
+    ]
 }

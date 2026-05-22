@@ -1,9 +1,11 @@
+/// <reference path="./types.d.ts" />
+
 // @ts-check
 
 /** @module Collection */
 
-import { isPlainObject } from "./helpers.js";
-import { Store, UpdateEventDetails } from "./Store.js";
+import { isPlainObject } from './helpers.js';
+import { Store, UpdateEventDetails } from './Store.js';
 
 /**
  * @template ItemValue
@@ -24,7 +26,7 @@ export class Collection {
         this.#store = store;
         this.#name = name;
 
-        if (typeof value != "undefined") {
+        if (typeof value != 'undefined') {
             this.#store.createCollectionItem(this.#name, value);
         }
     }
@@ -46,19 +48,19 @@ export class Collection {
     }
 
     /**
-     * Sets a value
+     * Sets a value (alias for .value)
      * @param {ItemValue[]} value
      */
     set content(value) {
-        this.#store.setItem(this.#name, value);
+        this.value = value;
     }
 
     /**
-     * Gets a value
+     * Gets a value (alias for .value)
      * @type {ItemValue[]}
      */
     get content() {
-        return this.#store.getItem(this.#name);
+        return this.value;
     }
 
     /**
@@ -73,6 +75,7 @@ export class Collection {
      * Subscribes for changes of the collection
      * @param {(details:UpdateEventDetails<any>, store:Store)=>void} callback callback function
      * @param {number|undefined} [debounce_time] debounce time
+     * @returns {() => void}
      */
     subscribe(callback, debounce_time) {
         // @ts-ignore
@@ -109,22 +112,24 @@ export class Collection {
      * @param {*} update_data
      */
     updateItemValue(index, update_data) {
-        var current_content = this.#store.getItem(this.#name);
-        var value;
+        const arr = [...this.value]; // shallow copy
+        const currentValue = arr[index];
+        if (currentValue === undefined) return;
 
-        if (isPlainObject(current_content[index])) {
-            value = { ...current_content[index], ...update_data };
+        let newValue;
+        if (isPlainObject(currentValue)) {
+            newValue = { ...currentValue, ...update_data };
         } else {
-            value = update_data;
+            newValue = update_data;
         }
-
-        current_content[index] = value;
+        arr[index] = newValue;
+        this.value = arr; // triggers reactivity
     }
 
     /**
      * On has-subscribers event
      * @param {(item_name:string, store:Store)=>void} callback
-     * @returns
+     * @returns {() => void}
      */
     onHasSubscribers(callback) {
         return this.#store.onHasSubscribers(this.#name, callback);
@@ -133,7 +138,7 @@ export class Collection {
     /**
      * On no-subscribers event
      * @param {(item_name:string, store:Store)=>void} callback
-     * @returns
+     * @returns {() => void}
      */
     onNoSubscribers(callback) {
         return this.#store.onNoSubscribers(this.#name, callback);

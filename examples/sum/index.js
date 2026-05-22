@@ -1,51 +1,33 @@
-// @ts-check 
+// @ts-check
 
-import { Store } from "./../../index.js";
+import { Store } from '@supercat1337/store';
 
-var a_counter_value = /** @type {HTMLElement} */ (document.querySelector("#a_counter_value"));
-var a_button_dec = document.querySelector("#a_dec_button");
-var a_button_inc = document.querySelector("#a_inc_button");
+const aValueDiv = document.querySelector('#a_counter_value');
+const aDecBtn = document.querySelector('#a_dec_button');
+const aIncBtn = document.querySelector('#a_inc_button');
 
-var b_counter_value = /** @type {HTMLElement} */ (document.querySelector("#b_counter_value"));
-var b_button_dec = document.querySelector("#b_dec_button");
-var b_button_inc = document.querySelector("#b_inc_button");
+const bValueDiv = document.querySelector('#b_counter_value');
+const bDecBtn = document.querySelector('#b_dec_button');
+const bIncBtn = document.querySelector('#b_inc_button');
 
-var c_counter_value = /** @type {HTMLElement} */ (document.querySelector("#c_counter_value"));
+const cValueDiv = document.querySelector('#c_counter_value');
 
-var store = new Store;
-
-var a = store.createAtom(0);
-var b = store.createAtom(0);
-
-var c = store.createComputed(() => {
-    return a.value + b.value;
-});
+const store = new Store();
+const a = store.createAtom(0);
+const b = store.createAtom(0);
+const c = store.createComputed(() => a.value + b.value);
 
 a.subscribe(() => {
-    a_counter_value.innerText = a.value.toString();
+    aValueDiv.innerText = a.value;
 }, 100);
-
 b.subscribe(() => {
-    b_counter_value.innerText = b.value.toString();
+    bValueDiv.innerText = b.value;
 }, 100);
-
 c.subscribe(() => {
-    c_counter_value.innerText = c.value.toString();
+    cValueDiv.innerText = c.value;
 }, 100);
 
-
-a_button_dec?.addEventListener("click", () => {
-    a.value--;
-});
-
-a_button_inc?.addEventListener("click", () => {
-    a.value++;
-});
-
-b_button_dec?.addEventListener("click", () => {
-    b.value--;
-});
-
-b_button_inc?.addEventListener("click", () => {
-    b.value++;
-});
+aDecBtn?.addEventListener('click', () => a.value--);
+aIncBtn?.addEventListener('click', () => a.value++);
+bDecBtn?.addEventListener('click', () => b.value--);
+bIncBtn?.addEventListener('click', () => b.value++);

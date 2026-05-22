@@ -1,249 +1,195 @@
-# Store.js
+# @supercat1337/store
 
-Cross-browser storage for all use cases.
+A lightweight, high-performance reactive state manager for modern JavaScript applications. Built on clean vanilla JS with strict JSDoc typing and a powerful internal dependency graph.
 
-> A store is simply an object with that allow interested parties to read the store value and be notified whenever it changes.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Size](https://img.shields.io/badge/bundle__size-13_kb-blue)
 
--   tiny (bundle size is 13 kb)
--   agnostic
--   reactive
--   support for instant and delayed reactions
--   fully documented
--   pure JavaScript (typed with JSDoc)
+## Key Features
 
-Installation
+- **⚡ Lightweight & Fast:** Only ~13 KB bundled, with minimal dependencies.
+- **🔄 Automated Dependency Tracking:** `Computed` properties automatically discover their dependencies during execution. No manual dependency arrays required.
+- **🛡️ Cycle Protection:** Internal validation (`DependencyGraph`) actively prevents synchronous cyclic loops before they can crash your app.
+- **📦 Atomic Data Structures:** Clean separation of concerns using primitives (`Atom`), arrays (`Collection`), and derived state (`Computed`).
+- **⏱️ Built-in Optimization:** Supports smart caching (`is_hard` evaluation mode) to skip expensive computations unless deep dependencies change, and built-in debouncing for subscriptions.
+- **🔮 Agnostic:** Works flawlessly with standard DOM API, React, Vue, Lit, or backend environments.
 
-```
-$ npm install @supercat1337/store
-```
+## Installation
 
-You can find many code examples in our [documentation](https://github.com/supercat1337/store/blob/main/docs-md/classes/Store.Store.md)
-
-Basic example: counter with debounce
-
-index.html
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Store demo</title>
-        <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-            rel="stylesheet"
-            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-            crossorigin="anonymous"
-        />
-    </head>
-
-    <body>
-        <div class="container mt-5">
-            <div class="d-flex flex-column align-items-center">
-                <h1 class="mb-3">c = a + b (debounce 0.1 second)</h1>
-
-                <div class="mb-3">
-                    <button class="btn btn-outline-secondary" id="a_dec_button">
-                        -
-                    </button>
-                    <div
-                        id="a_counter_value"
-                        class="d-inline-block text-center"
-                        style="width: 100px;"
-                    >
-                        0
-                    </div>
-                    <button class="btn btn-outline-secondary" id="a_inc_button">
-                        +
-                    </button>
-                </div>
-                <div class="mb-3">
-                    <button class="btn btn-outline-secondary" id="b_dec_button">
-                        -
-                    </button>
-                    <div
-                        id="b_counter_value"
-                        class="d-inline-block text-center"
-                        style="width: 100px;"
-                    >
-                        0
-                    </div>
-                    <button class="btn btn-outline-secondary" id="b_inc_button">
-                        +
-                    </button>
-                </div>
-                <div>=</div>
-                <div class="mb-3">
-                    <div
-                        id="c_counter_value"
-                        class="d-inline-block text-center"
-                        style="width: 100px;"
-                    >
-                        0
-                    </div>
-                </div>
-            </div>
-        </div>
-        <script src="index.js" type="module"></script>
-    </body>
-</html>
+```bash
+npm install @supercat1337/store
 ```
 
-index.js
+## Core Concepts
 
-```js
-// @ts-check
+The store architecture is split into three main reactive building blocks:
 
-import { Store } from "@supercat1337/store";
+1. **Atom:** Represents a single primitive or object state slot.
+2. **Collection:** A specialized wrapper designed for reactive arrays, supporting granular item mutations without breaking reactivity.
+3. **Computed:** Derived states calculated from values of Atoms, Collections, or other Computed values.
 
-var a_counter_value = /** @type {HTMLElement} */ (
-    document.querySelector("#a_counter_value")
-);
-var a_button_dec = document.querySelector("#a_dec_button");
-var a_button_inc = document.querySelector("#a_inc_button");
+---
 
-var b_counter_value = /** @type {HTMLElement} */ (
-    document.querySelector("#b_counter_value")
-);
-var b_button_dec = document.querySelector("#b_dec_button");
-var b_button_inc = document.querySelector("#b_inc_button");
+## Code Examples
 
-var c_counter_value = /** @type {HTMLElement} */ (
-    document.querySelector("#c_counter_value")
-);
+### 1. Basic Reactive State & Computed Properties
 
-var store = new Store();
-
-var a = store.createAtom(0);
-var b = store.createAtom(0);
-
-var c = store.createComputed(() => {
-    return a.value + b.value;
-});
-
-a.subscribe(() => {
-    a_counter_value.innerText = a.value;
-}, 100);
-
-b.subscribe(() => {
-    b_counter_value.innerText = b.value;
-}, 100);
-
-c.subscribe(() => {
-    c_counter_value.innerText = c.value;
-}, 100);
-
-a_button_dec?.addEventListener("click", () => {
-    a.value--;
-});
-
-a_button_inc?.addEventListener("click", () => {
-    a.value++;
-});
-
-b_button_dec?.addEventListener("click", () => {
-    b.value--;
-});
-
-b_button_inc?.addEventListener("click", () => {
-    b.value++;
-});
-```
-
-Also you can work with arrays
-
-```js
-// @ts-check
-import { Store } from "@supercat1337/store";
-
-var store = new Store();
-
-var a = store.createCollection([]);
-var b = store.createComputed(() => {
-    return a.value.length;
-});
-
-b.subscribe((details) => {
-    console.log(`b = ${details.value}`);
-});
-
-var arr = a.value;
-
-arr.push(1);
-// outputs: b = 1
-arr.push(2);
-// outputs: b = 2
-arr.pop();
-// outputs: b = 1
-```
-
-And objects
-
-```js
-// @ts-check
-import { Store } from "@supercat1337/store";
-
-class State {
-    counter1 = 0;
-    counter2 = 0;
-    counter3 = 0;
-
-    incr1 = () => {
-        this.counter1++;
-    };
-
-    incr2 = () => {
-        this.counter2++;
-    };
-
-    incr3 = () => {
-        this.counter3++;
-    };
-}
+```javascript
+import { Store } from '@supercat1337/store';
 
 const store = new Store();
-const state = store.observeObject(new State());
 
-const counter1div = document.createElement("div");
-const counter2div = document.createElement("div");
-const counter3div = document.createElement("div");
+// Create basic state primitives (value first, optional name second)
+const price = store.createAtom(10, 'apple_price');
+const quantity = store.createAtom(3, 'apple_quantity');
 
-const btn1 = document.createElement("button");
-btn1.innerText = "inct 1";
-btn1.addEventListener("click", state.incr1);
+// Create derived state (automatically tracks price and quantity)
+const totalCost = store.createComputed(() => price.value * quantity.value, 'total_cost');
 
-const btn2 = document.createElement("button");
-btn2.innerText = "inct 2";
-btn2.addEventListener("click", () => {
-    state.counter2++;
-});
+// Subscribe to changes (with optional debounce in ms)
+const unsubscribe = totalCost.subscribe(details => {
+    console.log(`Total cost updated to: ${details.value}`);
+}, 100); // debounced to at most once per 100ms
 
-document.body.appendChild(counter1div);
-document.body.appendChild(counter2div);
-document.body.appendChild(counter3div);
-document.body.appendChild(btn1);
-document.body.appendChild(btn2);
+// Trigger reactivity
+price.value = 12; // Console logs: Total cost updated to: 36
+quantity.value = 5; // Console logs: Total cost updated to: 60
 
-(async () => {
-    await store.when(() => state.counter1 >= 3);
+// Clean up
+unsubscribe();
+```
 
-    alert("Another cool thing is when");
-})();
+### 2. Working with Collections (Arrays)
 
-// Trigger when counter1 or counter2 changed
-store.autorun(() => {
-    counter1div.innerHTML = `counter 1: ${state.counter1}`;
-    counter2div.innerHTML = `counter 2: ${state.counter2}`;
-});
+```javascript
+import { Store } from '@supercat1337/store';
 
-// Trigger when counter3 changed (another way)
-store.reaction(
-    () => [state.counter3],
-    () => {
-        counter3div.innerHTML = `counter 3: ${state.counter3}`;
-    }
+const store = new Store();
+const todoList = store.createCollection(
+    [
+        { text: 'Write code', done: false },
+        { text: 'Test code', done: false },
+    ],
+    'todos'
 );
 
-setInterval(state.incr3, 1000);
+// Derived state counting uncompleted tasks
+const pendingCount = store.createComputed(
+    () => todoList.value.filter(todo => !todo.done).length,
+    'pending_todos'
+);
+
+console.log(pendingCount.value); // 2
+
+// Update an object inside a specific index safely and immutably
+todoList.updateItemValue(0, { done: true });
+
+console.log(pendingCount.value); // 1 (Reacts instantly)
 ```
+
+### 3. Asynchronous Scheduling via `when()`
+
+The store provides a native `when` utility that returns a Promise resolving as soon as a condition becomes true.
+
+```javascript
+import { Store } from '@supercat1337/store';
+
+const store = new Store();
+const counter = store.createAtom(0, 'counter');
+
+// Wait until counter reaches 3
+(async () => {
+    await store.when(() => counter.value >= 3);
+    console.log('Condition met! Counter is 3 or higher.');
+})();
+
+// Simulating increments over time
+counter.value = 1;
+counter.value = 2;
+counter.value = 3; // Triggers the async block above
+```
+
+### 4. Debounced Subscriptions
+
+You can pass a debounce time (in milliseconds) as the second argument to `subscribe()`. This is useful for performance‑intensive UI updates.
+
+```javascript
+const store = new Store();
+const width = store.createAtom(window.innerWidth, 'windowWidth');
+
+const unsubscribe = width.subscribe(details => {
+    console.log(`Window width changed to ${details.value}px`);
+}, 200); // at most once per 200ms
+
+window.addEventListener('resize', () => {
+    width.value = window.innerWidth;
+});
+
+// Later: unsubscribe()
+```
+
+### 5. Autorun and Reaction
+
+For automatic side effects that re‑run whenever their dependencies change, use `autorun`. For finer control, use `reaction` which only reacts to data accessed in the first function.
+
+```javascript
+import { Store } from '@supercat1337/store';
+
+const store = new Store();
+const firstName = store.createAtom('John', 'first');
+const lastName = store.createAtom('Doe', 'last');
+
+// autorun runs immediately and then on every dependency change
+store.autorun(() => {
+    console.log(`Full name: ${firstName.value} ${lastName.value}`);
+});
+// Logs: "Full name: John Doe"
+
+// reaction tracks only firstName and executes effect when it changes
+store.reaction(
+    () => firstName.value, // data function (tracked)
+    () => console.log(`First name changed to ${firstName.value}`) // effect
+);
+
+firstName.value = 'Jane';
+// Logs: "First name changed to Jane" and autorun logs "Full name: Jane Doe"
+```
+
+---
+
+## Advanced Options
+
+### Deep Evaluation Optimization (`is_hard`)
+
+By default, `Computed` values re-evaluate lazily based on structural versions. If you have computationally heavy logic, you can enforce hard evaluation constraints to double-check structural equivalence before declaring the node stale:
+
+```javascript
+const heavyCalculation = store.createComputed(
+    () => {
+        // Heavy tasks here...
+        return result;
+    },
+    'heavy',
+    { is_hard: true }
+);
+```
+
+### Custom Naming Conventions
+
+The store allows names containing alphanumeric characters, dashes, dots, and colons to facilitate predictable hierarchical namespaces:
+
+```javascript
+const userFirstName = store.createAtom('John', 'user:profile.first_name');
+```
+
+## Documentation
+
+Full generated API reports and class specs can be found in the repository:
+
+- 📖 [HTML Documentation Suite](https://github.com/supercat1337/store/blob/main/docs/index.html)
+
+📖 **For AI agents**: see [AI_DOCS.md](./AI_DOCS.md) – structured documentation for LLMs.
+
+## License
+
+MIT [Albert Bazaleev]

@@ -1,6 +1,8 @@
+/// <reference path="./types.d.ts" />
+
 // @ts-check
 
-import { Store, UpdateEventDetails } from "./Store.js";
+import { Store, UpdateEventDetails } from './Store.js';
 
 /** @module Computed */
 
@@ -9,23 +11,28 @@ import { Store, UpdateEventDetails } from "./Store.js";
  */
 export class Computed {
     /** @type {String} */
-    #name
+    #name;
     /** @type {Store} */
-    #store
+    #store;
 
     /**
      * Creates the computed item
      * @param {Store} store - the store
      * @param {string} name - the name of the item
      * @param {() => ItemValue} [callback]
-     * @param {{is_hard?:boolean}} [options={}] - options. Use is_hard  when computing is expensive. 
+     * @param {{is_hard?:boolean}} [options={}] - options. Use is_hard when computing is expensive.
      */
     constructor(store, name, callback, options = {}) {
         this.#store = store;
         this.#name = name;
 
-        if (typeof callback != "undefined") {
-            this.#store.createComputedItem(this.#name, callback, options);
+        if (typeof callback != 'undefined') {
+            const ok = this.#store.createComputedItem(this.#name, callback, options);
+            if (!ok) {
+                throw new Error(
+                    `Failed to create computed item "${this.#name}": name already exists, store is sealed, or dependencies invalid.`
+                );
+            }
         }
     }
 
@@ -46,12 +53,13 @@ export class Computed {
     }
 
     /**
-     * 
+     * Subscribes to changes of the computed item.
      * @param {(details:UpdateEventDetails<ItemValue>, store:Store)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
+     * @returns {() => void}
      */
     subscribe(callback, debounce_time) {
-        return this.#store.subscribe(this.#name, callback, debounce_time);
+        return this.#store.subscribe(this.#name, /** @type {import('./types.js').Subscriber} */ (callback), debounce_time);
     }
 
     /**
@@ -88,8 +96,8 @@ export class Computed {
 
     /**
      * On has-subscribers event
-     * @param {(item_name:string, store:Store)=>void} callback 
-     * @returns 
+     * @param {(item_name:string, store:Store)=>void} callback
+     * @returns {() => void}
      */
     onHasSubscribers(callback) {
         return this.#store.onHasSubscribers(this.#name, callback);
@@ -97,21 +105,19 @@ export class Computed {
 
     /**
      * On no-subscribers event
-     * @param {(item_name:string, store:Store)=>void} callback 
-     * @returns 
+     * @param {(item_name:string, store:Store)=>void} callback
+     * @returns {() => void}
      */
     onNoSubscribers(callback) {
         return this.#store.onNoSubscribers(this.#name, callback);
     }
 
     /**
-     * 
-     * @param {{(a:ItemValue, b:ItemValue, item_name:string, property: (string | null)):boolean} | null} func_or_null 
+     * Sets a custom compare function for this computed item.
+     * @param {{(a:ItemValue, b:ItemValue, item_name:string, property: (string | null)):boolean} | null} func_or_null
      * @returns {boolean}
      */
     setCompareFunction(func_or_null) {
         return this.#store.setCompareFunction(this.#name, func_or_null);
     }
-
 }
-

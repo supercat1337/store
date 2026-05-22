@@ -1,19 +1,17 @@
 {
     "compilerOptions": {
-      "baseUrl": ".",
-      "paths": {
-        "src/*": ["./src/*"],
-        "@/*": ["./node_modules/*"]
-      },
-      "target": "ESNext",
-      "module": "ES6",
-      "noEmit": true,
-      "lib": [
-          "DOM",
-          "ES2020"
-        ],
+        "allowJs": true,
+        "checkJs": true,
+        "resolveJsonModule": true,
+        "target": "ESNext",
+        "module": "NodeNext",
+        "noEmit": true,
+        "lib": ["DOM", "ES2020"],
+        "moduleResolution": "NodeNext",
+        "paths": {
+            "@supercat1337/store": ["./src/index.js"],
+            "@supercat1337/store/*": ["./src/*"]
+        }
     },
-    //Add any build/compiled folders here to stop vscode searching those
-    "exclude": ["dist"],
-    "include": ["./index.js", "node_modules/*"]
+    "include": ["src/**/*", "examples/**/*"]
 }

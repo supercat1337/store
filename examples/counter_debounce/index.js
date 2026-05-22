@@ -1,31 +1,22 @@
-// @ts-check 
+// @ts-check
 
-import { Store } from "../../src/Store.js";
+import { Store } from '@supercat1337/store';
 
-var counter_value = /** @type {HTMLElement} */ (document.querySelector("#counter_value"));
+const counterValue = document.querySelector('#counter_value');
+const buttonDec = document.querySelector('#dec_button');
+const buttonInc = document.querySelector('#inc_button');
 
-var button_dec = document.querySelector("#dec_button");
-var button_inc = document.querySelector("#inc_button");
-
-let store = new Store();
-let obj = store.asObject();
+const store = new Store();
+const obj = store.asObject();
 
 const showValue = () => {
-    counter_value.innerText = obj.counter;
+    counterValue.innerText = obj.counter;
 };
 
-const dec = () => {
-    obj.counter--;
-};
+// second argument = debounce time (ms)
+store.subscribe('counter', showValue, 1000);
 
-const inc = () => {
-    obj.counter++;
-};
-
-store.subscribe("counter", showValue, 1000);
-
-button_dec?.addEventListener("click", dec);
-
-button_inc?.addEventListener("click", inc);
+buttonDec?.addEventListener('click', () => obj.counter--);
+buttonInc?.addEventListener('click', () => obj.counter++);
 
 obj.counter = 0;

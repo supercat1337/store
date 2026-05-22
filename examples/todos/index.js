@@ -1,149 +1,87 @@
-// @ts-check 
-import { Store, UpdateEventDetails } from "./../../src/Store.js";
+// @ts-check
+import { Store } from '@supercat1337/store';
 
 // Model
-const store = new Store;
-globalThis.store = store;
+const store = new Store();
+const todosCollection = store.createCollection([], 'todos');
+const todos = todosCollection.value;
+const todosLength = store.createComputed(() => todosCollection.value.length);
 
-/**
- * @typedef {string} ItemValue
- */
+// View elements
+const rootList = document.querySelector('#root_list');
+const addButton = document.querySelector('#add_todo_button');
+const addInput = document.querySelector('#add_todo_input');
+const lengthSpan = document.querySelector('#list_length_span');
 
-const todos_collection = store.createCollection(/** @type {ItemValue[]} */ ([]), "todos");
-
-const todos = todos_collection.value;
-globalThis.todos = todos_collection.value;
-
-const computed_length = store.createComputed(()=>{
-    return todos_collection.value.length;
-});
-
-// View
-const root_list = /** @type {HTMLElement} */ (document.querySelector("#root_list"));
-const add_todo_button = /** @type {HTMLButtonElement} */ (document.querySelector("#add_todo_button"));
-const add_todo_input = /** @type {HTMLInputElement} */ (document.querySelector("#add_todo_input"));
-
-const list_length_span = /** @type {HTMLSpanElement} */ (document.querySelector("#list_length_span"));
-
-
-const list_item_template = /* html */`
+const listItemTemplate = `
 <li class="list-group-item d-flex align-items-center list-group-item-action">
-    <div class="text flex-fill"></div>
-    <div>
-        <button type="button" class="btn-close" aria-label="Close"></button>
-    </div>
+  <div class="text flex-fill"></div>
+  <div><button type="button" class="btn-close" aria-label="Close"></button></div>
 </li>
 `;
 
-/**
- * @param  { number} size 
- */
 function setListSize(size) {
-    const listItemsLength = root_list.children.length;
-
-    if (listItemsLength < size) {
-        let code = list_item_template.repeat(size - listItemsLength);
-        root_list.insertAdjacentHTML("beforeend", code);
-    }
-
-    if (listItemsLength > size) {
-        for (let i = size; i < listItemsLength; i++) {
-            root_list.lastElementChild?.remove();
-        }
+    const current = rootList.children.length;
+    if (current < size) {
+        rootList.insertAdjacentHTML('beforeend', listItemTemplate.repeat(size - current));
+    } else if (current > size) {
+        for (let i = size; i < current; i++) rootList.lastElementChild?.remove();
     }
 }
 
-/**
- * @param {number} index 
- * @param {string} value 
- */
 function setListItemValue(index, value) {
-    var listItem = /** @type {HTMLElement} */ (root_list.children.item(index));
-    if (!listItem) return;
-
-    var textElement = /** @type {HTMLElement} */ (listItem.querySelector(".text"));
-    textElement.innerText = value;
+    const item = rootList.children[index];
+    if (item) item.querySelector('.text').innerText = value;
 }
 
-/**
- * @param {number} index 
- */
 function removeListItem(index) {
-    root_list.children.item(index)?.remove();
+    rootList.children[index]?.remove();
 }
 
-function getTextAndClearInput() {
-    var text = add_todo_input.value.trim();
-    if (text != "") {
-        add_todo_input.value = "";
-    }
-
+function getTextAndClear() {
+    const text = addInput.value.trim();
+    if (text) addInput.value = '';
     return text;
 }
 
-/**
- * @param {Element} element 
- * @returns {number}
- */
-function getChildElementIndex(element) {
-    return Array.prototype.indexOf.call(element.parentNode?.children, element);
+function getChildIndex(el) {
+    return Array.prototype.indexOf.call(el.parentNode?.children, el);
 }
 
-// Presenter
-/**
- * 
- * @param {Event|KeyboardEvent} e 
- */
-function addTodoCallback(e) {
-    if (e instanceof KeyboardEvent && e.key != "Enter") return;
-
-    var todo_name = getTextAndClearInput();
-    if (todo_name == "") return;
-
-    todos.push(todo_name);
+// Event handlers
+function addTodoHandler(e) {
+    if (e instanceof KeyboardEvent && e.key !== 'Enter') return;
+    const name = getTextAndClear();
+    if (name) todos.push(name);
 }
 
-add_todo_button.addEventListener("click", addTodoCallback);
-add_todo_input.addEventListener("keydown", addTodoCallback);
+addButton.addEventListener('click', addTodoHandler);
+addInput.addEventListener('keydown', addTodoHandler);
 
-root_list.addEventListener("click", (e) => {
-    var closeButton = /** @type {HTMLElement} */ (e.target);
-    if (!closeButton.classList.contains("btn-close")) return;
-
-    var listItem = /** @type {HTMLLIElement} */ (closeButton.closest("li")); 
-    var index = getChildElementIndex(listItem);
-    todos.splice(index, 1);
+rootList.addEventListener('click', e => {
+    const btn = e.target?.closest('.btn-close');
+    if (!btn) return;
+    const li = btn.closest('li');
+    const idx = getChildIndex(li);
+    todos.splice(idx, 1);
 });
 
-todos_collection.subscribe((details) => {
+// Reactivity
+todosCollection.subscribe(details => {
     if (details.property === null) return;
-
-    if (details.property == "length") {
+    if (details.property === 'length') {
         setListSize(todos.length);
         return;
     }
-
-    var index = parseInt(details.property);
-
+    const index = parseInt(details.property, 10);
     if (isNaN(index)) return;
-
-    if (details.eventType == "set") {
-        setListItemValue(index, details.value);
-    }
-
-    if (details.eventType == "delete") {
-        removeListItem(index);
-    }
-
+    if (details.eventType === 'set') setListItemValue(index, details.value);
+    else if (details.eventType === 'delete') removeListItem(index);
 });
 
-computed_length.subscribe((details)=>{
-    list_length_span.innerHTML = details.value.toString();
+todosLength.subscribe(({ value }) => {
+    lengthSpan.innerText = value;
 });
 
-// Init
-
-for (let i = 1; i <= 10; i++) {
-    todos.push(`item ${i}`);
-}
-
+// Initial data
+for (let i = 1; i <= 10; i++) todos.push(`item ${i}`);

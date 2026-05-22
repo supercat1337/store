@@ -1,571 +1,398 @@
 // @ts-check
-/** @module EventEmitterExt */
 
-
-// STRATEGY_ORDERED_BY_LISTENER_ID  - Iterate over the listeners in the order they were registered .
-// STRATEGY_ORDERED_BY_EVENTS - Iterate over listeners in the order they were registered, grouped by events.
-const STRATEGY_ORDERED_BY_LISTENER_ID = 0;
-const STRATEGY_ORDERED_BY_EVENTS = 1;
+const ORIGINAL = Symbol('original');
 
 /**
- * @template {string} T
+ * @template {string | symbol | Record<string|symbol, any[]>} [Events=string]
  */
-class EventEmitterExt {
-
-    /** @type {Map.<string, Set<number>>} */
-    #events = new Map;
-
-    #muted = false;
-
-    /** @type {boolean} */
-    autoRegister = false;
-
-    /** @type {Map.<string, Array<any>>} */
-    #scheduledEvents = new Map;
-
-    #lastListenerId = -1;
-
-    /** @type {Map.<number, Function>} */
-    #listeners = new Map;
-
-    /** @type {Map.<number, number>} */
-    #listenersCountData = new Map;
-
-    #listenersAreRunning = false;
-
-    /** @type {number} */
-    #listenerRunnerStrategy = STRATEGY_ORDERED_BY_EVENTS;
+class EventEmitterLite {
+    /**
+     * @type {Object.<Events extends string | symbol ? Events : keyof Events, Function[]>}
+     */
+    events = Object.create(null);
 
     /**
-     * Set the strategy for running listeners. The strategy is used to determine the order in which listeners are called.
-     * @param {number} strategy - The strategy to use. The following values are supported:
-     * 0 - Iterate over the listeners in the order they were registered .
-     * 1 - Iterate over listeners in the order they were registered, grouped by events.
+     * logErrors indicates whether errors thrown by listeners should be logged to the console.
+     * @type {boolean}
      */
-    setListenerRunnerStrategy(strategy) {
-        this.#listenerRunnerStrategy = strategy;
-    }
-
-    /**
-     * Get the strategy for running listeners. The strategy is used to determine the order in which listeners are called.
-     * @returns {number} - The strategy to use. The following values are supported:
-     * 0 - Iterate over the listeners in the order they were registered .
-     * 1 - Iterate over listeners in the order they were registered, grouped by events.
-     */
-    getListenerRunnerStrategy() {
-        return this.#listenerRunnerStrategy;
-    }
-
-    /**
-     * Register an event listener
-     * @param {Function} func 
-     * @returns {number} - Listener ID
-     */
-    #registerListener(func) {
-        let id = ++this.#lastListenerId;
-        this.#listeners.set(id, func);
-        this.#listenersCountData.set(id, 0);
-        return id;
-    }
-
-    /**
-     * Remove an event listener by ID
-     * @param {number} id 
-     */
-    #removeListenerById(id) {
-        this.#listeners.delete(id);
-    }
-
-    /**
-     * Get the listener ID by function
-     * @param {Function} func 
-     * @returns {number} - Listener ID. -1 if not found
-     */
-    #getListenerIdByFunc(func) {
-        for (let [key, value] of this.#listeners) {
-            if (value === func) {
-                return key;
-            }
-        }
-
-        return -1;
-    }
-
-    /**
-     * Attach a listener to an event
-     * @param {T} event
-     * @param {number} listener_id
-     */
-    #attachListenerToEvent(event, listener_id) {
-
-        let listeners = this.#events.get(event) || new Set;
-
-        listeners.add(listener_id);
-
-        let count = this.#listenersCountData.get(listener_id) || 0;
-        count++;
-
-        this.#listenersCountData.set(listener_id, count);
-    }
-
-    /**
-     * 
-     * @param {T} event 
-     * @param {number} listener_id 
-     * @returns 
-     */
-    #detachListenerFromEvent(event, listener_id) {
-        let listeners = this.#events.get(event) || new Set;
-
-        listeners.delete(listener_id);
-
-        let count = this.#listenersCountData.get(listener_id) || 1;
-        count--;
-        this.#listenersCountData.set(listener_id, count);
-
-        this.#removeListenerIfNotUsing(listener_id);
-    }
-
-    /**
-     * Remove an event listener from an event
-     * @param {number} listener_id
-     */
-    #removeListenerIfNotUsing(listener_id) {
-
-        let count = this.#listenersCountData.get(listener_id) || 0;
-
-        if (count == 0) {
-            this.#removeListenerById(listener_id);
-            this.#listenersCountData.delete(listener_id);
-            return;
-        }
-
-    }
-
-    /**
-     * Set the event emitter to a muted state. While muted, any calls to emit or emitMany
-     * will not trigger any event listeners. Instead, the events and their arguments will be
-     * stored to be triggered when the event emitter is unmuted.
-     */
-    mute() {
-        this.#muted = true;
-    }
-
-    /**
-     * Unmutes the event emitter, allowing events to be triggered.
-     * Any events that were scheduled while muted will be executed.
-     */
-    unmute() {
-        this.#muted = false;
-        this.#runScheduledEvents();
-    }
-
-    /**
-     * Returns whether the event emitter is currently muted.
-     * @returns {boolean}
-     */
-    isMuted() {
-        return this.#muted;
-    }
-
-    #runScheduledEvents() {
-
-        if (this.#scheduledEvents.size === 0) {
-            return;
-        }
-
-        this.#listenersAreRunning = true;
-
-        /** @type {Map<number, any[]>} */
-        let listenersRunData = new Map();
-
-        this.#events.forEach((listeners, event) => {
-
-            if (this.#scheduledEvents.has(event)) {
-                let args = this.#scheduledEvents.get(event) || [];
-                listeners.forEach((listener_id) => {
-                    listenersRunData.set(listener_id, args);
-                });
-            }
-        });
-
-        this.#scheduledEvents.clear();
-
-        let orderedListenerIds = Array.from(listenersRunData.keys());
-
-        if (this.#listenerRunnerStrategy == STRATEGY_ORDERED_BY_LISTENER_ID) {
-            orderedListenerIds.sort((a, b) => {
-                return a - b
-            });
-        }
-
-        orderedListenerIds.forEach((listener_id) => {
-            let args = listenersRunData.get(listener_id) || [];
-            let listener = this.#listeners.get(listener_id);
-
-            try {
-                if (listener)
-                listener(...args);
-            }
-            catch (e) {
-                console.error(e);
-            }
-        });
-
-        this.#listenersAreRunning = false;
-    }
-
-    /**
-     * Register events to be emitted. This should be called before any other methods on this class. 
-     * The order of the events in the `events` array determines the order in which the event listeners are triggered.
-     * This method can be called multiple times to register multiple events.
-     * @param {T[]} events - Array of events to register
-     */
-    registerEvents(...events) {
-        events.forEach((event) => {
-            if (!this.#events.has(event)) {
-                this.#events.set(event, new Set());
-            }
-        });
-    }
-
-    /**
-     * Unregister events from being emitted. If the event is not already registered, this has no effect.
-     * @param {T[]} events - Array of events to unregister
-     */
-    unregisterEvents(...events) {
-        events.forEach((event) => {
-
-            if (!this.#events.has(event)) {
-                return;
-            }
-
-            let listeners = this.#events.get(event);
-
-            if (listeners) {
-                listeners.forEach((listener_id) => {
-                    this.#detachListenerFromEvent(event, listener_id);
-                });
-
-                this.#events.delete(event);
-            }
-
-        });
-    }
-
-    unregisterAllEvents() {
-        this.#events.clear();
-        this.#listeners.clear();
-        this.#listenersCountData.clear();
-        this.#scheduledEvents.clear();
-    }
+    logErrors = true;
 
     /**
      * on is used to add a callback function that's going to be executed when the event is triggered
-     * @param {T} event
+     * @template {Events extends string | symbol ? Events : keyof Events} K
+     * @param {K} event
      * @param {Function} listener
-     * @returns {()=>void}
+     * @returns {() => void}
      */
     on(event, listener) {
+        if (!this.events[event]) this.events[event] = [];
 
-        const emptyFunction = () => { };
-
-        if (this.autoRegister == false) {
-
-            if (!this.#events.has(event)) {
-                return emptyFunction;
-            }
-
-        } else {
-            this.registerEvents(event);
-        }
-
-        let listener_id = this.#registerListener(listener);
-
-        this.#attachListenerToEvent(event, listener_id);
-
-        let that = this;
-
-        let unsubscriber = function () {
-            that.#detachListenerFromEvent(event, listener_id);
-        };
-
+        this.events[event].push(listener);
+        let unsubscriber = () => this.removeListener(event, listener);
         return unsubscriber;
-    }
-
-    /**
-     * Add a callback function that's going to be executed when any of the events are triggered
-     * @param {T[]} events - Array of events to listen to
-     * @param {Function} listener - Callback to execute when any of the events are triggered
-     * @returns {()=>void}
-     */
-    onAny(events, listener) {
-
-        if (this.autoRegister == true) {
-            this.registerEvents(...events);
-        }
-
-        let events_copy = Array.from(events).filter(event => this.#events.has(event));
-
-        if (events_copy.length == 0) {
-            return () => { };
-        }
-
-        let listener_id = this.#registerListener(listener);
-
-        events_copy.forEach((event) => {
-            this.#attachListenerToEvent(event, listener_id);
-        });
-
-        return () => {
-            events_copy.forEach((event) => {
-                this.#detachListenerFromEvent(event, listener_id);
-            });
-        };
-    }
-
-    /**
-     * Remove an event listener from an event
-     * @param {T} event
-     * @param {Function} listener
-     */
-    removeListener(event, listener) {
-        if (!this.#events.has(event)) {
-            return;
-        }
-
-        let listener_id = this.#getListenerIdByFunc(listener);
-
-        if (listener_id == -1) {
-            return;
-        }
-
-        this.#detachListenerFromEvent(event, listener_id);
-    }
-
-    /**
-     * Remove all event listeners from an event
-     * @param {T} event
-     */
-    removeAllListeners(event) {
-        if (!this.#events.has(event)) {
-            return;
-        }
-
-        let listeners = this.#events.get(event) || new Set;
-
-        listeners.forEach((listener_id) => {
-            this.#detachListenerFromEvent(event, listener_id);
-        });
-    }
-
-    /**
-     * Alias for removeListener
-     * @param {T} event
-     * @param {Function} listener
-     */
-    off(event, listener) {
-        this.removeListener(event, listener);
-    }
-
-    /**
-     * Check if an event is registered with the event emitter
-     * @param {T} event
-     * @returns {boolean}
-     */
-    hasEvent(event) {
-        return this.#events.has(event);
-    }
-
-    /**
-     * Check if there are any listeners registered for a specific event
-     * @param {T} event - The event to check for listeners
-     * @returns {boolean} - Returns true if there are listeners for the event, false otherwise
-     */
-    hasListeners(event) {
-        let listeners = this.#events.get(event) || new Set;
-        return listeners.size > 0;
-    }
-
-    /**
-     * Get the number of listeners registered for a specific event
-     * @param {T} event - The event to get the number of listeners for
-     * @returns {number} - The number of listeners for the event
-     */
-    getNumberOfListeners(event) {
-        let eventData = this.#events.get(event) || new Set;
-        return eventData.size;
-    }
-
-    /**
-     * emit is used to trigger an event
-     * @param {T} event
-     * @param {any[]} args
-     */
-    emit(event, ...args) {
-        if (this.#listenersAreRunning) {
-            throw new Error("Cannot call emit while listeners are running");
-        }
-
-        if (!this.#events.has(event)) {
-            return;
-        }
-
-        if (this.#muted) {
-            this.#scheduledEvents.set(event, args);
-        } else {
-            this.#emit(event, ...args);
-        }
-    }
-
-    /**
-     * emit is used to trigger an event
-     * @param {T} event
-     * @param {any[]} args
-     */
-    #emit(event, ...args) {
-
-        let listeners = this.#events.get(event) || new Set();
-
-        this.#listenersAreRunning = true;
-
-        listeners.forEach((listener_id) => {
-            try {
-                let listener = this.#listeners.get(listener_id);
-
-                if (listener) {
-                    listener(...args);
-                }
-
-            }
-            catch (e) {
-                console.error(event, args);
-                console.error(e);
-            }
-
-        });
-
-        this.#listenersAreRunning = false;
-    }
-
-    /**
-     * emitMany is used to trigger multiple events at the same time
-     * @param {T[]} events - Array of events to trigger
-     * @param {any[]} args - Arguments to pass to the event listeners
-     */
-    emitMany(events, ...args) {
-
-        if (this.#listenersAreRunning) {
-            throw new Error("Cannot call emitMany while listeners are running");
-        }
-
-        events.forEach((event) => {
-            if (!this.#events.has(event)) {
-                return;
-            }
-
-            this.#scheduledEvents.set(event, args);
-        });
-
-        if (!this.#muted) {
-            this.#runScheduledEvents();
-        }
     }
 
     /**
      * Add a one-time listener
-     * @param {T} event
+     * @template {Events extends string | symbol ? Events : keyof Events} K
+     * @param {K} event
      * @param {Function} listener
      * @returns {()=>void}
      */
     once(event, listener) {
-        let that = this;
-
-        let unsubscriber = this.on(event, function () {
-            unsubscriber();
-            listener.apply(that, arguments);
-        });
-
-        return unsubscriber;
+        const wrapper = (/** @type {...any} */ ...args) => {
+            this.removeListener(event, wrapper);
+            listener.apply(this, args);
+        };
+        wrapper[ORIGINAL] = listener;
+        return this.on(event, wrapper);
     }
 
-
     /**
-     * Wait for an event to be emitted
-     * @param {T} event
-     * @param {number} [max_wait_ms=0] - Maximum time to wait in ms. If 0, the function will wait indefinitely.
-     * @returns {Promise<boolean>} - Resolves with true if the event was emitted, false if the time ran out.
+     * off is an alias for removeListener
+     * @template {Events extends string | symbol ? Events : keyof Events} K
+     * @param {K} event
+     * @param {Function} listener
      */
-    waitForEvent(event, max_wait_ms = 0) {
-
-        return new Promise((resolve) => {
-            let timeout;
-
-            let unsubscriber = this.on(event, () => {
-
-                if (max_wait_ms > 0) {
-                    clearTimeout(timeout);
-                }
-
-                unsubscriber();
-                resolve(true);
-            });
-
-            if (max_wait_ms > 0) {
-                timeout = setTimeout(() => {
-                    unsubscriber();
-                    resolve(false);
-                }, max_wait_ms);
-
-            }
-
-        });
+    off(event, listener) {
+        return this.removeListener(event, listener);
     }
 
+    /**
+     * Remove an event listener from an event
+     * @template {Events extends string | symbol ? Events : keyof Events} K
+     * @param {K} event
+     * @param {Function} listener
+     */
+    removeListener(event, listener) {
+        if (typeof listener !== 'function') return;
+
+        const listeners = this.events[event];
+        if (!listeners) return;
+
+        // @ts-ignore
+        const idx = listeners.findIndex(l => l === listener || l[ORIGINAL] === listener);
+        if (idx > -1) {
+            listeners.splice(idx, 1);
+            if (listeners.length === 0) delete this.events[event];
+        }
+    }
 
     /**
-     * Wait for any of the specified events to be emitted
-     * @param {T[]} events - Array of event names to wait for
-     * @param {number} [max_wait_ms=0] - Maximum time to wait in ms. If 0, the function will wait indefinitely.
-     * @returns {Promise<boolean>} - Resolves with true if any event was emitted, false if the time ran out.
+     * emit is used to trigger an event
+     * @template {Events extends string | symbol ? Events : keyof Events} K
+     * @param {K} event
+     * @param {...any} args
      */
-    waitForAnyEvent(events, max_wait_ms = 0) {
+    emit(event, ...args) {
+        const listeners = this.events[event];
+        if (!listeners) return;
 
-        return new Promise((resolve) => {
-            let timeout;
+        const queue = (this.events[event] || []).slice();
+        var length = queue.length;
 
-            /** @type {Function[]} */
-            let unsubscribers = [];
-
-            const main_unsubscriber = () => {
-                if (max_wait_ms > 0) {
-                    clearTimeout(timeout);
+        for (let i = 0; i < length; i++) {
+            try {
+                queue[i].apply(this, args);
+            } catch (e) {
+                if (this.logErrors) {
+                    console.error(`Error in listener for event "${String(event)}":`, e);
                 }
-
-                unsubscribers.forEach((unsubscriber) => {
-                    unsubscriber();
-                });
-
-                resolve(true);
-            };
-
-            events.forEach((event) => {
-                unsubscribers.push(this.on(event, main_unsubscriber));
-            });
-
-            if (max_wait_ms > 0) {
-                timeout = setTimeout(() => {
-                    main_unsubscriber();
-                    resolve(false);
-                }, max_wait_ms);
-
             }
-
-        });
+        }
     }
 }
 
 // @ts-check
+
+/**
+ * @template {string | symbol | Record<string|symbol, any[]>} [Events=string]
+ * @extends {EventEmitterLite<Events>}
+ */
+class EventEmitter extends EventEmitterLite {
+    /** @type {Object.<"#has-listeners"|"#no-listeners"|"#listener-error", Function[]>} */
+    #internalEvents = {
+        '#has-listeners': [],
+        '#no-listeners': [],
+        '#listener-error': [],
+    };
+
+    #isDestroyed = false;
+    #isReportingError = false; // Used to prevent infinite loop
+
+    /**
+     * Is the event emitter destroyed?
+     * @type {boolean}
+     */
+    get isDestroyed() {
+        return this.#isDestroyed;
+    }
+
+    /**
+     * on is used to add a callback function that's going to be executed when the event is triggered
+     * @template {Events extends string | symbol ? Events : keyof Events} K
+     * @param {K} event
+     * @param {Function} listener
+     */
+    on(event, listener) {
+        if (this.#isDestroyed) throw new Error('EventEmitter is destroyed');
+
+        // Сheck if this is the first listener
+        const isFirst = !this.events[event] || this.events[event].length === 0;
+
+        const unsubscriber = super.on(event, listener);
+
+        if (isFirst) {
+            this.#emitInternal('#has-listeners', event);
+        }
+
+        return unsubscriber;
+    }
+
+    /**
+     * Remove an event listener from an event
+     * @template {Events extends string | symbol ? Events : keyof Events} K
+     * @param {K} event
+     * @param {Function} listener
+     */
+    removeListener(event, listener) {
+        if (typeof listener !== 'function') return;
+        if (this.#isDestroyed || !this.events[event]) return;
+
+        super.removeListener(event, listener);
+
+        // If this is the last listener
+        if (!this.events[event]) {
+            this.#emitInternal('#no-listeners', event);
+        }
+    }
+
+    /**
+     * Internal method to add a listener to an internal event
+     * @param {"#has-listeners"|"#no-listeners"|"#listener-error"} event
+     * @param {Function} listener
+     * @returns {()=>void}
+     */
+    #onInternalEvent(event, listener) {
+        this.#internalEvents[event].push(listener);
+
+        let that = this;
+
+        let unsubscriber = function () {
+            that.#removeInternalListener(event, listener);
+        };
+        return unsubscriber;
+    }
+
+    /**
+     * Internal method to remove a listener from an internal event
+     * @param {"#has-listeners"|"#no-listeners"|"#listener-error"} event
+     * @param {Function} listener
+     */
+    #removeInternalListener(event, listener) {
+        const listeners = this.#internalEvents[event];
+        if (!listeners) return;
+
+        // Check if the listener is in the array
+        const idx = listeners.indexOf(listener);
+        if (idx > -1) listeners.splice(idx, 1);
+    }
+
+    /**
+     * emit is used to trigger an event
+     * @template {Events extends string | symbol ? Events : keyof Events} K
+     * @param {K} event
+     * @param {...any} args
+     */
+    emit(event, ...args) {
+        if (this.#isDestroyed) {
+            return;
+        }
+
+        if (typeof this.events[event] !== 'object') return;
+
+        const listeners = [...this.events[event]];
+        var length = listeners.length;
+
+        for (var i = 0; i < length; i++) {
+            try {
+                listeners[i].apply(this, args);
+            } catch (e) {
+                this.#emitInternal('#listener-error', e, event, ...args);
+                if (this.logErrors) {
+                    console.error(`Error in listener for event "${String(event)}":`, e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Internal function to emit an event
+     * @param {"#has-listeners"|"#no-listeners"|"#listener-error"} event
+     * @param {...any} args
+     */
+    #emitInternal(event, ...args) {
+        const listeners = this.#internalEvents[event];
+        if (!listeners || listeners.length === 0) return;
+
+        // Copy the array to avoid mutation
+        const queue = listeners.slice();
+
+        for (const fn of queue) {
+            try {
+                fn.apply(this, args);
+            } catch (e) {
+                if (event === '#listener-error' || this.#isReportingError) {
+                    if (this.logErrors) {
+                        console.error('Critical error in internal listener:', e);
+                    }
+                    continue;
+                }
+
+                this.#isReportingError = true;
+                try {
+                    this.#emitInternal('#listener-error', e, event, ...args);
+                } finally {
+                    this.#isReportingError = false;
+                }
+            }
+        }
+    }
+
+    /**
+     * Wait for a specific event to be emitted.
+     * @template {Events extends string | symbol? Events : keyof Events} K
+     * @param {K} event - The event to wait for.
+     * @param {number} [max_wait_ms=0] - Maximum time to wait in ms. If 0, waits indefinitely.
+     * @returns {Promise<boolean>} - Resolves with true if event emitted, false on timeout.
+     */
+    waitForEvent(event, max_wait_ms = 0) {
+        return this.waitForAnyEvent([event], max_wait_ms);
+    }
+
+    /**
+     * Wait for any of the specified events to be emitted.
+     * @template {Events extends string  | symbol? Events : keyof Events} K
+     * @param {K[]} events - Array of event names.
+     * @param {number} [max_wait_ms=0] - Maximum time to wait in ms.
+     * @returns {Promise<boolean>} - Resolves with true if any event emitted, false on timeout.
+     */
+    waitForAnyEvent(events, max_wait_ms = 0) {
+        if (this.#isDestroyed) throw new Error('EventEmitter is destroyed');
+
+        return new Promise(resolve => {
+            /** @type {NodeJS.Timeout} */
+            let timeout;
+            /** @type {Function[]} */
+            const unsubscribers = [];
+
+            const cleanup = () => {
+                if (timeout) clearTimeout(timeout);
+                unsubscribers.forEach(u => u());
+            };
+
+            const onEvent = () => {
+                cleanup();
+                resolve(true);
+            };
+
+            const uniqueEvents = [...new Set(events)];
+            uniqueEvents.forEach(event => {
+                unsubscribers.push(this.on(event, onEvent));
+            });
+
+            if (max_wait_ms > 0) {
+                timeout = setTimeout(() => {
+                    cleanup();
+                    resolve(false);
+                }, max_wait_ms);
+            }
+        });
+    }
+
+    /**
+     * Clear all events
+     */
+    clear() {
+        if (this.#isDestroyed) return;
+
+        /** @type {(Events extends string  | symbol? Events : keyof Events)[]} */
+        // @ts-ignore
+        const eventNames = Object.keys(this.events);
+
+        eventNames.forEach(event => {
+            this.clearEventListeners(event);
+        });
+    }
+
+    /**
+     * Destroys the event emitter, clearing all events and listeners.
+     */
+    destroy() {
+        if (this.#isDestroyed) return;
+        this.clear();
+        this.#isDestroyed = true;
+        this.#internalEvents = {
+            '#has-listeners': [],
+            '#no-listeners': [],
+            '#listener-error': [],
+        };
+        this.events = Object.create(null);
+    }
+
+    /**
+     * Clears all listeners for a specified event.
+     * @template {Events extends string  | symbol? Events : keyof Events} K
+     * @param {K} event
+     */
+    clearEventListeners(event) {
+        if (this.#isDestroyed) return;
+
+        const listeners = this.events[event];
+        if (listeners && listeners.length > 0) {
+            delete this.events[event];
+            this.#emitInternal('#no-listeners', event);
+        }
+    }
+
+    /**
+     * onHasEventListeners() is used to subscribe to the "#has-listeners" event. This event is emitted when the number of listeners for any event (except "#has-listeners" and "#no-listeners") goes from 0 to 1.
+     * @param {Function} callback
+     * @returns {()=>void}
+     */
+    onHasEventListeners(callback) {
+        if (this.#isDestroyed) {
+            throw new Error('EventEmitter is destroyed');
+        }
+        return this.#onInternalEvent('#has-listeners', callback);
+    }
+
+    /**
+     * onNoEventListeners() is used to subscribe to the "#no-listeners" event. This event is emitted when the number of listeners for any event (except "#has-listeners" and "#no-listeners") goes from 1 to 0.
+     * @param {Function} callback
+     * @returns {()=>void}
+     */
+    onNoEventListeners(callback) {
+        if (this.#isDestroyed) {
+            throw new Error('EventEmitter is destroyed');
+        }
+        return this.#onInternalEvent('#no-listeners', callback);
+    }
+
+    /**
+     * onListenerError() is used to subscribe to the "#listener-error" event. This event is emitted when any listener throws an error.
+     * @param {Function} callback
+     * @returns {()=>void}
+     */
+    onListenerError(callback) {
+        if (this.#isDestroyed) {
+            throw new Error('EventEmitter is destroyed');
+        }
+        return this.#onInternalEvent('#listener-error', callback);
+    }
+}
+
+/// <reference path="./types.d.ts" />
 
 
 /** @module Atom */
@@ -574,17 +401,16 @@ class EventEmitterExt {
  * @template ItemValue
  */
 class Atom {
-
     /** @type {String} */
-    #name
+    #name;
     /** @type {Store} */
-    #store
+    #store;
 
     /**
      * Creates the atom item
-     * @param {Store} store 
-     * @param {string} name 
-     * @param {ItemValue} value 
+     * @param {Store} store
+     * @param {string} name
+     * @param {ItemValue} value
      */
     constructor(store, name, value) {
         this.#store = store;
@@ -592,7 +418,6 @@ class Atom {
         /** @type {ItemValue} */
         this.value = value;
     }
-
 
     /**
      * Sets the value of this atom
@@ -624,7 +449,11 @@ class Atom {
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
-        return this.#store.subscribe(this.#name, callback, debounce_time);
+        return this.#store.subscribe(
+            this.#name,
+            /** @type {import('./types.js').Subscriber} */ (callback),
+            debounce_time
+        );
     }
 
     /**
@@ -644,8 +473,8 @@ class Atom {
     }
 
     /**
-     * 
-     * @param {{(a:ItemValue, b:ItemValue, item_name:string, property: (string | null)):boolean} | null} func_or_null 
+     *
+     * @param {{(a:ItemValue, b:ItemValue, item_name:string, property: (string | null)):boolean} | null} func_or_null
      * @returns {boolean}
      */
     setCompareFunction(func_or_null) {
@@ -662,8 +491,8 @@ class Atom {
 
     /**
      * On has-subscribers event
-     * @param {(item_name:string, store:Store)=>void} callback 
-     * @returns 
+     * @param {(item_name:string, store:Store)=>void} callback
+     * @returns
      */
     onHasSubscribers(callback) {
         return this.#store.onHasSubscribers(this.#name, callback);
@@ -671,13 +500,12 @@ class Atom {
 
     /**
      * On no-subscribers event
-     * @param {(item_name:string, store:Store)=>void} callback 
-     * @returns 
+     * @param {(item_name:string, store:Store)=>void} callback
+     * @returns
      */
     onNoSubscribers(callback) {
         return this.#store.onNoSubscribers(this.#name, callback);
     }
-
 }
 
 // @ts-check
@@ -688,12 +516,11 @@ class Atom {
  * @returns {boolean} true if the value is a plain object, false otherwise.
  */
 function isPlainObject(obj) {
-    return typeof obj === "object" && obj !== null && !Array.isArray(obj);
+    return typeof obj === 'object' && obj !== null && !Array.isArray(obj);
 }
 
 /**
- * Checks if two arrays are equal. If the arrays are not the same length, then this function returns false.
- * Otherwise, this function checks if each element of the two arrays is equal, using the compareAny function.
+ * Checks if two arrays are equal.
  * @param {any[]} a - The first array to compare.
  * @param {any[]} b - The second array to compare.
  * @returns {boolean} True if the two arrays are equal, false otherwise.
@@ -713,10 +540,9 @@ function compareArrays(a, b) {
 }
 
 /**
- * Checks if two plain objects are equal. If the objects do not have the same set of keys, then this function returns false.
- * Otherwise, this function checks if each value of the two objects is equal, using the compareAny function.
- * @param {Object} a - The first object to compare.
- * @param {Object} b - The second object to compare.
+ * Checks if two plain objects are equal.
+ * @param {Record<string, any>} a - The first object to compare.
+ * @param {Record<string, any>} b - The second object to compare.
  * @returns {boolean} True if the two objects are equal, false otherwise.
  */
 function comparePlainObjects(a, b) {
@@ -744,8 +570,7 @@ function comparePlainObjects(a, b) {
 }
 
 /**
- * Checks if two objects are equal. If objects are arrays, then check if stringified versions of them are equal.
- * If objects are not arrays, then check if sorted stringified versions of them are equal.
+ * Checks if two objects are equal.
  * @param {unknown} a
  * @param {unknown} b
  * @returns {boolean}
@@ -775,21 +600,21 @@ function compareAny(a, b) {
  * @param {number} wait - Time in milliseconds to wait before the function gets called.
  * @returns {T}
  * @example
-   window.addEventListener('resize', debounce((evt) => console.log(evt), 250));
+ * window.addEventListener('resize', debounce((evt) => console.log(evt), 250));
  */
 function debounce(func, wait) {
-    var timeout;
-    var f = (...args) => {
-        var context = this;
-        var later = function () {
-            timeout = null;
-            func.apply(context, args);
-        };
+    /** @type {ReturnType<typeof setTimeout> | undefined} */
+    let timeout;
+    // @ts-ignore
+    const debounced = function (...args) {
+        // @ts-ignore
+        const context = this; 
         clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+        timeout = setTimeout(() => {
+            func.apply(context, args);
+        }, wait);
     };
-
-    return /** @type {T} */ (f);
+    return /** @type {T} */ (debounced);
 }
 
 /**
@@ -799,14 +624,10 @@ function debounce(func, wait) {
  * @returns {Set<T>}
  */
 function arrayToSet(arr) {
-    var result = new Set();
-    for (let i = 0; i < arr.length; i++) {
-        result.add(arr[i]);
-    }
-    return result;
+    return new Set(arr);
 }
 
-// @ts-check
+/// <reference path="./types.d.ts" />
 
 
 /**
@@ -828,7 +649,7 @@ class Collection {
         this.#store = store;
         this.#name = name;
 
-        if (typeof value != "undefined") {
+        if (typeof value != 'undefined') {
             this.#store.createCollectionItem(this.#name, value);
         }
     }
@@ -850,19 +671,19 @@ class Collection {
     }
 
     /**
-     * Sets a value
+     * Sets a value (alias for .value)
      * @param {ItemValue[]} value
      */
     set content(value) {
-        this.#store.setItem(this.#name, value);
+        this.value = value;
     }
 
     /**
-     * Gets a value
+     * Gets a value (alias for .value)
      * @type {ItemValue[]}
      */
     get content() {
-        return this.#store.getItem(this.#name);
+        return this.value;
     }
 
     /**
@@ -877,6 +698,7 @@ class Collection {
      * Subscribes for changes of the collection
      * @param {(details:UpdateEventDetails<any>, store:Store)=>void} callback callback function
      * @param {number|undefined} [debounce_time] debounce time
+     * @returns {() => void}
      */
     subscribe(callback, debounce_time) {
         // @ts-ignore
@@ -913,22 +735,24 @@ class Collection {
      * @param {*} update_data
      */
     updateItemValue(index, update_data) {
-        var current_content = this.#store.getItem(this.#name);
-        var value;
+        const arr = [...this.value]; // shallow copy
+        const currentValue = arr[index];
+        if (currentValue === undefined) return;
 
-        if (isPlainObject(current_content[index])) {
-            value = { ...current_content[index], ...update_data };
+        let newValue;
+        if (isPlainObject(currentValue)) {
+            newValue = { ...currentValue, ...update_data };
         } else {
-            value = update_data;
+            newValue = update_data;
         }
-
-        current_content[index] = value;
+        arr[index] = newValue;
+        this.value = arr; // triggers reactivity
     }
 
     /**
      * On has-subscribers event
      * @param {(item_name:string, store:Store)=>void} callback
-     * @returns
+     * @returns {() => void}
      */
     onHasSubscribers(callback) {
         return this.#store.onHasSubscribers(this.#name, callback);
@@ -937,14 +761,14 @@ class Collection {
     /**
      * On no-subscribers event
      * @param {(item_name:string, store:Store)=>void} callback
-     * @returns
+     * @returns {() => void}
      */
     onNoSubscribers(callback) {
         return this.#store.onNoSubscribers(this.#name, callback);
     }
 }
 
-// @ts-check
+/// <reference path="./types.d.ts" />
 
 
 /** @module Computed */
@@ -954,23 +778,28 @@ class Collection {
  */
 class Computed {
     /** @type {String} */
-    #name
+    #name;
     /** @type {Store} */
-    #store
+    #store;
 
     /**
      * Creates the computed item
      * @param {Store} store - the store
      * @param {string} name - the name of the item
      * @param {() => ItemValue} [callback]
-     * @param {{is_hard?:boolean}} [options={}] - options. Use is_hard  when computing is expensive. 
+     * @param {{is_hard?:boolean}} [options={}] - options. Use is_hard when computing is expensive.
      */
     constructor(store, name, callback, options = {}) {
         this.#store = store;
         this.#name = name;
 
-        if (typeof callback != "undefined") {
-            this.#store.createComputedItem(this.#name, callback, options);
+        if (typeof callback != 'undefined') {
+            const ok = this.#store.createComputedItem(this.#name, callback, options);
+            if (!ok) {
+                throw new Error(
+                    `Failed to create computed item "${this.#name}": name already exists, store is sealed, or dependencies invalid.`
+                );
+            }
         }
     }
 
@@ -991,12 +820,13 @@ class Computed {
     }
 
     /**
-     * 
+     * Subscribes to changes of the computed item.
      * @param {(details:UpdateEventDetails<ItemValue>, store:Store)=>void} callback
      * @param {number|undefined} [debounce_time] debounce time
+     * @returns {() => void}
      */
     subscribe(callback, debounce_time) {
-        return this.#store.subscribe(this.#name, callback, debounce_time);
+        return this.#store.subscribe(this.#name, /** @type {import('./types.js').Subscriber} */ (callback), debounce_time);
     }
 
     /**
@@ -1033,8 +863,8 @@ class Computed {
 
     /**
      * On has-subscribers event
-     * @param {(item_name:string, store:Store)=>void} callback 
-     * @returns 
+     * @param {(item_name:string, store:Store)=>void} callback
+     * @returns {() => void}
      */
     onHasSubscribers(callback) {
         return this.#store.onHasSubscribers(this.#name, callback);
@@ -1042,120 +872,156 @@ class Computed {
 
     /**
      * On no-subscribers event
-     * @param {(item_name:string, store:Store)=>void} callback 
-     * @returns 
+     * @param {(item_name:string, store:Store)=>void} callback
+     * @returns {() => void}
      */
     onNoSubscribers(callback) {
         return this.#store.onNoSubscribers(this.#name, callback);
     }
 
     /**
-     * 
-     * @param {{(a:ItemValue, b:ItemValue, item_name:string, property: (string | null)):boolean} | null} func_or_null 
+     * Sets a custom compare function for this computed item.
+     * @param {{(a:ItemValue, b:ItemValue, item_name:string, property: (string | null)):boolean} | null} func_or_null
      * @returns {boolean}
      */
     setCompareFunction(func_or_null) {
         return this.#store.setCompareFunction(this.#name, func_or_null);
     }
-
 }
+
+/// <reference path="./types.d.ts" />
 
 // @ts-check
 
+/**
+ * Checks if adding a new computed node would create a cycle in the dependency graph.
+ * @param {string} nodeName - Name of the new node.
+ * @param {string[]} dependencies - Dependencies of the new node.
+ * @param {Map<string, import('./types.js').TypeStructureOfComputed>} computedMap - Map of existing computed nodes.
+ * @returns {boolean} - True if a cycle would be created.
+ */
+function wouldCreateCycle(nodeName, dependencies, computedMap) {
+    const visited = new Set();
+    const stack = new Set();
 
-// type Modify<T, R> = Omit<T, keyof R> & R;
+    /**
+     * @param {string} current
+     * @returns {boolean}
+     */
+    function hasCycle(current) {
+        if (stack.has(current)) return true;
+        if (visited.has(current)) return false;
+
+        visited.add(current);
+        stack.add(current);
+
+        const node = computedMap.get(current);
+        if (node && node.dependencies) {
+            for (const dep of node.dependencies) {
+                if (computedMap.has(dep)) {
+                    if (hasCycle(dep)) return true;
+                }
+            }
+        }
+        stack.delete(current);
+        return false;
+    }
+
+    for (const dep of dependencies) {
+        if (computedMap.has(dep)) {
+            if (hasCycle(dep)) return true;
+        }
+    }
+    return false;
+}
 
 /**
- * @preserve
- *
- * @typedef {(a:any, b:any, item_name:string, property: (string | null))=>boolean} CompareFunction
- *
- * @typedef {(details:UpdateEventDetails, store:Store)=>void} Subscriber
- *
- * @typedef {()=>void} Unsubscriber
- *
- * @typedef {(data:ChangeEventObject, store:Store)=>void} ChangeEventSubscriber
- *
- * @typedef {{[key:string]: UpdateEventDetails}} UpdatedItems
- *
- * @typedef {{[key:string] : UpdateEventDetails[]}} ChangeEventObject
- * @property {"set"|"delete"} eventType
- * @property {UpdatedItems} details
- *
- * @typedef {Object} TypeStructureOfAtom
- * @property {any} value
- * @property {number} version
- *
- * @typedef {Object} TypeStructureOfCollection
- * @property {*[]} value
- * @property {number} version
- *
- * @typedef {Object} TypeStructureOfComputed
- * @property {string} item_name - item name
- * @property {string[]} dependencies - item dependencies
- * @property {Set<string>} influences
- * @property {()=>any} getter
- * @property {any} value
- * @property {boolean} stale
- * @property {string} memo
- * @property {boolean} is_hard - if the
- * @property {number} version
- *
+ * Marks computed nodes as stale based on updated items.
+ * @param {IterableIterator<import('./types.js').TypeStructureOfComputed>} computedNodes - All computed nodes.
+ * @param {Set<string>} updatedItemNames - Set of item names that have changed.
+ * @param {Map<string, import('./types.js').TypeStructureOfComputed>} computedMap - Map for lookups.
+ * @returns {Set<string>} - Set of stale computed names.
  */
+function markStaleComputeds(computedNodes, updatedItemNames, computedMap) {
+    const staleSet = new Set();
 
-/**
- * @typedef { {is_hard?:boolean} } ComputedOptions
- */
+    // First pass: find directly stale nodes
+    for (const node of computedNodes) {
+        if (node.stale) continue;
+        // If any dependency is in updatedItemNames, mark stale
+        if (node.dependencies.some(dep => updatedItemNames.has(dep))) {
+            node.stale = true;
+            staleSet.add(node.item_name);
+        }
+    }
 
-/**
- * @typedef {Atom} TypeAtom
- * @typedef {Computed} TypeComputed
- * @typedef {Collection} TypeCollection
- */
+    // Propagate staleness through influences (breadth‑first)
+    const queue = Array.from(staleSet);
+    const processed = new Set();
 
-/** @typedef {Store} TypeStore */
+    while (queue.length) {
+        const currentName = queue.shift();
+        if (processed.has(currentName)) continue;
+        processed.add(currentName);
 
-/** @typedef {UpdateEventDetails} TypeUpdateEventDetails */
+        const currentNode = computedMap.get(currentName);
+        if (!currentNode) continue;
+
+        for (const influencedName of currentNode.influences) {
+            const influencedNode = computedMap.get(influencedName);
+            if (influencedNode && !influencedNode.stale) {
+                influencedNode.stale = true;
+                staleSet.add(influencedName);
+                queue.push(influencedName);
+            }
+        }
+    }
+
+    return staleSet;
+}
+
+/// <reference path="./types.d.ts" />
+
 
 /**
  * @template T
  */
 class UpdateEventDetails {
     /** @type {T} */
-    value;
+    value = /** @type {any} */ (undefined);
 
     /** @type {T} */
-    old_value;
+    old_value = /** @type {any} */ (undefined);
 
     /** @type {string} */
-    item_name;
+    item_name = '';
 
     /** @type {"set"|"delete"} */
-    eventType;
+    eventType = 'set';
 
     /** @type {string|null} */
     property = null;
 }
 
-const item_name_pattern = /^([a-zA-Z_][a-zA-Z0-9_]*)$/;
+const item_name_pattern = /^([a-zA-Z_][a-zA-Z0-9_\-.:]*)$/;
 
 class Store {
-    /** @type {Map<string, TypeStructureOfAtom>} */
+    /** @type {Map<string, import('./types.js').TypeStructureOfAtom>} */
     #atoms = new Map();
 
-    /** @type {Map<string, TypeStructureOfComputed>} */
+    /** @type {Map<string, import('./types.js').TypeStructureOfComputed>} */
     #computed = new Map();
 
-    /** @type {Map<string, TypeStructureOfCollection>} */
+    /** @type {Map<string, import('./types.js').TypeStructureOfCollection>} */
     #collections = new Map();
 
-    /** @type {Map<string, Array>} */
+    /** @type {Map<string, any>} */
     #collections_proxy = new Map();
 
-    /** @type {Object} */
+    /** @type {Record<string, any> | null} */
     #proxyObject = null;
 
-    /** @type {{[item_name: string ]: (CompareFunction | null) }} */
+    /** @type {{[item_name: string ]: (import('./types.js').CompareFunction | null) }} */
     #customCompareFunctions = {};
 
     /** @type {boolean} */
@@ -1164,14 +1030,17 @@ class Store {
     /** @type {boolean} */
     #reactions_are_running = false;
 
-    /** @type {[string, UpdateEventDetails][]} */
+    /** @type {[string, UpdateEventDetails<any>][]} */
     #change_events = [];
 
     /** @type {number} */
     #debounce_time = 0;
 
-    /** @type {EventEmitterExt<string>} */
-    #eventEmitter = new EventEmitterExt();
+    /** @type {EventEmitter} */
+    #eventEmitter = new EventEmitter();
+
+    /** @type {Map<string, number>} */
+    #listenerCounts = new Map();
 
     #track_deps_flag = false;
 
@@ -1183,27 +1052,6 @@ class Store {
     /**
      * Used to debug code during testing
      * @type {Function}
-     * @example
-     *```js
-     * import test from "./../node_modules/ava/entrypoints/main.mjs";
-     *
-     * test("create store", t => {
-     *
-     *     var store = new Store;
-     *     store.setItems({ a: 1, b: 2 });
-     *     store.log = t.log;
-     *
-     *     if (store.getItem("a") == 1 && store.getItem("b") == 2) {
-     *         t.pass();
-     *     }
-     *     else {
-     *         store.log(store.getItem("a"), store.getItem("b"));
-     *         // outputs 1, 2
-     *         t.fail();
-     *     }
-     *
-     * });
-     * ```
      */
     log = console.log;
     logError = console.error;
@@ -1213,7 +1061,7 @@ class Store {
      * Creates a store
      */
     constructor() {
-        this.#eventEmitter.autoRegister = true;
+        // No need for autoRegister in new EventEmitter
     }
 
     /**
@@ -1232,9 +1080,9 @@ class Store {
      * @returns {false|UpdateEventDetails<ItemValue>}
      */
     #setAtom(item_name, value) {
-        var old_value = undefined;
+        let old_value = undefined;
 
-        var atom = /** @type {TypeStructureOfAtom} */ (
+        let atom = /** @type {import('./types.js').TypeStructureOfAtom} */ (
             /** @type {unknown} */ (this.#atoms.get(item_name))
         );
 
@@ -1242,14 +1090,9 @@ class Store {
             old_value = atom.value;
         }
 
-        var equal = true;
+        let equal = true;
         if (this.#customCompareFunctions[item_name]) {
-            equal = this.#customCompareFunctions[item_name](
-                old_value,
-                value,
-                item_name,
-                null
-            );
+            equal = this.#customCompareFunctions[item_name](old_value, value, item_name, null);
         } else {
             equal = compareAny(old_value, value);
         }
@@ -1259,10 +1102,8 @@ class Store {
             atom.version++;
             this.#atoms.set(item_name, atom);
 
-            let details = /** @type {UpdateEventDetails<ItemValue>} */ (
-                new UpdateEventDetails()
-            );
-            details.eventType = "set";
+            let details = /** @type {UpdateEventDetails<ItemValue>} */ (new UpdateEventDetails());
+            details.eventType = 'set';
             details.item_name = item_name;
             details.value = value;
             details.old_value = old_value;
@@ -1283,7 +1124,7 @@ class Store {
         if (!this.#isValidItemName(item_name)) {
             throw new Error(`${item_name} is wrong store's item_name`);
         }
-        var atom = { version: 0, value };
+        let atom = { version: 0, value };
         this.#atoms.set(item_name, atom);
     }
 
@@ -1292,45 +1133,39 @@ class Store {
      * @param {string} item_name
      * @param {string} property
      * @param {any} value
-     * @returns {false|UpdateEventDetails} updated
+     * @returns {false|UpdateEventDetails<any>}
      */
     #setCollectionItem(item_name, property, value) {
         if (this.#reactions_are_running) {
             throw new Error(
-                "You cannot change property values ​​while reactions are running. Use method next() in reaction"
+                'You cannot change property values while reactions are running. Use method next() in reaction'
             );
         }
 
         property = property.toString();
 
-        var collection_obj = /** @type {TypeStructureOfCollection} */ (
+        let collection_obj = /** @type {import('./types.js').TypeStructureOfCollection} */ (
             /** @type {unknown} */ (this.#collections.get(item_name))
         );
 
         let collection = collection_obj.value;
 
-        let old_value = collection[property];
+        let old_value = /** @type {any} */ (collection)[property];
 
         let equal = true;
 
         if (this.#customCompareFunctions[item_name]) {
-            equal = this.#customCompareFunctions[item_name](
-                old_value,
-                value,
-                item_name,
-                property
-            );
-            //this.log(equal, old_value, value, item_name, property);
+            equal = this.#customCompareFunctions[item_name](old_value, value, item_name, property);
         } else {
             equal = compareAny(old_value, value);
         }
 
         if (equal) return false;
 
-        collection[property] = value;
+        /** @type {any} */ (collection)[property] = value;
 
         let details = new UpdateEventDetails();
-        details.eventType = "set";
+        details.eventType = 'set';
         details.item_name = item_name;
         details.property = property;
         details.value = value;
@@ -1346,31 +1181,28 @@ class Store {
      *
      * @param {string} item_name
      * @param {string} property
-     * @returns {false|UpdateEventDetails} updated
+     * @returns {false|UpdateEventDetails<any>}
      */
     #deleteCollectionItem(item_name, property) {
         if (this.#reactions_are_running) {
             throw new Error(
-                "You cannot change property values ​​while reactions are running. Use method next() in reaction"
+                'You cannot change property values while reactions are running. Use method next() in reaction'
             );
         }
 
         property = property.toString();
 
-        var collection_obj = /** @type {TypeStructureOfCollection} */ (
+        let collection_obj = /** @type {import('./types.js').TypeStructureOfCollection} */ (
             /** @type {unknown} */ (this.#collections.get(item_name))
         );
 
-        var collection = collection_obj.value;
-        //if (collection === undefined)
-        //    throw new Error(`#deleteCollectionItem error: ${item_name}`);
+        let collection = collection_obj.value;
+        let old_value = /** @type {any} */ (collection)[property];
 
-        var old_value = collection[property];
+        delete (/** @type {any} */ (collection)[property]);
 
-        delete collection[property];
-
-        var details = new UpdateEventDetails();
-        details.eventType = "delete";
+        let details = new UpdateEventDetails();
+        details.eventType = 'delete';
         details.item_name = item_name;
         details.property = property;
         details.value = null;
@@ -1381,6 +1213,7 @@ class Store {
 
         return details;
     }
+
     /**
      *
      * @param {string} item_name
@@ -1388,27 +1221,25 @@ class Store {
      */
     #setCollection(item_name, array) {
         if (!Array.isArray(array)) {
-            this.warn(
-                `Cannot assign a non-array value to a collection. Now ${item_name} == [].`
-            );
+            this.warn(`Cannot assign a non-array value to a collection. Now ${item_name} == [].`);
             array = [];
         }
 
-        var collection_obj = /** @type {TypeStructureOfCollection} */ (
+        let collection_obj = /** @type {import('./types.js').TypeStructureOfCollection} */ (
             /** @type {unknown} */ (this.#collections.get(item_name))
         );
 
-        var old_array = collection_obj.value;
+        let old_array = collection_obj.value;
 
-        var equal = true;
+        let equal = true;
 
-        var length = old_array.length;
+        let length = old_array.length;
 
         if (length != array.length) {
             let details = new UpdateEventDetails();
-            details.eventType = "set";
+            details.eventType = 'set';
             details.item_name = item_name;
-            details.property = "length";
+            details.property = 'length';
             details.value = array.length;
             details.old_value = length;
             collection_obj.version++;
@@ -1431,11 +1262,7 @@ class Store {
         old_array.length = array.length;
 
         for (let i = 0; i < array.length; i++) {
-            let details = this.#setCollectionItem(
-                item_name,
-                i.toString(),
-                array[i]
-            );
+            let details = this.#setCollectionItem(item_name, i.toString(), array[i]);
             if (details) {
                 equal = false;
             }
@@ -1444,7 +1271,7 @@ class Store {
         if (equal) return false;
 
         let main_details = new UpdateEventDetails();
-        main_details.eventType = "set";
+        main_details.eventType = 'set';
         main_details.item_name = item_name;
         main_details.value = array;
         main_details.old_value = undefined;
@@ -1459,18 +1286,10 @@ class Store {
      * Checks if item exists by its name
      * @param {string} item_name
      * @returns {boolean}
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: 2 });
-     *
-     * this.log(store.hasItem("a"));
-     * // outputs true
-     * ```
      */
     hasItem(item_name) {
         return (
-            item_name == "store" ||
+            item_name == 'store' ||
             this.#atoms.has(item_name) ||
             this.#computed.has(item_name) ||
             this.#collections.has(item_name)
@@ -1481,18 +1300,9 @@ class Store {
      * Sets item's value
      * @param {string} item_name
      * @param {any} value
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: 2 });
-     *
-     * store.setItem("a", 2);
-     * this.log(store.getItem("a"), store.getItem("b"));
-     * // outputs 2, 2
-     * ```
      */
     setItem(item_name, value) {
-        var obj = {
+        let obj = {
             [item_name]: value,
         };
 
@@ -1504,65 +1314,41 @@ class Store {
      * @param {string[]} item_names atoms & collections
      */
     #sendSignalToComputedItems(item_names) {
-        var updated_item_names = arrayToSet(item_names);
-        /** @type {Set<string>} */
-        var staled_computeds = new Set();
+        const updatedItemNames = arrayToSet(item_names);
+        const staleComputeds = markStaleComputeds(
+            this.#computed.values(),
+            updatedItemNames,
+            this.#computed
+        );
 
-        this.#computed.forEach((computed) => {
-            //console.log(updated_item_names, staled_computeds);
-            this.#markStaleComputedValueIfNeeded(
-                computed,
-                updated_item_names,
-                staled_computeds
-            );
-        });
+        const staleWithSubscribers = Array.from(staleComputeds).filter(itemName =>
+            this.hasSubscribers(itemName)
+        );
 
-        var store = this;
-
-        var staled_computeds_with_subscribers = Array.from(
-            staled_computeds
-        ).filter((item_name) => store.hasSubscribers(item_name));
-
-        staled_computeds_with_subscribers.forEach((computed_name) => {
-            let computed = /** @type {TypeStructureOfComputed} */ (
-                /** @type {unknown} */ store.#computed.get(computed_name)
-            );
-
-            if (computed.stale) {
-                store.#recalc(computed.item_name);
+        for (const computedName of staleWithSubscribers) {
+            const computed = this.#computed.get(computedName);
+            if (computed && computed.stale) {
+                this.#recalc(computed.item_name);
             }
-        });
+        }
     }
 
     /**
      * Sets values of items
      * @param {{[item_name: string]: any}} obj
-     *
-     * @example
-     *```js
-     * var store = new Store;
-     * store.setItems({ a: 1, b: 2 });
-     *
-     * if (store.getItem("a") == 1 && store.getItem("b") == 2) {
-     *     this.log('ok');
-     * }
-     * else {
-     *     this.log('fail');
-     * }
-     * ```
      */
     setItems(obj) {
         if (this.#reactions_are_running) {
             throw new Error(
-                "You cannot change property values ​​while reactions are running. Use method next() in reaction"
+                'You cannot change property values while reactions are running. Use method next() in reaction'
             );
         }
 
         /** @type {string[]} */
-        var updated_atom_item_names = [];
+        let updated_atom_item_names = [];
 
         for (let item_name in obj) {
-            if (item_name == "store") {
+            if (item_name == 'store') {
                 continue;
             }
 
@@ -1572,9 +1358,7 @@ class Store {
 
             if (!this.hasItem(item_name)) {
                 if (this.#is_sealed) {
-                    this.logError(
-                        `Store is sealed. Can't create the item "${item_name}"`
-                    );
+                    this.logError(`Store is sealed. Can't create the item "${item_name}"`);
                     continue;
                 }
 
@@ -1605,20 +1389,6 @@ class Store {
      * Checks if item is computed
      * @param {string} item_name
      * @returns {boolean}
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: 2 });
-     * store.createComputedItem(
-     *     "c",
-     *     (store) => {
-     *         return store.getItem("a") + store.getItem("b");
-     *     }
-     * );
-     *
-     * this.log(store.isComputedItem("a"), store.isComputedItem("c"));
-     * // outputs: false, true
-     * ```
      */
     isComputedItem(item_name) {
         return this.#computed.has(item_name);
@@ -1627,21 +1397,7 @@ class Store {
     /**
      * Checks if item is Atom
      * @param {string} item_name
-     * @returns {Boolean}
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: 2 });
-     * store.createComputedItem(
-     *     "c",
-     *     (store) => {
-     *         return store.getItem("a") + store.getItem("b");
-     *     }
-     * );
-     *
-     * this.log(store.isAtomItem("a"), store.isAtomItem("c"));
-     * // outputs: true, false
-     * ```
+     * @returns {boolean}
      */
     isAtomItem(item_name) {
         return this.#atoms.has(item_name);
@@ -1650,17 +1406,7 @@ class Store {
     /**
      * Checks if item is Collection
      * @param {string} item_name
-     * @returns {Boolean}
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: 2 });
-     *
-     * store.createCollectionItem("c", [{ q: 2, t: 90 }]);
-     *
-     * this.log(store.isCollection("a"), store.isCollection("c"));
-     * // outputs: false, true
-     * ```
+     * @returns {boolean}
      */
     isCollection(item_name) {
         return this.#collections.has(item_name);
@@ -1672,12 +1418,11 @@ class Store {
      */
     #calcMemo(item_names) {
         return item_names
-            .map((dep) => {
-                var reactive =
-                    this.#atoms.get(dep) || this.#collections.get(dep);
+            .map(dep => {
+                let reactive = this.#atoms.get(dep) || this.#collections.get(dep);
                 if (reactive) return reactive.version;
 
-                var computed = this.#computed.get(dep);
+                let computed = this.#computed.get(dep);
                 if (!computed) return undefined;
 
                 if (!computed.stale) return computed.version;
@@ -1686,18 +1431,17 @@ class Store {
 
                 return computed.version;
             })
-            .join(",");
+            .join(',');
     }
 
     /**
      *
      * @param {string} item_name
-     * @returns {false|UpdateEventDetails}
+     * @returns {false|UpdateEventDetails<any>}
      */
     #recalc(item_name) {
         let computed = this.#computed.get(item_name);
-        if (computed === undefined)
-            throw new Error(`#recalc error: ${item_name}`);
+        if (computed === undefined) throw new Error(`#recalc error: ${item_name}`);
 
         let old_value = computed.value;
 
@@ -1719,12 +1463,7 @@ class Store {
 
         let equal = true;
         if (this.#customCompareFunctions[item_name]) {
-            equal = this.#customCompareFunctions[item_name](
-                old_value,
-                value,
-                item_name,
-                null
-            );
+            equal = this.#customCompareFunctions[item_name](old_value, value, item_name, null);
         } else {
             equal = compareAny(old_value, value);
         }
@@ -1735,7 +1474,7 @@ class Store {
         computed.version++;
 
         let details = new UpdateEventDetails();
-        details.eventType = "set";
+        details.eventType = 'set';
         details.item_name = item_name;
         details.value = value;
         details.old_value = old_value;
@@ -1747,35 +1486,7 @@ class Store {
     /**
      * Recalcs computed value
      * @param {string} item_name
-     * @returns {false|UpdateEventDetails}
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: [1, 2, 3] });
-     *
-     * var obj = store.asObject();
-     *
-     * store.createComputedItem(
-     *     "c",
-     *     (store) => {
-     *         return store.getItem("a") + store.getItem("b")[1];
-     *     }
-     * );
-     *
-     * store.subscribe("c", (details) => {
-     *     store.log("c is changed: " + details.value);
-     * });
-     *
-     * obj.a = 2;
-     * // outputs: c is changed: 4
-     *
-     * obj.b[1] = 25;
-     * // outputs nothing
-     *
-     * store.recalcComputed("c");
-     * // outputs: c is changed: 27
-     *
-     * ```
+     * @returns {false|UpdateEventDetails<any>}
      */
     recalcComputed(item_name) {
         if (!this.isComputedItem(item_name)) {
@@ -1795,30 +1506,33 @@ class Store {
      *
      * @param {string} item_name
      * @param {(store: Store)=>any} callback
-     * @param {*} options
+     * @param {import('./types.js').ComputedOptions} options
      */
     #registerComputed(item_name, callback, options = {}) {
         let store = this;
 
-        var __callback = () => {
+        let __callback = () => {
             try {
                 return callback(store);
             } catch (e) {
                 this.logError(`Computed error ${item_name}: `, e);
-                return "#ERROR!";
+                return '#ERROR!';
             }
         };
 
-        var result = this.getUsedItems(__callback);
+        let result = this.getUsedItems(__callback);
 
-        var value = result.value;
-        var depsArray = result.items; //.filter(item_name => this.isAtomItem(item_name) || this.isCollection(item_name));
+        let value = result.value;
+        let depsArray = result.items;
 
-        var depsComputed = result.items.filter((item_name) =>
-            this.isComputedItem(item_name)
-        );
+        // Cyclic dependency check
+        if (wouldCreateCycle(item_name, depsArray, this.#computed)) {
+            throw new Error(`Cyclic dependency detected for computed item "${item_name}"`);
+        }
 
-        depsComputed.forEach((deps_item_name) => {
+        let depsComputed = result.items.filter(item_name => this.isComputedItem(item_name));
+
+        depsComputed.forEach(deps_item_name => {
             let computed = this.#computed.get(deps_item_name);
             computed?.influences.add(item_name);
         });
@@ -1827,10 +1541,8 @@ class Store {
             throw new Error(`Computed item ${item_name} hasn't dependencies`);
         }
 
-        var is_hard = options.hasOwnProperty("is_hard")
-            ? options.is_hard
-            : false;
-        var memo = "";
+        let is_hard = options.is_hard === true;
+        let memo = '';
 
         if (is_hard) {
             memo = this.#calcMemo(depsArray);
@@ -1839,7 +1551,7 @@ class Store {
         this.#computed.set(item_name, {
             item_name: item_name,
             dependencies: depsArray,
-            influences: new Set(), // влияет на другие компьютеды
+            influences: new Set(),
             getter: __callback,
             value: value,
             stale: false,
@@ -1851,69 +1563,10 @@ class Store {
 
     /**
      *
-     * @param {TypeStructureOfComputed} computed
-     * @param {Set<string>} updated_item_names
-     * @param {Set<string>} staled_computeds
-     * @returns {boolean} Returns if value is stale
-     */
-    #markStaleComputedValueIfNeeded(
-        computed,
-        updated_item_names,
-        staled_computeds
-    ) {
-        if (computed.stale) return true;
-
-        //console.log(computed, updated_item_names, staled_computeds);
-
-        var dependencies = computed.dependencies;
-        var computeds = computed.dependencies.filter((item_name) =>
-            this.#computed.has(item_name)
-        );
-
-        for (var i = 0; i < dependencies.length; i++) {
-            if (updated_item_names.has(dependencies[i])) {
-                computed.stale = true;
-                staled_computeds.add(computed.item_name);
-            }
-        }
-
-        var store = this;
-        /**
-         *
-         * @param {TypeStructureOfComputed} computed
-         */
-        function f(computed) {
-            computed.influences.forEach((next_computed_name) => {
-                let next_computed = store.#computed.get(next_computed_name);
-                if (!next_computed) return;
-
-                if (next_computed.stale) return;
-
-                next_computed.stale = true;
-                staled_computeds.add(next_computed_name);
-
-                if (next_computed.influences.size > 0) {
-                    f(next_computed);
-                }
-            });
-        }
-
-        computeds.forEach((computed_name) => {
-            let computed = store.#computed.get(computed_name);
-            if (!computed) return;
-
-            f(computed);
-        });
-
-        return false;
-    }
-
-    /**
-     *
      * @param {string} item_name
      * @param {(store: Store)=>any} callback
      * @param {boolean} [skip_item_name_validation=false]
-     * @param {ComputedOptions} [options={}]
+     * @param {import('./types.js').ComputedOptions} [options={}]
      * @returns {boolean}
      */
     #createComputedItemExtended(
@@ -1943,67 +1596,16 @@ class Store {
      * Creates a computed item
      * @param {string} item_name
      * @param {(store: Store)=>any} callback
-     * @param {ComputedOptions} [options={}]
-     * @returns {boolean} is created
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: [1, 2, 3] });
-     *
-     * var obj = store.asObject();
-     *
-     * store.createComputedItem(
-     *     "c",
-     *     (store) => {
-     *         return store.getItem("a") + store.getItem("b")[1];
-     *     }
-     * );
-     *
-     * store.subscribe("c", (details) => {
-     *     store.log("c is changed: " + details.value);
-     * });
-     *
-     * obj.a = 2;
-     * // outputs: c is changed: 4
-     *
-     * obj.b[1] = 25;
-     * // outputs nothing
-     *
-     * store.recalcComputed("c");
-     * // outputs: c is changed: 27
-     * ```
-     *
-     * When computed item has error
-     * @example
-     *```js
-     * var store = new Store({ a: "abcdef", b: "ghijk" });
-     * store.createComputedItem(
-     *     "c",
-     *     (store) => {
-     *         return store.getItem("a").slice(0, 1) + store.getItem("b").slice(0, 1);
-     *     }
-     * );
-     *
-     * store.setItem("b", 0);
-     *
-     * this.log(store.getItem("c"));
-     * // outputs "#ERROR!"
-     * ```
+     * @param {import('./types.js').ComputedOptions} [options={}]
+     * @returns {boolean}
      */
     createComputedItem(item_name, callback, options = {}) {
         if (this.#is_sealed) {
-            this.logError(
-                `Store is sealed. Can't create the item "${item_name}"`
-            );
+            this.logError(`Store is sealed. Can't create the item "${item_name}"`);
             return false;
         }
 
-        return this.#createComputedItemExtended(
-            item_name,
-            callback,
-            false,
-            options
-        );
+        return this.#createComputedItemExtended(item_name, callback, false, options);
     }
 
     /**
@@ -2011,21 +1613,7 @@ class Store {
      * @template {any[]} T
      * @param {string} item_name
      * @param {T} array
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: 2 });
-     *
-     * var c = store.createCollectionItem("c", [1, 2, 3]);
-     *
-     * store.subscribe("c", (details) => {
-     *     this.log("collection item is changed. (property :" + details.property + ", value: " + details.value + ")");
-     * });
-     *
-     * c[0] = 15;
-     * // outputs: collection item is changed. (property: 0, value: 15)
-     *
-     * ```
+     * @returns {T}
      */
     createCollectionItem(item_name, array) {
         item_name = item_name.trim();
@@ -2038,21 +1626,17 @@ class Store {
             throw new Error(`${item_name} is wrong store's item_name`);
         }
 
-        var store = this;
-        var proxy = new Proxy(array, {
+        let store = this;
+        let proxy = new Proxy(array, {
             deleteProperty: function (target, property) {
-                target.length;
-
-                if (typeof property == "symbol") {
+                if (typeof property == 'symbol') {
+                    // @ts-ignore
                     delete target[property];
-                } else if (typeof property == "string") {
-                    let details = store.#deleteCollectionItem(
-                        item_name,
-                        property
-                    );
+                } else if (typeof property == 'string') {
+                    let details = store.#deleteCollectionItem(item_name, property);
 
                     if (details) {
-                        delete target[property];
+                        delete (/** @type {any} */ (target)[property]);
 
                         store.#sendSignalToComputedItems([item_name]);
                         store.#fireEvents();
@@ -2062,14 +1646,13 @@ class Store {
                 return true;
             },
             set: function (target, property, value, receiver) {
-                if (typeof property == "symbol") {
+                if (typeof property == 'symbol') {
+                    // @ts-ignore
                     target[property] = value;
-                } else if (typeof property == "string") {
+                } else if (typeof property == 'string') {
                     let collection_obj =
-                        /** @type {TypeStructureOfCollection} */ (
-                            /** @type {unknown} */ (
-                                store.#collections.get(item_name)
-                            )
+                        /** @type {import('./types.js').TypeStructureOfCollection} */ (
+                            /** @type {unknown} */ (store.#collections.get(item_name))
                         );
 
                     let collection = collection_obj.value;
@@ -2078,23 +1661,19 @@ class Store {
 
                     if (!isNaN(index) && index >= collection.length) {
                         let details = new UpdateEventDetails();
-                        details.eventType = "set";
+                        details.eventType = 'set';
                         details.item_name = item_name;
-                        details.property = "length";
+                        details.property = 'length';
                         details.value = index + 1;
                         details.old_value = collection_length;
                         store.#registerEvent(item_name, details);
                         collection_obj.version++;
                     }
 
-                    let details = store.#setCollectionItem(
-                        item_name,
-                        property,
-                        value
-                    );
+                    let details = store.#setCollectionItem(item_name, property, value);
 
                     if (details) {
-                        target[property] = value;
+                        /** @type {any} */ (target)[property] = value;
 
                         store.#sendSignalToComputedItems([item_name]);
                         store.#fireEvents();
@@ -2112,144 +1691,24 @@ class Store {
     }
 
     /**
-     * Sets the callback for the "change" event. The "change" event is fired when the value of any store element changes.
-     * @param {ChangeEventSubscriber} callback
-     * @returns {Unsubscriber} unsubscriber
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: 2 });
-     *
-     * store.onChange((data) => {
-     *   store.log(data);
-     * });
-     *
-     * store.setItem("a", 2);
-     * //outputs:
-     * //{
-     * //  a: [
-     * //    UpdateEventDetails {
-     * //      value: 2,
-     * //      old_value: 1,
-     * //      item_name: 'a',
-     * //      eventType: 'set',
-     * //      property: null
-     * //    }
-     * //  ]
-     * //}
-     *
-     * store.setItem("b", 5);
-     * //outputs:
-     * //{
-     * //  b: [
-     * //    UpdateEventDetails {
-     * //      value: 5,
-     * //      old_value: 2,
-     * //      item_name: 'b',
-     * //      eventType: 'set',
-     * //      property: null
-     * //    }
-     * //  ]
-     * //}
-     *
-     * store.setItems({ a: 0, b: 0 });
-     * //outputs:
-     * //{
-     * //  a: [
-     * //    UpdateEventDetails {
-     * //      value: 0,
-     * //      old_value: 2,
-     * //      item_name: 'a',
-     * //      eventType: 'set',
-     * //      property: null
-     * //    }
-     * //  ],
-     * //  b: [
-     * //    UpdateEventDetails {
-     * //      value: 0,
-     * //      old_value: 5,
-     * //      item_name: 'b',
-     * //      eventType: 'set',
-     * //      property: null
-     * //    }
-     * //  ]
-     * //}
-     * ```
+     * Sets the callback for the "change" event.
+     * @param {import('./types.js').ChangeEventSubscriber} callback
+     * @returns {import('./types.js').Unsubscriber}
      */
     onChange(callback) {
-        let unsubscriber = this.#eventEmitter.on("#change", callback);
+        let unsubscriber = this.#eventEmitter.on('#change', callback);
         return unsubscriber;
     }
 
     /**
-     * @typedef {string|Atom|Collection|Computed} OnChangeParams
+     * @typedef {string|Atom<any>|Collection<any>|Computed<any>} OnChangeParams
      */
 
     /**
-     * Sets a callback for the "change" event for elements whose names are specified in the array.
-     * @param {OnChangeParams[]} items item names or item objects
-     * @param {ChangeEventSubscriber} callback
-     * @returns {Unsubscriber|undefined} unsubscriber
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: 2 });
-     *
-     * store.onChangeAny(["a", "b"], (data) => {
-     *   store.log(data);
-     * });
-     *
-     * store.setItem("a", 2);
-     * //outputs:
-     * //{
-     * //  a: [
-     * //    UpdateEventDetails {
-     * //      value: 2,
-     * //      old_value: 1,
-     * //      item_name: 'a',
-     * //      eventType: 'set',
-     * //      property: null
-     * //    }
-     * //  ]
-     * //}
-     *
-     * store.setItem("b", 5);
-     * //outputs:
-     * //{
-     * //  b: [
-     * //    UpdateEventDetails {
-     * //      value: 5,
-     * //      old_value: 2,
-     * //      item_name: 'b',
-     * //      eventType: 'set',
-     * //      property: null
-     * //    }
-     * //  ]
-     * //}
-     *
-     * store.setItems({ a: 0, b: 0 });
-     * //outputs:
-     * //{
-     * //  a: [
-     * //    UpdateEventDetails {
-     * //      value: 0,
-     * //      old_value: 2,
-     * //      item_name: 'a',
-     * //      eventType: 'set',
-     * //      property: null
-     * //    }
-     * //  ],
-     * //  b: [
-     * //    UpdateEventDetails {
-     * //      value: 0,
-     * //      old_value: 5,
-     * //      item_name: 'b',
-     * //      eventType: 'set',
-     * //      property: null
-     * //    }
-     * //  ]
-     * //}
-     * ```
+     * Sets a callback for the "change" event for specified items.
+     * @param {OnChangeParams[]} items
+     * @param {import('./types.js').ChangeEventSubscriber} callback
+     * @returns {import('./types.js').Unsubscriber|undefined}
      */
     onChangeAny(items, callback) {
         /** @type {string[]} */
@@ -2258,7 +1717,7 @@ class Store {
         for (let i = 0; i < items.length; i++) {
             let item = items[i];
 
-            if (typeof item == "string") {
+            if (typeof item == 'string') {
                 if (this.hasItem(item)) {
                     arr_item_names.push(item);
                 }
@@ -2266,11 +1725,7 @@ class Store {
                 continue;
             }
 
-            if (
-                item instanceof Atom ||
-                item instanceof Computed ||
-                item instanceof Collection
-            ) {
+            if (item instanceof Atom || item instanceof Computed || item instanceof Collection) {
                 if (item.store === this) {
                     arr_item_names.push(item.name);
                 }
@@ -2282,11 +1737,11 @@ class Store {
         let store = this;
 
         let unsubscriber = this.#eventEmitter.on(
-            "#change",
-            function (/** @type {ChangeEventObject} */ details) {
+            '#change',
+            function (/** @type {import('./types.js').ChangeEventObject} */ details) {
                 let shouldFireEvent = false;
 
-                /** @type {ChangeEventObject} */
+                /** @type {import('./types.js').ChangeEventObject} */
                 let events = {};
 
                 for (let item_name in details) {
@@ -2310,36 +1765,10 @@ class Store {
      * Deletes an item from the store
      * @param {string} item_name
      * @returns {boolean}
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: 2 });
-     *
-     * store.createComputedItem(
-     *     "c",
-     *     (store) => {
-     *         return store.getItem("a") + store.getItem("b");
-     *     }
-     * );
-     *
-     * store.createCollectionItem("d", [1, 2, 3]);
-     *
-     * store.deleteItem("a");
-     * store.deleteItem("b");
-     * store.deleteItem("c");
-     * store.deleteItem("d");
-     *
-     * var items = store.getItems(true);
-     *
-     * this.log(Object.keys(items).length);
-     * // outputs: 0
-     * ```
      */
     deleteItem(item_name) {
         if (this.#is_sealed) {
-            this.logError(
-                `Store is sealed. Can't delete the item "${item_name}"`
-            );
+            this.logError(`Store is sealed. Can't delete the item "${item_name}"`);
             return false;
         }
 
@@ -2350,13 +1779,25 @@ class Store {
         let value = this.getItem(item_name);
 
         let details = new UpdateEventDetails();
-        details.eventType = "delete";
+        details.eventType = 'delete';
         details.item_name = item_name;
         details.value = value;
 
         this.clearItemSubscribers(item_name);
 
         if (this.isComputedItem(item_name)) {
+            const comp = this.#computed.get(item_name);
+            if (comp) {
+                // Remove this computed from influences of its dependencies
+                for (const dep of comp.dependencies) {
+                    if (this.isComputedItem(dep)) {
+                        const depComp = this.#computed.get(dep);
+                        if (depComp) {
+                            depComp.influences.delete(item_name);
+                        }
+                    }
+                }
+            }
             this.#computed.delete(item_name);
         }
 
@@ -2376,55 +1817,20 @@ class Store {
 
     /**
      *
-     * @returns {{[item_name:string]:TypeStructureOfAtom}}
+     * @returns {{[item_name:string]:import('./types.js').TypeStructureOfAtom}}
      */
     #getAtoms() {
         return Object.fromEntries(this.#atoms);
     }
 
     /**
-     * Returns a store data as an js object
+     * Returns a store data as a js object
      * @param {boolean} show_computed
      * @returns {{[item_name: string]: any}}
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: 2 });
-     *
-     * store.createComputedItem(
-     *     "c",
-     *     (store) => {
-     *         return store.getItem("a") + store.getItem("b");
-     *     }
-     * );
-     *
-     * var items = store.getItems();
-     * store.log(items);
-     * // outputs:
-     * // {
-     * //   a: 1,
-     * //   b: 2,
-     * // }
-     *
-     * // with computed
-     * var items_2 = store.getItems(true);
-     * store.log(items_2);
-     * // outputs:
-     * // {
-     * //  a: 1,
-     * //  b: 2,
-     * //  c: 3,
-     * // }
-     *
-     * ```
      */
     getItems(show_computed = false) {
         if (show_computed) {
-            return Object.assign(
-                {},
-                this.#getAtoms(),
-                this.#getComputedValues()
-            );
+            return Object.assign({}, this.#getAtoms(), this.#getComputedValues());
         }
 
         return this.#getAtoms();
@@ -2433,6 +1839,7 @@ class Store {
     /**
      *
      * @param {string} item_name
+     * @returns {any}
      */
     #getComputedValue(item_name) {
         if (this.#track_deps_flag) {
@@ -2440,16 +1847,14 @@ class Store {
         }
 
         let computed = this.#computed.get(item_name);
-        if (computed === undefined)
-            throw new Error(`#getComputedValue error: ${item_name}`);
+        if (computed === undefined) throw new Error(`#getComputedValue error: ${item_name}`);
 
         if (computed.stale) {
             this.#recalc(item_name);
         }
 
         let computed_new = this.#computed.get(item_name);
-        if (computed_new === undefined)
-            throw new Error(`#getComputedValue error: ${item_name}`);
+        if (computed_new === undefined) throw new Error(`#getComputedValue error: ${item_name}`);
 
         return computed_new.value;
     }
@@ -2457,6 +1862,7 @@ class Store {
     /**
      *
      * @param {string} item_name
+     * @returns {any}
      */
     #getCollection(item_name) {
         if (this.#track_deps_flag) {
@@ -2471,12 +1877,10 @@ class Store {
      * @returns {{[item_name: string]: any}}
      */
     #getComputedValues() {
-        let result = {};
+        let result = /** @type {{[item_name: string]: any}} */ ({});
 
-        this.#computed.forEach((computed) => {
-            result[computed.item_name] = this.#getComputedValue(
-                computed.item_name
-            );
+        this.#computed.forEach(computed => {
+            result[computed.item_name] = this.#getComputedValue(computed.item_name);
         });
 
         return result;
@@ -2485,25 +1889,25 @@ class Store {
     /**
      *
      * @param {string} item_name
+     * @returns {any}
      */
     #getAtomValue(item_name) {
         if (this.#track_deps_flag) {
             this.#tracked_set.add(item_name);
         }
 
-        var atom = this.#atoms.get(item_name);
-        var result = atom ? atom.value : undefined;
+        let atom = this.#atoms.get(item_name);
+        let result = atom ? atom.value : undefined;
         return result;
     }
 
     /**
-     * Returns an item's value. If the element name is called store, then a reference to the Store object will be returned
-     *
+     * Returns an item's value.
      * @param {string} item_name
-     * @returns {any} returns the item's value
+     * @returns {any}
      */
     getItem(item_name) {
-        if (item_name == "store") {
+        if (item_name == 'store') {
             return this;
         }
 
@@ -2550,172 +1954,96 @@ class Store {
     /**
      * Sets a callback for item's value changes
      * @param {string} item_name
-     * @param {Subscriber} callback
-     * @param {number|undefined} [debounce_time] debounce time
-     * @returns {Unsubscriber} Returns unsubscriber
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: 2 });
-     *
-     * var unsubscriber = store.subscribe("a", (details) => {
-     *     this.log(`item "${details.item_name}" is changed: ${details.value}`);
-     * });
-     *
-     * store.setItem("a", 2);
-     * // outputs: item "a" is changed: 2
-     *
-     * unsubscriber();
-     *
-     * store.setItem("a", 3);
-     * // outputs nothing
-     * ```
+     * @param {import('./types.js').Subscriber} callback
+     * @param {number|undefined} [debounce_time]
+     * @returns {import('./types.js').Unsubscriber}
      */
     subscribe(item_name, callback, debounce_time) {
         if (debounce_time === undefined) {
             debounce_time = this.#debounce_time;
         }
 
-        var _callback =
-            debounce_time <= 0 ? callback : debounce(callback, debounce_time);
+        let _callback = debounce_time <= 0 ? callback : debounce(callback, debounce_time);
 
-        let unsubscriber = this.#eventEmitter.on(item_name, _callback);
+        // Update listener counts
+        let currentCount = this.#listenerCounts.get(item_name) || 0;
+        const hadListeners = currentCount > 0;
+        const newCount = currentCount + 1;
+        this.#listenerCounts.set(item_name, newCount);
 
-        if (this.#eventEmitter.getNumberOfListeners(item_name) == 1) {
-            this.#eventEmitter.emit(
-                "#has-subscribers:" + item_name,
-                item_name,
-                this
-            );
+        // Emit "has-subscribers" if this is the first listener
+        if (!hadListeners) {
+            this.#eventEmitter.emit('#has-subscribers:' + item_name, item_name, this);
         }
 
-        return () => {
+        const unsubscriber = this.#eventEmitter.on(item_name, _callback);
+
+        let isUnsubscribed = false;
+        const wrappedUnsubscribe = () => {
+            if (isUnsubscribed) return;
+            isUnsubscribed = true;
+
             unsubscriber();
 
-            if (this.#eventEmitter.getNumberOfListeners(item_name) == 0) {
-                this.#eventEmitter.emit(
-                    "#no-subscribers:" + item_name,
-                    item_name,
-                    this
-                );
+            const countAfter = (this.#listenerCounts.get(item_name) || 0) - 1;
+            if (countAfter <= 0) {
+                this.#listenerCounts.delete(item_name);
+                this.#eventEmitter.emit('#no-subscribers:' + item_name, item_name, this);
+            } else {
+                this.#listenerCounts.set(item_name, countAfter);
             }
         };
+
+        return wrappedUnsubscribe;
     }
 
     /**
      * Returns whether the item has subscribers
      * @param {string} item_name
+     * @returns {boolean}
      */
     hasSubscribers(item_name) {
-        return this.#eventEmitter.hasListeners(item_name);
+        const count = this.#listenerCounts.get(item_name) || 0;
+        return count > 0;
     }
 
     /**
      * Deletes all subscribers
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 0, b: 2 });
-     *
-     * store.subscribe("a", () => {
-     *     this.log("Hello");
-     * });
-     *
-     * store.setItem("a", 1);
-     * // outputs: Hello
-     *
-     * store.clearSubscribers();
-     * store.setItem("a", 2);
-     *
-     * // outputs nothing
-     * ```
      */
     clearSubscribers() {
-        this.#eventEmitter.unregisterAllEvents();
+        this.#eventEmitter.clear();
+        this.#listenerCounts.clear();
     }
 
     /**
      * Deletes the item's subscribers
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 0, b: 2 });
-     *
-     * store.subscribe("a", () => {
-     *     this.log("Hello");
-     * });
-     *
-     * store.setItem("a", 1);
-     * // outputs: Hello
-     *
-     * store.clearItemSubscribers("a");
-     * store.setItem("a", 2);
-     *
-     * // outputs nothing
-     * ```
      * @param {string} item_name
      */
     clearItemSubscribers(item_name) {
-        let should_emit_event = false;
+        const count = this.#listenerCounts.get(item_name) || 0;
+        if (count === 0) return;
 
-        let countListeners = this.#eventEmitter.getNumberOfListeners(item_name);
+        this.#eventEmitter.clearEventListeners(item_name);
+        this.#listenerCounts.delete(item_name);
 
-        if (countListeners == 0) {
-            return;
-        }
-
-        if (countListeners > 0) {
-            should_emit_event = true;
-        }
-
-        this.#eventEmitter.removeAllListeners(item_name);
-
-        if (should_emit_event) {
-            this.#eventEmitter.emit("#no-subscribers:" + item_name);
-        }
+        // Emit "no-subscribers" event
+        this.#eventEmitter.emit('#no-subscribers:' + item_name, item_name, this);
     }
 
     /**
-     * Resets the instance. Deletes all items an subscribers.
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 0, b: 2 });
-     *
-     * store.subscribe("a", () => {
-     *     this.log("Hello");
-     * });
-     *
-     * store.reset();
-     *
-     * this.log(store.getItem("a"));
-     * // outputs: null
-     * ```
+     * Resets the instance. Deletes all items and subscribers.
      */
     reset() {
         this.#atoms.clear();
         this.#computed.clear();
         this.#collections.clear();
-
         this.clearSubscribers();
+        this.#base_item_name_index = 0;
     }
 
     /**
-     * Represents the store as object. Returns an proxy object.
-     * @returns { {[item_name:string]:any}}
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: 2 });
-     *
-     * store.subscribe("b", (details) => {
-     *     this.log(details.value);
-     * });
-     *
-     * var obj = store.asObject();
-     * obj.b = 5; // same as store.setItem("b", 5);
-     * // outputs: 5
-     * ```
+     * Represents the store as object. Returns a proxy object.
+     * @returns {Record<string, any>}
      */
     asObject() {
         if (!this.#proxyObject) {
@@ -2727,16 +2055,16 @@ class Store {
 
     /**
      *
-     * @returns {{[item_name:string]:any}}
+     * @returns {Record<string, any>}
      */
     #createProxy() {
         let target = {};
         let that = this;
 
-        /** @type {ProxyHandler} */
+        /** @type {ProxyHandler<Record<string, any>>} */
         const handler = {
             get(target, item_name) {
-                if (typeof item_name == "string") {
+                if (typeof item_name == 'string') {
                     return that.getItem(item_name);
                 }
 
@@ -2760,7 +2088,7 @@ class Store {
             },
 
             deleteProperty: function (target, item_name) {
-                if (typeof item_name == "string") {
+                if (typeof item_name == 'string') {
                     that.deleteItem(item_name);
                 }
 
@@ -2774,27 +2102,8 @@ class Store {
     /**
      * Sets a custom compare function for the item.
      * @param {string} item_name
-     * @param {CompareFunction | null} func_or_null
+     * @param {import('./types.js').CompareFunction | null} func_or_null
      * @returns {boolean}
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: { value: 1, meta_info: { qwe: 900 } } });
-     *
-     * store.setCompareFunction("a", (old_value, value) => {
-     *     return (old_value.value == value.value);
-     * });
-     *
-     * store.subscribe("a", () => {
-     *     this.log("changed");
-     * });
-     *
-     * store.setItem("a", { value: 1, meta_info: { qwe: 1000 } });
-     * // outputs nothing
-     *
-     * store.setItem("a", { value: 2, meta_info: { qwe: 900 } });
-     * // outputs: changed
-     * ```
      */
     setCompareFunction(item_name, func_or_null) {
         if (!this.hasItem(item_name)) return false;
@@ -2812,33 +2121,7 @@ class Store {
     }
 
     /**
-     * Seals the store. This protects the store from creating new items or deleting items
-     *
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: 2 });
-     *
-     * store.createComputedItem(
-     *     "c",
-     *     (store) => {
-     *         return store.getItem("a") + store.getItem("b");
-     *     }
-     * );
-     *
-     * store.seal();
-     *
-     * store.setItem("a", 2);
-     * store.setItem("e", 2);
-     *
-     * store.deleteItem("a");
-     * store.deleteItem("b");
-     * store.deleteItem("c");
-     *
-     *
-     * var items = store.getItems(true);
-     * store.log(items);
-     * // outputs: { a: 2, b: 2, c: 4 }
-     * ```
+     * Seals the store.
      */
     seal() {
         this.#is_sealed = true;
@@ -2854,7 +2137,7 @@ class Store {
     /**
      *
      * @param {string} event_name
-     * @param {UpdateEventDetails} details
+     * @param {UpdateEventDetails<any>} details
      */
     #registerEvent(event_name, details) {
         this.#change_events.push([event_name, details]);
@@ -2865,28 +2148,30 @@ class Store {
 
         this.#reactions_are_running = true;
 
-        /** @type {ChangeEventObject} */
-        var events = {};
+        /** @type {import('./types.js').ChangeEventObject} */
+        let events = {};
 
-        var i = 0;
+        let i = 0;
         while (i < this.#change_events.length) {
             let ev = this.#change_events[i];
             this.#eventEmitter.emit(ev[0], ev[1], this);
             i++;
 
+
             if (!events[ev[0]]) {
                 events[ev[0]] = [];
             }
 
+            // @ts-ignore
             events[ev[0]].push(ev[1]);
         }
 
-        this.#eventEmitter.emit("#change", events, this);
+        this.#eventEmitter.emit('#change', events, this);
 
         this.#change_events = [];
         this.#reactions_are_running = false;
 
-        this.#eventEmitter.emit("#reactions_finished", this);
+        this.#eventEmitter.emit('#reactions_finished', this);
     }
 
     /**
@@ -2900,35 +2185,10 @@ class Store {
     /**
      * Calls a function after all reactions have completed execution
      * @param {(store:Store)=>void} func
-     * @example
-     *```js
-     * var store = new Store({ a: 1, b: 2 });
-     * store.log = t.log;
-     * store.logError = t.log;
-     * store.warn = t.log;
-     *
-     * var foo = 0;
-     *
-     * store.subscribe("a", () => {
-     *     store.next(() => {
-     *         store.setItem("b", 0);
-     *     });
-     *     foo = 1;
-     * });
-     *
-     * store.setItem("a", 2);
-     *
-     * if (foo == 1 && store.getItem("b") == 0) {
-     *     console.log("success");
-     * }
-     * else {
-     *     console.log("fail");
-     * }
-     *```
      */
     next(func) {
         if (this.#reactions_are_running) {
-            this.#eventEmitter.once("#reactions_finished", func);
+            this.#eventEmitter.once('#reactions_finished', func);
         } else {
             func(this);
         }
@@ -2948,27 +2208,9 @@ class Store {
      * @param {T} value
      * @param {string} [name]
      * @returns {Atom<T>}
-     * @example
-     *```js
-     *
-     * var store = new Store;
-     * var foo = 0;
-     *
-     * let a = store.createAtom(1);
-     * a.subscribe((details) => {
-     *     foo++;
-     * });
-     *
-     * a.value++;
-     * a.value++;
-     *
-     *
-     * console.log(foo == 2);
-     * // outputs: true
-     *```
      */
     createAtom(value, name) {
-        if (typeof name == "undefined") {
+        if (typeof name == 'undefined') {
             name = this.#generateItemName();
         }
         return new Atom(this, name, value);
@@ -2976,8 +2218,8 @@ class Store {
 
     /**
      * Creates or updates an atom with the specified item name and value.
-     * @param {string} item_name - The name of the atom item to create or update.
-     * @param {*} value - The value to set for the atom item.
+     * @param {string} item_name
+     * @param {any} value
      */
     createAtomItem(item_name, value) {
         this.setItem(item_name, value);
@@ -2986,29 +2228,7 @@ class Store {
     /**
      * Returns an instance of the Atom if the item exists
      * @param {string} item_name
-     * @returns {TypeAtom}
-     *
-     * @example
-     *```js
-     * var store = new Store;
-     *
-     * let a = store.createAtom(1, "a");
-     * let b = store.getAtom("a");
-     * let value = store.getItem("a");
-     *
-     * console.log(store.getItem("a") == a.value);
-     * // true
-     *
-     * console.log(a.name === b.name);
-     * // true
-     *
-     * console.log(a.value === b.value);
-     * // true
-     *
-     * console.log(value === b.value);
-     * // true
-     *
-     *```
+     * @returns {import('./types.js').TypeAtom}
      */
     getAtom(item_name) {
         if (this.isAtomItem(item_name)) {
@@ -3023,38 +2243,11 @@ class Store {
      * @template T
      * @param {() => T} callback
      * @param {string} [name]
-     * @param {ComputedOptions} options
+     * @param {import('./types.js').ComputedOptions} options
      * @returns {Computed<T>}
-     *
-     * @example
-     *```js
-     * var store = new Store;
-     *
-     * var foo = 0;
-     *
-     * let a = store.createAtom(1);
-     *
-     * let b = store.createComputed(() => {
-     *     return a.value + 1;
-     * });
-     *
-     * b.subscribe(() => {
-     *     foo++;
-     * });
-     *
-     * a.value++;
-     * a.value++;
-     *
-     * console.log(b.value);
-     * // 3
-     *
-     * console.log(foo);
-     * // 2
-     *
-     *```
      */
     createComputed(callback, name, options = {}) {
-        if (typeof name == "undefined") {
+        if (typeof name == 'undefined') {
             name = this.#generateItemName();
         }
 
@@ -3064,25 +2257,7 @@ class Store {
     /**
      * Returns an instance of the Computed if the item exists
      * @param {string} item_name
-     * @returns {TypeComputed}
-     *
-     * @example
-     *```js
-     * var store = new Store;
-     *
-     * let a = store.createAtom(0);
-     *
-     * let b = store.createComputed(() => { return a.value + 1 });
-     * let c = store.getComputed(b.name);
-     *
-     * a.value++;
-     *
-     * console.log(b.name === c.name);
-     * // true
-     *
-     * console.log(c.value == 2);
-     * // true
-     *```
+     * @returns {import('./types.js').TypeComputed}
      */
     getComputed(item_name) {
         if (!this.isComputedItem(item_name)) {
@@ -3098,39 +2273,9 @@ class Store {
      * @param {T[]} value
      * @param {string} [name]
      * @returns {Collection<T>}
-     *
-     * @example
-     *```js
-     * var store = new Store;
-     *
-     * var value_changed = 0;
-     * var length_changed = 0;
-     *
-     * let a = store.createCollection([]);
-     *
-     * a.subscribe((details) => {
-     *
-     *     if (details.property == "length") {
-     *         length_changed++;
-     *         return;
-     *     }
-     *
-     *     value_changed++;
-     * });
-     *
-     * a.value.push(1);
-     * a.value.push(2);
-     *
-     * console.log(value_changed);
-     * // 2
-     *
-     * console.log(length_changed);
-     * // 2
-     *
-     *```
      */
     createCollection(value, name) {
-        if (typeof name == "undefined") {
+        if (typeof name == 'undefined') {
             name = this.#generateItemName();
         }
 
@@ -3140,45 +2285,7 @@ class Store {
     /**
      * Returns an instance of the Collection if the item exists
      * @param {string} item_name
-     * @returns {TypeCollection}
-     *
-     * @example
-     *```js
-     * var store = new Store;
-     *
-     * var value_changed = 0;
-     * var length_changed = 0;
-     *
-     * let b = store.createCollection([1, 2, 3], "b");
-     *
-     * let a = store.getCollection("b");
-     *
-     * a.subscribe((details) => {
-     *
-     *     if (details.property == "length") {
-     *         length_changed++;
-     *         return;
-     *     }
-     *
-     *     value_changed++;
-     * });
-     *
-     * a.value.push(1);
-     * a.value.push(2);
-     *
-     * console.log(a.value.length);
-     * // 5
-     *
-     * console.log(a.name === b.name);
-     * // true
-     *
-     * console.log(value_changed);
-     * // 2
-     *
-     * console.log(length_changed);
-     * // 2
-     *
-     *```
+     * @returns {import('./types.js').TypeCollection}
      */
     getCollection(item_name) {
         if (this.isCollection(item_name)) {
@@ -3189,70 +2296,17 @@ class Store {
     }
 
     /**
-     * Create item names from object
+     * Observe an object, turning its properties into reactive store items.
      * @template {Object} T
      * @param {T} target
      * @returns {T & {store: Store}}
-     *
-     *
-     * @example
-     *```js
-     * class Sample {
-     *     a = 0;
-     *     b = null;
-     *     c = [];
-     *
-     *     d = undefined;
-     *
-     *     e = Symbol();
-     *
-     *     incA () {
-     *         this.a++;
-     *     }
-     * }
-     *
-     * var store = createStore();
-     *
-     * var sample = store.observeObject(new Sample);
-     *
-     * sample.store.subscribe("a", (details)=>{
-     *     //store.log(details);
-     * });
-     *
-     * sample.store.subscribe("c", (details)=>{
-     *     //store.log(details);
-     * });
-     *
-     * sample.incA();
-     * sample.incA();
-     *
-     * sample.c.push("foo");
-     *
-     *
-     * console.log(store.getItem("a") == sample.a);
-     * // true
-     *
-     * console.log(sample.a );
-     * // 2
-     *
-     * console.log(store.isAtomItem("b"));
-     * // true
-     *
-     * console.log(store.isAtomItem("d"));
-     * // true
-     *
-     * console.log(store.isAtomItem("e"));
-     * // false
-     *
-     *
-     *```
      */
     observeObject(target) {
         if (!isPlainObject(target))
             throw new Error(`obj must have an object type. obj = ${target}`);
 
         let that = this;
-        /** @type { {[key:string]:any} } */
+        /** @type {PropertyDescriptorMap} */
         let props = {
             store: {
                 get() {
@@ -3264,7 +2318,7 @@ class Store {
         for (let prop in target) {
             let value = target[prop];
 
-            if (!(value instanceof Function || typeof value === "symbol")) {
+            if (!(value instanceof Function || typeof value === 'symbol')) {
                 props[prop] = {
                     get() {
                         return that.getItem(prop);
@@ -3281,7 +2335,7 @@ class Store {
                     continue;
                 }
 
-                if (value instanceof Function || typeof value === "symbol") {
+                if (value instanceof Function || typeof value === 'symbol') {
                     continue;
                 }
 
@@ -3316,11 +2370,13 @@ class Store {
     getUsedItems(func) {
         this.#tracked_set.clear();
         this.#track_deps_flag = true;
-        let value = func();
-
-        var items = Array.from(this.#tracked_set);
-
-        this.#track_deps_flag = false;
+        let value;
+        try {
+            value = func();
+        } finally {
+            this.#track_deps_flag = false;
+        }
+        const items = Array.from(this.#tracked_set);
         this.#tracked_set.clear();
         return {
             value,
@@ -3329,78 +2385,10 @@ class Store {
     }
 
     /**
-     * The autorun function accepts one function that should run every time anything it observes changes.
-     * It also runs once when you create the autorun itself. It only responds to changes in observable state,
-     * things you have annotated atom, collection or computed.
-     * @param {()=>any} func_to_track function to track items & reaction
-     * @param {ComputedOptions} [options = {}]
-     *
-     * @example
-     *```js
-     * class State {
-     *   counter1 = 0;
-     *   counter2 = 0;
-     *   counter3 = 0;
-     *
-     *   incr1 = () => {
-     *     this.counter1++;
-     *   };
-     *
-     *   incr2 = () => {
-     *     this.counter2++;
-     *   };
-     *
-     *   incr3 = () => {
-     *     this.counter3++;
-     *   };
-     * }
-     *
-     * const store = new Store();
-     * const state = store.observeObject(new State());
-     *
-     * const counter1div = document.createElement('div');
-     * const counter2div = document.createElement('div');
-     * const counter3div = document.createElement('div');
-     *
-     * const btn1 = document.createElement('button');
-     * btn1.innerText = 'inct 1';
-     * btn1.addEventListener('click', state.incr1);
-     *
-     * const btn2 = document.createElement('button');
-     * btn2.innerText = 'inct 2';
-     * btn2.addEventListener('click', () => {
-     *   state.counter2++;
-     * });
-     *
-     * document.body.appendChild(counter1div);
-     * document.body.appendChild(counter2div);
-     * document.body.appendChild(counter3div);
-     * document.body.appendChild(btn1);
-     * document.body.appendChild(btn2);
-     *
-     * (async () => {
-     *   await store.when(() => state.counter1 >= 3);
-     *
-     *   alert('Another cool thing is when');
-     * })();
-     *
-     * // Trigger when counter1 or counter2 changed
-     * store.autorun(() => {
-     *   counter1div.innerHTML = `counter 1: ${state.counter1}`;
-     *   counter2div.innerHTML = `counter 2: ${state.counter2}`;
-     * });
-     *
-     * // Trigger when counter3 changed (another way)
-     * store.reaction(
-     *   () => [state.counter3],
-     *   () => {
-     *     counter3div.innerHTML = `counter 3: ${state.counter3}`;
-     *   }
-     * );
-     *
-     * setInterval(state.incr3, 1000);
-     *
-     *```
+     * Autorun – runs the function whenever any observed dependency changes.
+     * @param {()=>any} func_to_track
+     * @param {import('./types.js').ComputedOptions} [options = {}]
+     * @returns {import('./types.js').Unsubscriber}
      */
     autorun(func_to_track, options = {}) {
         let computed = this.createComputed(func_to_track, undefined, options);
@@ -3408,44 +2396,35 @@ class Store {
     }
 
     /**
-     * reaction is like autorun, but gives more fine grained control on which observables will be tracked.
-     * It takes two functions: the first, data function, is tracked and returns the data that is used as input for the second, effect function.
-     * It is important to note that the side effect only reacts to data that was accessed in the data function,
-     * which might be less than the data that is actually used in the effect function.
-     * @param {()=>any} data_function function to track items
-     * @param {()=>any} effect_function reaction
-     * @param {ComputedOptions} [options = {}]
-     * @returns {Unsubscriber | undefined}
+     * Reaction – tracks only data accessed in data_function and runs effect when they change.
+     * @param {()=>any} data_function
+     * @param {()=>any} effect_function
+     * @param {import('./types.js').ComputedOptions} [options = {}]
+     * @returns {import('./types.js').Unsubscriber}
      */
     reaction(data_function, effect_function, options = {}) {
-        var result = this.getUsedItems(data_function);
-        if (result.items.length > 0) {
-            let computed = this.createComputed(
-                data_function,
-                undefined,
-                options
-            );
-            return computed.subscribe(effect_function);
-
-            //return this.onChangeAny(result.items, effect_function);
+        const result = this.getUsedItems(data_function);
+        if (result.items.length === 0) {
+            // No reactive dependencies – call effect once
+            effect_function();
+            return () => {};
         }
+        const computed = this.createComputed(data_function, undefined, options);
+        return computed.subscribe(effect_function);
     }
 
     /**
-     * when observes and runs the given predicate function until it returns true.
-     * Once that happens, the given effect function is executed and the autorunner is disposed.
-     * The when function returns a disposer, allowing you to cancel it manually,
-     * unless you don't pass in a second effect function, in which case it returns a Promise.
+     * When – waits for predicate to become true, then runs effect (or resolves promise).
      * @param {()=>boolean} predicate
      * @param {()=>void} [effect]
-     * @returns {Unsubscriber | undefined | Promise<true>}
+     * @returns {import('./types.js').Unsubscriber | undefined | Promise<true>}
      */
     when(predicate, effect) {
-        var result = this.getUsedItems(predicate);
+        let result = this.getUsedItems(predicate);
 
         if (!effect)
             return new Promise((resolve, reject) => {
-                var unsubscriber = this.onChangeAny(result.items, () => {
+                let unsubscriber = this.onChangeAny(result.items, () => {
                     let result = predicate();
                     if (result) {
                         if (unsubscriber) {
@@ -3470,12 +2449,10 @@ class Store {
      * On has-subscribers event
      * @param {string} item_name
      * @param {(item_name:string, store:Store)=>void} callback
+     * @returns {import('./types.js').Unsubscriber}
      */
     onHasSubscribers(item_name, callback) {
-        let unsubscriber = this.#eventEmitter.on(
-            "#has-subscribers:" + item_name,
-            callback
-        );
+        let unsubscriber = this.#eventEmitter.on('#has-subscribers:' + item_name, callback);
         return unsubscriber;
     }
 
@@ -3483,12 +2460,10 @@ class Store {
      * On no-subscribers event
      * @param {string} item_name
      * @param {(item_name:string, store:Store)=>void} callback
+     * @returns {import('./types.js').Unsubscriber}
      */
     onNoSubscribers(item_name, callback) {
-        let unsubscriber = this.#eventEmitter.on(
-            "#no-subscribers:" + item_name,
-            callback
-        );
+        let unsubscriber = this.#eventEmitter.on('#no-subscribers:' + item_name, callback);
         return unsubscriber;
     }
 }

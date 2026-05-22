@@ -1,6 +1,8 @@
+/// <reference path="./types.d.ts" />
+
 // @ts-check
 
-import { Store, UpdateEventDetails } from "./Store.js";
+import { Store, UpdateEventDetails } from './Store.js';
 
 /** @module Atom */
 
@@ -8,17 +10,16 @@ import { Store, UpdateEventDetails } from "./Store.js";
  * @template ItemValue
  */
 export class Atom {
-
     /** @type {String} */
-    #name
+    #name;
     /** @type {Store} */
-    #store
+    #store;
 
     /**
      * Creates the atom item
-     * @param {Store} store 
-     * @param {string} name 
-     * @param {ItemValue} value 
+     * @param {Store} store
+     * @param {string} name
+     * @param {ItemValue} value
      */
     constructor(store, name, value) {
         this.#store = store;
@@ -26,7 +27,6 @@ export class Atom {
         /** @type {ItemValue} */
         this.value = value;
     }
-
 
     /**
      * Sets the value of this atom
@@ -58,7 +58,11 @@ export class Atom {
      * @param {number|undefined} [debounce_time] debounce time
      */
     subscribe(callback, debounce_time) {
-        return this.#store.subscribe(this.#name, callback, debounce_time);
+        return this.#store.subscribe(
+            this.#name,
+            /** @type {import('./types.js').Subscriber} */ (callback),
+            debounce_time
+        );
     }
 
     /**
@@ -78,8 +82,8 @@ export class Atom {
     }
 
     /**
-     * 
-     * @param {{(a:ItemValue, b:ItemValue, item_name:string, property: (string | null)):boolean} | null} func_or_null 
+     *
+     * @param {{(a:ItemValue, b:ItemValue, item_name:string, property: (string | null)):boolean} | null} func_or_null
      * @returns {boolean}
      */
     setCompareFunction(func_or_null) {
@@ -96,8 +100,8 @@ export class Atom {
 
     /**
      * On has-subscribers event
-     * @param {(item_name:string, store:Store)=>void} callback 
-     * @returns 
+     * @param {(item_name:string, store:Store)=>void} callback
+     * @returns
      */
     onHasSubscribers(callback) {
         return this.#store.onHasSubscribers(this.#name, callback);
@@ -105,11 +109,10 @@ export class Atom {
 
     /**
      * On no-subscribers event
-     * @param {(item_name:string, store:Store)=>void} callback 
-     * @returns 
+     * @param {(item_name:string, store:Store)=>void} callback
+     * @returns
      */
     onNoSubscribers(callback) {
         return this.#store.onNoSubscribers(this.#name, callback);
     }
-
 }

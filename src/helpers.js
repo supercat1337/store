@@ -6,12 +6,11 @@
  * @returns {boolean} true if the value is a plain object, false otherwise.
  */
 export function isPlainObject(obj) {
-    return typeof obj === "object" && obj !== null && !Array.isArray(obj);
+    return typeof obj === 'object' && obj !== null && !Array.isArray(obj);
 }
 
 /**
- * Checks if two arrays are equal. If the arrays are not the same length, then this function returns false.
- * Otherwise, this function checks if each element of the two arrays is equal, using the compareAny function.
+ * Checks if two arrays are equal.
  * @param {any[]} a - The first array to compare.
  * @param {any[]} b - The second array to compare.
  * @returns {boolean} True if the two arrays are equal, false otherwise.
@@ -31,10 +30,9 @@ export function compareArrays(a, b) {
 }
 
 /**
- * Checks if two plain objects are equal. If the objects do not have the same set of keys, then this function returns false.
- * Otherwise, this function checks if each value of the two objects is equal, using the compareAny function.
- * @param {Object} a - The first object to compare.
- * @param {Object} b - The second object to compare.
+ * Checks if two plain objects are equal.
+ * @param {Record<string, any>} a - The first object to compare.
+ * @param {Record<string, any>} b - The second object to compare.
  * @returns {boolean} True if the two objects are equal, false otherwise.
  */
 export function comparePlainObjects(a, b) {
@@ -62,8 +60,7 @@ export function comparePlainObjects(a, b) {
 }
 
 /**
- * Checks if two objects are equal. If objects are arrays, then check if stringified versions of them are equal.
- * If objects are not arrays, then check if sorted stringified versions of them are equal.
+ * Checks if two objects are equal.
  * @param {unknown} a
  * @param {unknown} b
  * @returns {boolean}
@@ -93,21 +90,21 @@ export function compareAny(a, b) {
  * @param {number} wait - Time in milliseconds to wait before the function gets called.
  * @returns {T}
  * @example
-   window.addEventListener('resize', debounce((evt) => console.log(evt), 250));
+ * window.addEventListener('resize', debounce((evt) => console.log(evt), 250));
  */
 export function debounce(func, wait) {
-    var timeout;
-    var f = (...args) => {
-        var context = this;
-        var later = function () {
-            timeout = null;
-            func.apply(context, args);
-        };
+    /** @type {ReturnType<typeof setTimeout> | undefined} */
+    let timeout;
+    // @ts-ignore
+    const debounced = function (...args) {
+        // @ts-ignore
+        const context = this; 
         clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+        timeout = setTimeout(() => {
+            func.apply(context, args);
+        }, wait);
     };
-
-    return /** @type {T} */ (f);
+    return /** @type {T} */ (debounced);
 }
 
 /**
@@ -117,9 +114,5 @@ export function debounce(func, wait) {
  * @returns {Set<T>}
  */
 export function arrayToSet(arr) {
-    var result = new Set();
-    for (let i = 0; i < arr.length; i++) {
-        result.add(arr[i]);
-    }
-    return result;
+    return new Set(arr);
 }
