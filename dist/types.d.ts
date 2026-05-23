@@ -46,20 +46,8 @@ export interface ComputedOptions {
     is_hard?: boolean;
 }
 
-export type TypeAtom = Atom<any>;
-export type TypeComputed = Computed<any>;
-export type TypeCollection = Collection<any>;
-export type TypeStore = Store;
-export type TypeUpdateEventDetails = UpdateEventDetails<any>;
 
 export type OnChangeParams = string | Atom<any> | Collection<any> | Computed<any>;
-
-// Forward declarations for classes (to avoid circular dependencies)
-declare class Store {}
-declare class Atom<T> {}
-declare class Computed<T> {}
-declare class Collection<T> {}
-declare class UpdateEventDetails<T> {}
 
 /* From Atom.d.ts */
 /** @module Atom */
@@ -541,9 +529,9 @@ export class Store {
     /**
      * Returns an instance of the Atom if the item exists
      * @param {string} item_name
-     * @returns {TypeAtom}
+     * @returns {Atom<any>}
      */
-    getAtom(item_name: string): TypeAtom;
+    getAtom(item_name: string): Atom<any>;
     /**
      * Creates an instance of the Computed
      * @template T
@@ -556,9 +544,9 @@ export class Store {
     /**
      * Returns an instance of the Computed if the item exists
      * @param {string} item_name
-     * @returns {TypeComputed}
+     * @returns {Computed<any>}
      */
-    getComputed(item_name: string): TypeComputed;
+    getComputed(item_name: string): Computed<any>;
     /**
      * Creates an instance of the Collection
      * @template T
@@ -570,9 +558,9 @@ export class Store {
     /**
      * Returns an instance of the Collection if the item exists
      * @param {string} item_name
-     * @returns {TypeCollection}
+     * @returns {Collection<any>}
      */
-    getCollection(item_name: string): TypeCollection;
+    getCollection(item_name: string): Collection<any>;
     /**
      * Observe an object, turning its properties into reactive store items.
      * @template {Object} T

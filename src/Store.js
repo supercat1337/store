@@ -1185,7 +1185,6 @@ class Store {
             this.#eventEmitter.emit(ev[0], ev[1], this);
             i++;
 
-
             if (!events[ev[0]]) {
                 events[ev[0]] = [];
             }
@@ -1256,7 +1255,7 @@ class Store {
     /**
      * Returns an instance of the Atom if the item exists
      * @param {string} item_name
-     * @returns {import('./types.js').TypeAtom}
+     * @returns {Atom<any>}
      */
     getAtom(item_name) {
         if (this.isAtomItem(item_name)) {
@@ -1285,7 +1284,7 @@ class Store {
     /**
      * Returns an instance of the Computed if the item exists
      * @param {string} item_name
-     * @returns {import('./types.js').TypeComputed}
+     * @returns {Computed<any>}
      */
     getComputed(item_name) {
         if (!this.isComputedItem(item_name)) {
@@ -1313,7 +1312,7 @@ class Store {
     /**
      * Returns an instance of the Collection if the item exists
      * @param {string} item_name
-     * @returns {import('./types.js').TypeCollection}
+     * @returns {Collection<any>}
      */
     getCollection(item_name) {
         if (this.isCollection(item_name)) {

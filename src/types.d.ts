@@ -46,17 +46,5 @@ export interface ComputedOptions {
     is_hard?: boolean;
 }
 
-export type TypeAtom = Atom<any>;
-export type TypeComputed = Computed<any>;
-export type TypeCollection = Collection<any>;
-export type TypeStore = Store;
-export type TypeUpdateEventDetails = UpdateEventDetails<any>;
 
 export type OnChangeParams = string | Atom<any> | Collection<any> | Computed<any>;
-
-// Forward declarations for classes (to avoid circular dependencies)
-declare class Store {}
-declare class Atom<T> {}
-declare class Computed<T> {}
-declare class Collection<T> {}
-declare class UpdateEventDetails<T> {}
