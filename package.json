@@ -1,6 +1,6 @@
 {
     "name": "@supercat1337/store",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "A lightweight, zero-dependency reactive state manager with automated dependency tracking, cyclic loop detection, and atomic/computed architecture.",
     "repository": {
         "type": "git",
